@@ -3,6 +3,7 @@
     <h2>Login CoFund</h2>
     <form @submit.prevent="handleLogin">
       <input v-model="form.email" type="email" placeholder="Email" required />
+      <InputText />
       <input v-model="form.password" type="password" placeholder="Password" required />
       <button type="submit">Masuk</button>
     </form>
@@ -12,6 +13,7 @@
 <script setup>
 import { ref } from 'vue';
 import authService from '../services/authService';
+import InputText from 'primevue/inputtext';
 
 const form = ref({
     email: '',
