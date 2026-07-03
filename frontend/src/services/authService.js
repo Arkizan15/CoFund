@@ -1,19 +1,19 @@
-import Register from "../views/Register.vue";
 import api from "./api";
 
 export default {
-    register(userData){
-        return api.post('/register', userData)
+    register(userData) {
+        return api.post('/auth/register', userData);
     },
 
-    login(credentials){
-        return api.post('/login', credentials)
+    login(credentials) {
+        return api.post('/auth/login', credentials);
     },
-    logout(){
-        return api.post('/logout')
-    },
-    getProfile(){
-        return api.get('/me')
-    }
 
-}
+    logout() {
+        return api.post('/auth/logout');
+    },
+
+    getProfile() {
+        return api.get('/auth/me');
+    },
+};

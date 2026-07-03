@@ -1,9 +1,15 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import './style.css'
-import App from './App.vue'
-import Login from './views/Login.vue'
 import PrimeVue from 'primevue/config'
+import App from './App.vue'
+import './style.css'
+import Login from './views/Login.vue'
+import Register from './views/Register.vue'
 
-createApp(Login).use(PrimeVue).use(createPinia()).mount('#app')
- 
+
+const app = createApp(Register)
+
+app.use(createPinia())
+app.use(PrimeVue)
+
+app.mount('#app')
