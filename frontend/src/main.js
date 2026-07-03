@@ -1,15 +1,16 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
+import ToastService from 'primevue/toastservice'
 import App from './App.vue'
+import Router from './router'
 import './style.css'
-import Login from './views/Login.vue'
-import Register from './views/Register.vue'
 
-
-const app = createApp(Register)
+const app = createApp(App)
 
 app.use(createPinia())
 app.use(PrimeVue)
+app.use(Router)
+app.use(ToastService)
 
 app.mount('#app')
