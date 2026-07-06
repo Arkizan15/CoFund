@@ -3,8 +3,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ $t('campaign.listTitle') }}</h1>
-          <p class="text-gray-500 text-sm mt-1">{{ $t('campaign.listSubtitle') }}</p>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Jelajahi Kampanye</h1>
+          <p class="text-gray-500 text-sm mt-1">Temukan dan dukung kampanye crowdfunding terbaik</p>
         </div>
       </div>
 
@@ -14,7 +14,7 @@
             <i class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
             <InputText
               v-model="search"
-              :placeholder="$t('campaign.searchPlaceholder')"
+              placeholder="Cari kampanye..."
               class="w-full pl-10 !border-gray-200 !rounded-xl !py-3 !text-sm"
             />
           </div>
@@ -24,7 +24,7 @@
               :options="categories"
               optionLabel="label"
               optionValue="value"
-              :placeholder="$t('campaign.allCategories')"
+              placeholder="Semua Kategori"
               class="w-full"
             />
           </div>
@@ -33,7 +33,7 @@
 
       <div v-if="filteredCampaigns.length === 0" class="text-center py-20">
         <i class="pi pi-inbox text-5xl text-gray-300 mb-4"></i>
-        <p class="text-gray-500">{{ $t('campaign.noCampaigns') }}</p>
+        <p class="text-gray-500">Tidak ada kampanye ditemukan</p>
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -50,7 +50,7 @@
             </div>
             <div class="absolute top-3 left-3">
               <span class="bg-white/90 backdrop-blur-sm text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
-                {{ $t('categories.' + (campaign.category?.slug || 'general')) }}
+                {{ campaign.category?.name || 'Umum' }}
               </span>
             </div>
           </div>
@@ -60,11 +60,11 @@
 
             <div class="space-y-3 mb-4">
               <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-500">{{ $t('campaign.collected') }}</span>
+                <span class="text-gray-500">Terkumpul</span>
                 <span class="font-semibold text-gray-800">{{ formatCurrency(campaign.collected_amount || 0) }}</span>
               </div>
               <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-500">{{ $t('campaign.target') }}</span>
+                <span class="text-gray-500">Target</span>
                 <span class="font-semibold text-gray-800">{{ formatCurrency(campaign.target_amount || 0) }}</span>
               </div>
             </div>
@@ -72,10 +72,10 @@
             <div class="space-y-2">
               <ProgressBar :value="progressPercent(campaign)" class="!h-2.5 !rounded-full" />
               <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-500">{{ $t('campaign.percentCollected', { percent: progressPercent(campaign) }) }}</span>
+                <span class="text-gray-500">{{ progressPercent(campaign) }}% terkumpul</span>
                 <span class="flex items-center gap-1 text-orange-600 font-medium">
                   <i class="pi pi-clock"></i>
-                  {{ $t('common.daysLeft', { days: remainingDays(campaign.deadline) }) }}
+                  {{ remainingDays(campaign.deadline) }} hari lagi
                 </span>
               </div>
             </div>
@@ -83,7 +83,7 @@
             <div class="mt-5 pt-4 border-t border-gray-100 flex gap-2">
               <router-link :to="`/campaigns/${campaign.slug}`" class="flex-1">
                 <Button
-                  :label="$t('common.seeDetail')"
+                  label="Lihat Detail"
                   icon="pi pi-arrow-right"
                   iconPos="right"
                   class="w-full bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 font-medium !py-2.5 !rounded-xl shadow-sm"
@@ -91,7 +91,7 @@
               </router-link>
               <Button
                 v-if="campaign.status === 'active'"
-                :label="$t('common.support')"
+                label="Dukung"
                 icon="pi pi-heart"
                 class="flex-1 bg-emerald-600 border-none hover:bg-emerald-700 text-white font-medium !py-2.5 !rounded-xl shadow-sm"
                 @click="openBackingDialog(campaign)"
@@ -103,7 +103,7 @@
     </div>
       <!-- Backing Dialog Modal -->
       <Dialog
-        v-model:visible="backingDialogVisible"            :header="$t('campaign.backThisCampaign') + ': ' + (backingCampaign?.title || '')"
+        v-model:visible="backingDialogVisible"            :header="'Dukung Kampanye Ini: ' + (backingCampaign?.title || '')"
         :modal="true"
         :closable="true"
         class="!rounded-2xl !w-full !max-w-md"
@@ -113,10 +113,10 @@
           <!-- Auth Check -->
           <div v-if="!authStore.isAuthenticated" class="text-center py-4">
             <i class="pi pi-lock text-3xl text-gray-300 mb-3 block"></i>
-            <p class="text-gray-600 text-sm mb-4">{{ $t('campaign.loginToBack') }}</p>
+            <p class="text-gray-600 text-sm mb-4">Silakan masuk terlebih dahulu untuk mendukung kampanye.</p>
             <router-link :to="{ name: 'Login', query: { redirect: route.fullPath } }" @click="backingDialogVisible = false">
               <Button
-                :label="$t('campaign.loginNow')"
+                label="Masuk Sekarang"
                 icon="pi pi-sign-in"
                 class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !rounded-xl"
               />
@@ -126,26 +126,26 @@
           <!-- Owner Check -->
           <div v-else-if="isOwner" class="text-center py-4">
             <i class="pi pi-info-circle text-3xl text-yellow-400 mb-3 block"></i>
-            <p class="text-gray-600 text-sm">{{ $t('campaign.cantBackOwn') }}</p>
+            <p class="text-gray-600 text-sm">Anda tidak dapat mendanai kampanye milik sendiri.</p>
           </div>
 
           <!-- Campaign Not Active -->
           <div v-else-if="backingCampaign.status !== 'active'" class="text-center py-4">
             <i class="pi pi-lock text-3xl text-gray-300 mb-3 block"></i>
-            <p class="text-gray-600 text-sm">{{ $t('campaign.campaignNotActive') }}</p>
+            <p class="text-gray-600 text-sm">Kampanye ini belum aktif untuk menerima dukungan dana.</p>
           </div>
 
           <!-- Backing Form -->
           <template v-else>
             <!-- Balance Info -->
             <div class="p-3 bg-slate-50 rounded-xl flex items-center justify-between">
-              <span class="text-xs text-gray-500 font-medium">{{ $t('campaign.yourBalance') }}</span>
+              <span class="text-xs text-gray-500 font-medium">Saldo Anda</span>
               <span class="text-sm font-bold text-gray-800">{{ formatCurrency(userBalance) }}</span>
             </div>
 
             <!-- Preset Amounts -->
             <div>
-              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">{{ $t('campaign.presetAmount') }}</label>
+              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Pilih Nominal</label>
               <div class="grid grid-cols-2 gap-2">
                 <button
                   v-for="preset in presetAmounts"
@@ -163,13 +163,13 @@
 
             <!-- Custom Amount -->
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('campaign.customAmount') }}</label>
+              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Atur Nominal Sendiri</label>
               <InputNumber
                 v-model="backingAmount"
                 :min="10000"
                 :step="10000"
                 prefix="Rp "
-                :placeholder="$t('campaign.amountPlaceholder')"
+                placeholder="Masukkan nominal"
                 class="w-full"
                 :class="{ 'p-invalid': backingError }"
                 fluid
@@ -177,7 +177,7 @@
               <small v-if="backingError" class="text-red-500 text-xs flex items-center gap-1">
                 <i class="pi pi-exclamation-circle"></i>{{ backingError }}
               </small>
-              <small v-else class="text-gray-400 text-xs">{{ $t('common.minAmount') }}</small>
+              <small v-else class="text-gray-400 text-xs">Minimal Rp 10.000</small>
             </div>
 
             <!-- Success Message -->
@@ -187,8 +187,8 @@
                   <i class="pi pi-check-circle text-emerald-700"></i>
                 </div>
                 <div>
-                  <p class="text-sm font-semibold text-emerald-800">{{ $t('campaign.backingSuccess') }}</p>
-                  <p class="text-xs text-emerald-600 mt-0.5">{{ $t('campaign.backingSuccessDetail', { amount: formatCurrency(lastBackingAmount) }) }}</p>
+                  <p class="text-sm font-semibold text-emerald-800">Dukungan Berhasil!</p>
+                  <p class="text-xs text-emerald-600 mt-0.5">Dana sebesar {{ formatCurrency(lastBackingAmount) }} telah masuk ke escrow.</p>
                 </div>
               </div>
             </div>
@@ -196,7 +196,7 @@
             <!-- Submit Button (opens confirmation) -->
             <Button
               v-if="!backingSuccess"
-              :label="$t('campaign.backThisCampaign')"
+              label="Dukung Kampanye Ini"
               icon="pi pi-heart"
               class="w-full !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3 !rounded-xl shadow-sm"
               :loading="backingLoading"
@@ -210,7 +210,7 @@
       <!-- Confirmation Dialog -->
       <Dialog
         v-model:visible="confirmDialogVisible"
-        :header="$t('campaign.confirmDonation')"
+        header="Konfirmasi Donasi"
         :modal="true"
         :closable="true"
         class="!rounded-2xl !w-full !max-w-sm"
@@ -221,23 +221,23 @@
             <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
               <i class="pi pi-heart text-xl text-emerald-600"></i>
             </div>
-            <p class="text-sm text-gray-500">{{ $t('campaign.youWillSupport') }}</p>
+            <p class="text-sm text-gray-500">Anda akan mendukung</p>
             <p class="text-base font-bold text-gray-800 mt-1 line-clamp-2">{{ backingCampaign?.title }}</p>
           </div>
 
           <div class="bg-slate-50 rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500">{{ $t('campaign.donationAmount') }}</span>
+              <span class="text-gray-500">Nominal Donasi</span>
               <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(confirmAmount) }}</span>
             </div>
             <hr class="border-gray-200" />
             <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500">{{ $t('campaign.availableBalance') }}</span>
+              <span class="text-gray-500">Saldo Tersedia</span>
               <span class="font-semibold text-gray-800">{{ formatCurrency(userBalance) }}</span>
             </div>
             <hr class="border-gray-200" />
             <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500">{{ $t('campaign.remainingBalance') }}</span>
+              <span class="text-gray-500">Sisa Saldo</span>
               <span class="font-semibold" :class="userBalance - confirmAmount >= 0 ? 'text-emerald-700' : 'text-red-600'">
                 {{ formatCurrency(Math.max(0, userBalance - confirmAmount)) }}
               </span>
@@ -246,13 +246,13 @@
 
           <div class="flex gap-2">
             <Button
-              :label="$t('common.cancel')"
+              label="Batal"
               icon="pi pi-arrow-left"
               class="flex-1 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium !py-3 !rounded-xl"
               @click="confirmDialogVisible = false"
             />
             <Button
-              :label="$t('campaign.confirmDonationAction')"
+              label="Konfirmasi Donasi"
               icon="pi pi-check-circle"
               class="flex-1 !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3 !rounded-xl shadow-sm"
               :loading="backingLoading"
@@ -267,7 +267,6 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
@@ -282,7 +281,6 @@ import * as campaignService from '@/services/campaignService'
 const route = useRoute()
 const authStore = useAuthStore()
 const toast = useToast()
-const { t } = useI18n()
 
 const campaigns = ref([])
 const search = ref('')
@@ -290,7 +288,7 @@ const selectedCategory = ref(null)
 const rawCategories = ref([])
 const categories = computed(() => {
   return rawCategories.value.map(cat => ({
-    label: t('categories.' + cat.label),
+    label: cat.label,
     value: cat.value
   }))
 })

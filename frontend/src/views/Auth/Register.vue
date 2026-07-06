@@ -13,19 +13,19 @@
           <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mb-4">
             <i class="pi pi-user-plus text-2xl"></i>
           </div>
-          <h2 class="text-2xl font-bold text-gray-900">{{ $t('auth.registerTitle') }}</h2>
-          <p class="text-sm text-gray-500 mt-1">{{ $t('auth.registerSubtitle') }}</p>
+          <h2 class="text-2xl font-bold text-gray-900">Daftar Akun Baru</h2>
+          <p class="text-sm text-gray-500 mt-1">Buat akun untuk mulai berdonasi dan membuat kampanye</p>
         </div>
 
         <form @submit.prevent="handleRegister" class="space-y-4">
           <div class="flex flex-col gap-1.5">
-            <label for="name" class="text-sm font-semibold text-gray-700">{{ $t('auth.name') }}</label>
+            <label for="name" class="text-sm font-semibold text-gray-700">Nama Lengkap</label>
             <span class="p-input-icon-left w-full">
               <i class="pi pi-user text-gray-400"></i>
               <InputText
                 id="name"
                 v-model="form.name"
-                :placeholder="$t('auth.namePlaceholder')"
+                placeholder="Masukkan nama lengkap"
                 class="w-full !rounded-xl !py-3 !text-sm"
                 :class="{ 'p-invalid': errors.name }"
                 required
@@ -35,14 +35,14 @@
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label for="email" class="text-sm font-semibold text-gray-700">{{ $t('auth.email') }}</label>
+            <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
             <span class="p-input-icon-left w-full">
               <i class="pi pi-envelope text-gray-400"></i>
               <InputText
                 id="email"
                 v-model="form.email"
                 type="email"
-                :placeholder="$t('auth.emailPlaceholder2')"
+                placeholder="Masukkan alamat email"
                 class="w-full !rounded-xl !py-3 !text-sm"
                 :class="{ 'p-invalid': errors.email }"
                 required
@@ -52,14 +52,14 @@
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label for="password" class="text-sm font-semibold text-gray-700">{{ $t('auth.password') }}</label>
+            <label for="password" class="text-sm font-semibold text-gray-700">Kata Sandi</label>
             <span class="p-input-icon-left w-full">
               <i class="pi pi-lock text-gray-400"></i>
               <InputText
                 id="password"
                 v-model="form.password"
                 type="password"
-                :placeholder="$t('auth.passwordPlaceholder')"
+                placeholder="Minimal 6 karakter"
                 class="w-full !rounded-xl !py-3 !text-sm"
                 :class="{ 'p-invalid': errors.password }"
                 minlength="6"
@@ -74,19 +74,19 @@
                 <div class="h-1.5 flex-1 rounded-full transition-colors duration-300" :class="passwordStrength.score >= 2 ? passwordStrength.color : 'bg-gray-200'"></div>
                 <div class="h-1.5 flex-1 rounded-full transition-colors duration-300" :class="passwordStrength.score >= 3 ? passwordStrength.color : 'bg-gray-200'"></div>
               </div>
-              <p class="text-xs font-medium" :class="passwordStrength.textColor">{{ $t('auth.passwordStrength', { label: passwordStrength.label }) }}</p>
+              <p class="text-xs font-medium" :class="passwordStrength.textColor">Kekuatan Sandi: {{ passwordStrength.label }}</p>
             </div>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label for="password_confirmation" class="text-sm font-semibold text-gray-700">{{ $t('auth.passwordConfirmation') }}</label>
+            <label for="password_confirmation" class="text-sm font-semibold text-gray-700">Konfirmasi Kata Sandi</label>
             <span class="p-input-icon-left w-full">
               <i class="pi pi-lock text-gray-400"></i>
               <InputText
                 id="password_confirmation"
                 v-model="form.password_confirmation"
                 type="password"
-                :placeholder="$t('auth.passwordConfirmPlaceholder')"
+                placeholder="Ulangi kata sandi"
                 class="w-full !rounded-xl !py-3 !text-sm"
                 :class="{ 'p-invalid': errors.password_confirmation }"
                 minlength="6"
@@ -108,7 +108,7 @@
 
           <Button
             type="submit"
-            :label="loading ? $t('auth.processing') : $t('auth.registerNow')"
+            :label="loading ? 'Memproses...' : 'Daftar Sekarang'"
             :icon="loading ? 'pi pi-spin pi-spinner' : 'pi pi-user-plus'"
             :disabled="loading"
             class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold !py-3 !rounded-xl border-none shadow-sm transition-all duration-200 mt-2"
@@ -116,9 +116,9 @@
         </form>
 
         <div class="text-center mt-6 text-sm text-gray-500">
-          {{ $t('auth.haveAccount') }}
+          Sudah punya akun?
           <router-link :to="{ name: 'Login' }" class="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors ml-1">
-            {{ $t('nav.login') }}
+            Masuk
           </router-link>
         </div>
       </div>

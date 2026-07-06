@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-slate-50 py-8">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="mb-8">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ $t('profile.title') }}</h1>
-        <p class="text-gray-500 text-sm mt-1">{{ $t('profile.subtitle') }}</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Profil Saya</h1>
+        <p class="text-gray-500 text-sm mt-1">Kelola informasi akun dan saldo dompet Anda</p>
       </div>
 
       <!-- Profile Banner -->
@@ -23,7 +23,7 @@
             </div>
             <p class="text-gray-500 text-sm mt-1">{{ authStore.user?.email }}</p>
             <p class="text-xs text-gray-400 mt-1">
-              <i class="pi pi-calendar mr-1"></i>{{ $t('profile.joinedDate', { date: formatDate(authStore.user?.created_at) }) }}
+              <i class="pi pi-calendar mr-1"></i>Bergabung sejak {{ formatDate(authStore.user?.created_at) }}
             </p>
           </div>
         </div>
@@ -37,21 +37,21 @@
               <i class="pi pi-wallet text-lg text-emerald-700"></i>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-gray-800">{{ $t('profile.digitalWallet') }}</h3>
-              <p class="text-xs text-gray-400">{{ $t('profile.walletSub') }}</p>
+              <h3 class="text-lg font-bold text-gray-800">Dompet Digital</h3>
+              <p class="text-xs text-gray-400">Kelola saldo donasi Anda</p>
             </div>
           </div>
 
           <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl p-6 text-white mb-6 shadow-sm">
             <p class="text-emerald-100 text-sm font-medium flex items-center gap-2">
-              <i class="pi pi-credit-card"></i>{{ $t('profile.currentBalance') }}
+              <i class="pi pi-credit-card"></i>Saldo Saat Ini
             </p>
             <p class="text-3xl font-bold mt-1 tracking-tight">{{ formatCurrency(currentBalance) }}</p>
           </div>
 
           <div class="space-y-4">
             <div class="flex flex-col gap-1.5">
-              <label for="topup-amount" class="text-sm font-semibold text-gray-700">{{ $t('profile.topUp') }}</label>
+              <label for="topup-amount" class="text-sm font-semibold text-gray-700">Top Up Saldo</label>
               <div class="flex gap-2">
                 <InputNumber
                   id="topup-amount"
@@ -60,13 +60,13 @@
                   :step="50000"
                   :max="999999999"
                   prefix="Rp "
-                  :placeholder="$t('campaign.amountPlaceholder')"
+                  placeholder="Masukkan nominal"
                   class="flex-1"
                   :class="{ 'p-invalid': topUpError }"
                   fluid
                 />
                 <Button
-                  :label="$t('profile.topUpButton')"
+                  label="Top Up"
                   icon="pi pi-plus"
                   class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !rounded-xl !px-6 shadow-sm"
                   :loading="topUpLoading"
@@ -77,19 +77,19 @@
               <small v-if="topUpError" class="text-red-500 text-xs flex items-center gap-1">
                 <i class="pi pi-exclamation-circle"></i>{{ topUpError }}
               </small>
-              <small v-else class="text-gray-400 text-xs">{{ $t('profile.topUpMinAmount') }}</small>
+              <small v-else class="text-gray-400 text-xs">Minimal top up Rp 10.000</small>
             </div>
 
             <div v-if="topUpSuccess" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-center gap-2 animate-pulse-once">
               <i class="pi pi-check-circle"></i>
-              <span>{{ $t('profile.topUpSuccess') }}</span>
+              <span>Top up berhasil!</span>
             </div>
           </div>
 
           <Divider class="my-5" />
 
           <Button
-            :label="$t('profile.transactionHistory')"
+            label="Riwayat Transaksi"
             icon="pi pi-history"
             class="p-button-text w-full !text-emerald-600 !justify-start !rounded-xl"
             @click="showHistory = !showHistory"
@@ -98,7 +98,7 @@
           <div v-if="showHistory" class="mt-4 space-y-3 max-h-80 overflow-y-auto">
             <div v-if="transactions.length === 0" class="text-center py-6 text-gray-400 text-sm">
               <i class="pi pi-inbox text-2xl mb-2 block"></i>
-              {{ $t('profile.noTransactions') }}
+              Belum ada transaksi
             </div>
             <div
               v-for="tx in transactions"
@@ -146,8 +146,8 @@
               ></i>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-gray-800">{{ $t('profile.creatorStatus') }}</h3>
-              <p class="text-xs text-gray-400">{{ $t('profile.creatorStatusSub') }}</p>
+              <h3 class="text-lg font-bold text-gray-800">Status Kreator</h3>
+              <p class="text-xs text-gray-400">Ajukan diri Anda menjadi kreator kampanye</p>
             </div>
           </div>
 
@@ -159,16 +159,16 @@
                   <i class="pi pi-check-circle text-emerald-700 text-lg"></i>
                 </div>
                 <div>
-                  <p class="text-base font-bold text-emerald-900">{{ $t('profile.youAreCreator') }}</p>
+                  <p class="text-base font-bold text-emerald-900">Anda adalah Kreator</p>
                   <p class="text-sm text-emerald-700 mt-1 leading-relaxed">
-                    {{ $t('profile.youAreCreatorDesc') }}
+                    Anda dapat membuat kampanye penggalangan dana sendiri
                   </p>
                 </div>
               </div>
             </div>
             <router-link :to="{ name: 'Dashboard' }" class="block">
               <Button
-                :label="$t('profile.createNewCampaign')"
+                label="Buat Kampanye Baru"
                 icon="pi pi-plus-circle"
                 class="w-full !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3.5 !rounded-xl shadow-sm"
               />
@@ -183,12 +183,12 @@
                   <i class="pi pi-clock text-yellow-700 text-lg"></i>
                 </div>
                 <div>
-                  <p class="text-base font-bold text-yellow-900">{{ $t('profile.pendingVerification') }}</p>
+                  <p class="text-base font-bold text-yellow-900">Menunggu Verifikasi Admin</p>
                   <p class="text-sm text-yellow-700 mt-1 leading-relaxed">
-                    {{ $t('profile.pendingVerificationDesc') }}
+                    Permintaan upgrade role Anda sedang diproses oleh admin.
                   </p>
                   <Badge
-                    :value="$t('profile.waiting')"
+                    value="Menunggu..."
                     severity="warn"
                     class="mt-3 !bg-yellow-200 !text-yellow-800 !rounded-full !text-xs !font-semibold !px-3 !py-1"
                   />
@@ -205,19 +205,19 @@
                   <i class="pi pi-info-circle text-purple-700 text-lg"></i>
                 </div>
                 <div>
-                  <p class="text-base font-bold text-purple-900">{{ $t('profile.becomeCreatorTitle') }}</p>
+                  <p class="text-base font-bold text-purple-900">Jadi Kreator</p>
                   <p class="text-sm text-gray-600 mt-1 leading-relaxed">
-                    {{ $t('profile.becomeCreatorDesc2') }}
+                    Dapatkan akses membuat kampanye penggalangan dana sendiri
                   </p>
                   <ul class="mt-3 space-y-1.5">
                     <li class="flex items-center gap-2 text-xs text-gray-500">
-                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>{{ $t('profile.benefit1') }}
+                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>Buat kampanye sendiri
                     </li>
                     <li class="flex items-center gap-2 text-xs text-gray-500">
-                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>{{ $t('profile.benefit2') }}
+                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>Kelola donasi masuk
                     </li>
                     <li class="flex items-center gap-2 text-xs text-gray-500">
-                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>{{ $t('profile.benefit3') }}
+                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>Cairkan dana kampanye
                     </li>
                   </ul>
                 </div>
@@ -226,13 +226,13 @@
 
             <div class="flex flex-col gap-1.5">
               <label for="reason" class="text-sm font-semibold text-gray-700">
-                {{ $t('profile.reasonLabel') }} <span class="text-gray-400 font-normal">{{ $t('common.optional') }}</span>
+                Alasan permohonan <span class="text-gray-400 font-normal">(Opsional)</span>
               </label>
               <Textarea
                 id="reason"
                 v-model="upgradeReason"
                 rows="4"
-                :placeholder="$t('profile.reasonPlaceholder')"
+                placeholder="Ceritakan mengapa Anda ingin menjadi kreator..."
                 class="w-full !rounded-xl !text-sm"
                 :maxlength="500"
               />
@@ -240,7 +240,7 @@
             </div>
 
             <Button
-              :label="$t('profile.requestUpgrade')"
+              label="Ajukan Jadi Kreator"
               icon="pi pi-shield"
               class="w-full !bg-purple-600 !border-none hover:!bg-purple-700 !text-white !font-semibold !py-3.5 !rounded-xl shadow-sm"
               :loading="upgradeLoading"
@@ -254,16 +254,16 @@
           <!-- Quick Stats -->
           <div class="space-y-3">
             <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-              <i class="pi pi-chart-bar text-xs"></i>{{ $t('profile.stats') }}
+              <i class="pi pi-chart-bar text-xs"></i>Statistik
             </h4>
             <div class="grid grid-cols-2 gap-4">
               <div class="bg-slate-50 rounded-xl p-4 text-center hover:bg-slate-100 transition-colors">
                 <p class="text-2xl font-bold text-gray-800">{{ totalBackings }}</p>
-                <p class="text-xs text-gray-500 mt-1">{{ $t('profile.totalBackings') }}</p>
+                <p class="text-xs text-gray-500 mt-1">Total Dukungan</p>
               </div>
               <div class="bg-slate-50 rounded-xl p-4 text-center hover:bg-slate-100 transition-colors">
                 <p class="text-2xl font-bold text-emerald-700">{{ formatCurrency(totalDonated) }}</p>
-                <p class="text-xs text-gray-500 mt-1">{{ $t('profile.totalDonated') }}</p>
+                <p class="text-xs text-gray-500 mt-1">Total Donasi</p>
               </div>
             </div>
           </div>
@@ -281,7 +281,6 @@ import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import Textarea from 'primevue/textarea'
 import Divider from 'primevue/divider'
-import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import walletService from '@/services/walletService'
 import roleService from '@/services/roleService'
@@ -296,11 +295,9 @@ const isAdmin = computed(() => authStore.user?.role === 'admin')
 const totalBackings = computed(() => authStore.user?.total_backings || 0)
 const totalDonated = computed(() => authStore.user?.total_backings || 0)
 
-const { t } = useI18n()
-
 const roleLabel = computed(() => {
-  const labels = { admin: t('dashboard.admin'), creator: t('dashboard.creator'), backer: t('auth.backer'), guest: t('auth.guest') }
-  return labels[authStore.user?.role] || t('auth.backer')
+  const labels = { admin: 'Admin', creator: 'Creator', backer: 'Backer', guest: 'Tamu' }
+  return labels[authStore.user?.role] || 'Backer'
 })
 
 const roleSeverity = computed(() => {
@@ -373,13 +370,13 @@ async function handleUpgradeRequest() {
 
 function formatTypeLabel(type) {
   const map = {
-    top_up: t('profile.typeTopUp'),
-    backing: t('profile.typeBacking'),
-    disbursement: t('profile.typeDisbursement'),
-    refund: t('profile.typeRefund'),
-    platform_fee: t('profile.typePlatformFee'),
+    top_up: 'Top Up',
+    backing: 'Backing',
+    disbursement: 'Pencairan',
+    refund: 'Refund',
+    platform_fee: 'Biaya Platform',
   }
-  return map[type] || t('common.general')
+  return map[type] || 'Umum'
 }
 
 function formatCurrency(val) {

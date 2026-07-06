@@ -13,13 +13,13 @@
           <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mb-4">
             <i class="pi pi-wallet text-2xl"></i>
           </div>
-          <h2 class="text-2xl font-bold text-gray-900">{{ $t('auth.loginTitle') }}</h2>
-          <p class="text-sm text-gray-500 mt-1">{{ $t('auth.loginSubtitle') }}</p>
+          <h2 class="text-2xl font-bold text-gray-900">Masuk ke Akun</h2>
+          <p class="text-sm text-gray-500 mt-1">Masukkan email dan password Anda</p>
         </div>
 
         <form @submit.prevent="handleLogin" class="space-y-5">
           <div class="flex flex-col gap-1.5">
-            <label for="email" class="text-sm font-semibold text-gray-700">{{ $t('auth.email') }}</label>
+            <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
             <span class="p-input-icon-left w-full">
               <i class="pi pi-envelope text-gray-400"></i>
               <InputText
@@ -36,14 +36,14 @@
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label for="password" class="text-sm font-semibold text-gray-700">{{ $t('auth.password') }}</label>
+            <label for="password" class="text-sm font-semibold text-gray-700">Kata Sandi</label>
             <span class="p-input-icon-left w-full">
               <i class="pi pi-lock text-gray-400"></i>
               <InputText
                 id="password"
                 v-model="form.password"
                 type="password"
-                :placeholder="$t('auth.password')"
+                placeholder="Kata Sandi"
                 class="w-full !rounded-xl !py-3 !text-sm"
                 :class="{ 'p-invalid': errors.password }"
                 required
@@ -59,7 +59,7 @@
 
           <Button
             type="submit"
-            :label="loading ? $t('common.loading') : $t('auth.loginAction')"
+            :label="loading ? 'Memproses...' : 'Masuk'"
             :icon="loading ? 'pi pi-spin pi-spinner' : 'pi pi-sign-in'"
             :disabled="loading"
             class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold !py-3 !rounded-xl border-none shadow-sm transition-all duration-200"
@@ -67,9 +67,9 @@
         </form>
 
         <div class="text-center mt-6 text-sm text-gray-500">
-          {{ $t('auth.noAccount') }}
+          Belum punya akun?
           <router-link :to="{ name: 'Register' }" class="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors ml-1">
-            {{ $t('auth.registerAction') }}
+            Daftar
           </router-link>
         </div>
       </div>

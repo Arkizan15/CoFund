@@ -11,7 +11,7 @@
     </main>
     <footer class="bg-white border-t border-gray-100 py-6 text-center text-xs text-gray-400">
       <div class="max-w-7xl mx-auto px-4">
-        &copy; {{ new Date().getFullYear() }} CoFund. {{ $t('common.allRightsReserved') }}.
+        &copy; {{ new Date().getFullYear() }} CoFund. Hak cipta dilindungi.
       </div>
     </footer>
   </div>

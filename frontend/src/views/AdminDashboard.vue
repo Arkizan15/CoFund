@@ -8,8 +8,8 @@
             <i class="pi pi-shield text-emerald-700 text-lg"></i>
           </div>
           <div>
-            <h2 class="text-base font-bold text-gray-900">{{ $t('admin.panelTitle') }}</h2>
-            <p class="text-[10px] text-gray-400">{{ $t('admin.panelSub') }}</p>
+            <h2 class="text-base font-bold text-gray-900">Panel Admin</h2>
+            <p class="text-[10px] text-gray-400">Manajemen platform</p>
           </div>
         </div>
       </div>
@@ -43,7 +43,7 @@
           class="flex items-center gap-2 text-xs text-gray-400 hover:text-emerald-600 transition-colors no-underline"
         >
           <i class="pi pi-arrow-left text-[10px]"></i>
-          {{ $t('nav.backToDashboard') }}
+          Kembali ke Dashboard
         </router-link>
       </div>
     </aside>
@@ -57,8 +57,8 @@
             <i class="pi pi-shield text-emerald-700 text-lg"></i>
           </div>
           <div>
-            <h1 class="text-lg font-bold text-gray-900">{{ $t('admin.panelTitle') }}</h1>
-            <p class="text-xs text-gray-400">{{ $t('admin.panelSub') }}</p>
+            <h1 class="text-lg font-bold text-gray-900">Panel Admin</h1>
+            <p class="text-xs text-gray-400">Manajemen platform</p>
           </div>
         </div>
         <div class="flex gap-2 overflow-x-auto pb-2">
@@ -80,60 +80,60 @@
       <!-- ==================== SECTION: OVERVIEW ==================== -->
       <div v-if="activeSection === 'overview'">
         <div class="mb-6">
-          <h1 class="text-2xl font-bold text-gray-900">{{ $t('admin.overviewTitle') }}</h1>
-          <p class="text-sm text-gray-400 mt-1">{{ $t('admin.overviewSub') }}</p>
+          <h1 class="text-2xl font-bold text-gray-900">Overview Platform</h1>
+          <p class="text-sm text-gray-400 mt-1">Ringkasan statistik dan seluruh kampanye di platform</p>
         </div>
 
         <!-- Executive Metric Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 text-white shadow-sm">
             <div class="flex items-center justify-between mb-4">
-              <p class="text-emerald-100 text-sm font-medium">{{ $t('admin.totalCampaigns') }}</p>
+              <p class="text-emerald-100 text-sm font-medium">Total Kampanye</p>
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                 <i class="pi pi-flag text-lg"></i>
               </div>
             </div>
             <p class="text-3xl font-bold">{{ overview.campaigns?.total || 0 }}</p>
             <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-emerald-100">
-              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>{{ $t('admin.active') }}: {{ overview.campaigns?.active || 0 }}</span>
-              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>{{ $t('admin.success') }}: {{ overview.campaigns?.success || 0 }}</span>
-              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>{{ $t('admin.failed') }}: {{ overview.campaigns?.failed || 0 }}</span>
+              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>Aktif: {{ overview.campaigns?.active || 0 }}</span>
+              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>Sukses: {{ overview.campaigns?.success || 0 }}</span>
+              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>Gagal: {{ overview.campaigns?.failed || 0 }}</span>
             </div>
           </div>
 
           <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-6 text-white shadow-sm">
             <div class="flex items-center justify-between mb-4">
-              <p class="text-blue-100 text-sm font-medium">{{ $t('admin.totalEscrow') }}</p>
+              <p class="text-blue-100 text-sm font-medium">Total Dana Escrow</p>
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                 <i class="pi pi-wallet text-lg"></i>
               </div>
             </div>
-            <p class="text-3xl font-bold">{{ formatCurrency(overview.finance?.total_collected || 0) }}</p>                <p class="text-xs text-blue-100 mt-3">{{ $t('admin.platformFee') }}: {{ formatCurrency(overview.finance?.total_platform_fee || 0) }}</p>
+            <p class="text-3xl font-bold">{{ formatCurrency(overview.finance?.total_collected || 0) }}</p>                <p class="text-xs text-blue-100 mt-3">Fee Platform: {{ formatCurrency(overview.finance?.total_platform_fee || 0) }}</p>
           </div>
 
           <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 text-white shadow-sm">
             <div class="flex items-center justify-between mb-4">
-              <p class="text-purple-100 text-sm font-medium">{{ $t('admin.totalUsers') }}</p>
+              <p class="text-purple-100 text-sm font-medium">Total Pengguna</p>
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                 <i class="pi pi-users text-lg"></i>
               </div>
             </div>
             <p class="text-3xl font-bold">{{ overview.users?.total || 0 }}</p>
             <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-purple-100">
-              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-300"></span>{{ $t('admin.creator') }}: {{ overview.users?.creators || 0 }}</span>
-              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-300"></span>{{ $t('admin.backer') }}: {{ overview.users?.backers || 0 }}</span>
+              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-300"></span>Creator: {{ overview.users?.creators || 0 }}</span>
+              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-300"></span>Backer: {{ overview.users?.backers || 0 }}</span>
             </div>
           </div>
 
           <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl p-6 text-white shadow-sm">
             <div class="flex items-center justify-between mb-4">
-              <p class="text-orange-100 text-sm font-medium">{{ $t('admin.totalBackings') }}</p>
+              <p class="text-orange-100 text-sm font-medium">Total Backing</p>
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                 <i class="pi pi-heart text-lg"></i>
               </div>
             </div>
             <p class="text-3xl font-bold">{{ overview.backings?.total || 0 }}</p>
-            <p class="text-xs text-orange-100 mt-3">{{ $t('admin.value') }}: {{ formatCurrency(overview.backings?.total_amount || 0) }}</p>
+            <p class="text-xs text-orange-100 mt-3">Nilai: {{ formatCurrency(overview.backings?.total_amount || 0) }}</p>
           </div>
         </div>
 
@@ -141,45 +141,45 @@
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-gray-800">{{ $t('admin.allCampaigns') }}</h3>
-              <p class="text-xs text-gray-400 mt-0.5">{{ $t('admin.allCampaignsSub') }}</p>
+              <h3 class="text-lg font-bold text-gray-800">Semua Kampanye</h3>
+              <p class="text-xs text-gray-400 mt-0.5">Seluruh kampanye yang pernah dibuat di platform</p>
             </div>
-            <Badge :value="$t('admin.dataCount', { count: allCampaigns.length })" severity="info" class="!bg-slate-100 !text-slate-600 !rounded-full !text-xs !font-medium !px-3" />
+            <Badge :value="allCampaigns.length + ' Data'" severity="info" class="!bg-slate-100 !text-slate-600 !rounded-full !text-xs !font-medium !px-3" />
           </div>
           <DataTable :value="allCampaigns" class="!text-sm" stripedRows responsiveLayout="scroll" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]">
-            <Column field="id" :header="$t('admin.id')" :style="{ width: '60px' }" />
-            <Column field="title" :header="$t('admin.name')">
+            <Column field="id" header="ID" :style="{ width: '60px' }" />
+            <Column field="title" header="Nama">
               <template #body="{ data }">
                 <div class="max-w-[200px]">
                   <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                  <p class="text-xs text-gray-400 truncate">{{ $t('categories.' + (data.category?.slug || 'general')) }}</p>
+                  <p class="text-xs text-gray-400 truncate">{{ data.category?.name || 'Umum' }}</p>
                 </div>
               </template>
             </Column>
-            <Column :header="$t('admin.creator')">
+            <Column header="Creator">
               <template #body="{ data }">
                 <span class="text-sm text-gray-600">{{ data.user?.name || 'N/A' }}</span>
               </template>
             </Column>
-            <Column :header="$t('admin.target')" :style="{ width: '120px' }">
+            <Column header="Target" :style="{ width: '120px' }">
               <template #body="{ data }">
                 <span class="font-medium text-gray-800 text-sm">{{ formatCurrency(data.target_amount) }}</span>
               </template>
             </Column>
-            <Column :header="$t('admin.collected')" :style="{ width: '120px' }">
+            <Column header="Terkumpul" :style="{ width: '120px' }">
               <template #body="{ data }">
                 <span class="font-semibold text-emerald-700 text-sm">{{ formatCurrency(data.collected_amount || 0) }}</span>
               </template>
             </Column>
-            <Column field="status" :header="$t('admin.status')" :style="{ width: '100px' }">
+            <Column field="status" header="Status" :style="{ width: '100px' }">
               <template #body="{ data }">
                 <Badge :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5" />
               </template>
             </Column>
-            <Column :header="$t('admin.actions')" :style="{ width: '100px' }">
+            <Column header="Aksi" :style="{ width: '100px' }">
               <template #body="{ data }">
                 <router-link :to="`/campaigns/${data.slug}`" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium no-underline flex items-center gap-1">
-                  <i class="pi pi-external-link text-[10px]"></i> {{ $t('admin.view') }}
+                  <i class="pi pi-external-link text-[10px]"></i> Lihat
                 </router-link>
               </template>
             </Column>
@@ -190,8 +190,8 @@
       <!-- ==================== SECTION: APPROVAL CAMPAIGN ==================== -->
       <div v-if="activeSection === 'approval'">
         <div class="mb-6">
-          <h1 class="text-2xl font-bold text-gray-900">{{ $t('admin.approvalTitle') }}</h1>
-          <p class="text-sm text-gray-400 mt-1">{{ $t('admin.approvalSub') }}</p>
+          <h1 class="text-2xl font-bold text-gray-900">Persetujuan Kampanye</h1>
+          <p class="text-sm text-gray-400 mt-1">Setujui atau tolak kampanye yang dikirim oleh Creator untuk direview</p>
         </div>
 
         <div v-if="approvalLoading" class="flex items-center justify-center py-20">
@@ -202,22 +202,22 @@
           <div class="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
             <i class="pi pi-check-circle text-4xl text-emerald-300"></i>
           </div>
-          <p class="text-gray-500 text-lg font-medium">{{ $t('admin.noApprovals') }}</p>
-          <p class="text-gray-400 text-sm mt-1">{{ $t('admin.noApprovalsSub') }}</p>
+          <p class="text-gray-500 text-lg font-medium">Tidak ada kampanye menunggu persetujuan</p>
+          <p class="text-gray-400 text-sm mt-1">Semua kampanye telah diproses</p>
         </div>
 
         <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <DataTable :value="pendingApprovals" class="!text-sm" stripedRows responsiveLayout="scroll" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]">
-            <Column field="id" :header="$t('admin.id')" :style="{ width: '60px' }" />
-            <Column :header="$t('admin.name')">
+            <Column field="id" header="ID" :style="{ width: '60px' }" />
+            <Column header="Nama">
               <template #body="{ data }">
                 <div class="max-w-[200px]">
                   <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                  <p class="text-xs text-gray-400 truncate">{{ $t('categories.' + (data.category?.slug || 'general')) }}</p>
+                  <p class="text-xs text-gray-400 truncate">{{ data.category?.name || 'Umum' }}</p>
                 </div>
               </template>
             </Column>
-            <Column :header="$t('admin.creator')">
+            <Column header="Creator">
               <template #body="{ data }">
                 <div class="flex items-center gap-2">
                   <div class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -227,27 +227,27 @@
                 </div>
               </template>
             </Column>
-            <Column :header="$t('admin.target')" :style="{ width: '120px' }">
+            <Column header="Target" :style="{ width: '120px' }">
               <template #body="{ data }">
                 <span class="font-medium text-gray-800 text-sm">{{ formatCurrency(data.target_amount) }}</span>
               </template>
             </Column>
-            <Column :header="$t('admin.deadline')" :style="{ width: '110px' }">
+            <Column header="Tenggat" :style="{ width: '110px' }">
               <template #body="{ data }">
                 <span class="text-xs text-gray-500">{{ formatDate(data.deadline) }}</span>
               </template>
             </Column>
-            <Column :header="$t('admin.date')" :style="{ width: '110px' }">
+            <Column header="Tanggal" :style="{ width: '110px' }">
               <template #body="{ data }">
                 <span class="text-xs text-gray-500">{{ formatDate(data.created_at) }}</span>
               </template>
             </Column>
-            <Column :header="$t('admin.actions')" :style="{ width: '140px' }">
+            <Column header="Aksi" :style="{ width: '140px' }">
               <template #body="{ data }">
                 <div class="flex items-center gap-1.5">
-                  <Button icon="pi pi-check" class="!w-8 !h-8 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !shadow-sm !text-white !text-xs" v-tooltip.left="$t('admin.approve')" @click="approveCampaign(data)" />
-                  <Button icon="pi pi-times" class="!w-8 !h-8 !rounded-full !bg-slate-400 !border-slate-400 hover:!bg-slate-500 !shadow-sm !text-white !text-xs" v-tooltip.left="$t('admin.reject')" @click="openCampaignRejectDialog(data)" />
-                  <Button icon="pi pi-ban" class="!w-8 !h-8 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !shadow-sm !text-white !text-xs" v-tooltip.left="$t('admin.ban')" @click="confirmBanCampaign(data)" />
+                  <Button icon="pi pi-check" class="!w-8 !h-8 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !shadow-sm !text-white !text-xs" v-tooltip.left="'Setujui'" @click="approveCampaign(data)" />
+                  <Button icon="pi pi-times" class="!w-8 !h-8 !rounded-full !bg-slate-400 !border-slate-400 hover:!bg-slate-500 !shadow-sm !text-white !text-xs" v-tooltip.left="'Tolak'" @click="openCampaignRejectDialog(data)" />
+                  <Button icon="pi pi-ban" class="!w-8 !h-8 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !shadow-sm !text-white !text-xs" v-tooltip.left="'Ban'" @click="confirmBanCampaign(data)" />
                 </div>
               </template>
             </Column>
@@ -258,22 +258,22 @@
       <!-- ==================== SECTION: ACTIVE CAMPAIGNS ==================== -->
       <div v-if="activeSection === 'active'">
         <div class="mb-6">
-          <h1 class="text-2xl font-bold text-gray-900">{{ $t('admin.activeTitle') }}</h1>
-          <p class="text-sm text-gray-400 mt-1">{{ $t('admin.activeSub') }}</p>
+          <h1 class="text-2xl font-bold text-gray-900">Kampanye Aktif</h1>
+          <p class="text-sm text-gray-400 mt-1">Pantau kampanye yang sedang berjalan di platform</p>
         </div>
 
         <!-- Active Campaigns Summary Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <p class="text-xs text-gray-500 font-medium">{{ $t('admin.totalActive') }}</p>
+            <p class="text-xs text-gray-500 font-medium">Total Aktif</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ activeCampaigns.length }}</p>
           </div>
           <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <p class="text-xs text-gray-500 font-medium">{{ $t('admin.totalCollected') }}</p>
+            <p class="text-xs text-gray-500 font-medium">Total Terkumpul</p>
             <p class="text-2xl font-bold text-emerald-700 mt-1">{{ formatCurrency(activeTotalCollected) }}</p>
           </div>
           <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <p class="text-xs text-gray-500 font-medium">{{ $t('admin.totalBackers') }}</p>
+            <p class="text-xs text-gray-500 font-medium">Total Backer</p>
             <p class="text-2xl font-bold text-blue-700 mt-1">{{ activeTotalBackers }}</p>
           </div>
         </div>
@@ -286,8 +286,8 @@
           <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
             <i class="pi pi-flag text-4xl text-gray-300"></i>
           </div>
-          <p class="text-gray-500 text-lg font-medium">{{ $t('admin.noActive') }}</p>
-          <p class="text-gray-400 text-sm mt-1">{{ $t('admin.noActiveSub') }}</p>
+          <p class="text-gray-500 text-lg font-medium">Belum ada kampanye aktif</p>
+          <p class="text-gray-400 text-sm mt-1">Kampanye yang disetujui akan muncul di sini</p>
         </div>
 
         <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -303,29 +303,29 @@
 
               <div class="space-y-2 mb-3">
                 <div class="flex items-center justify-between text-sm">
-                  <span class="text-gray-500">{{ $t('campaign.collected') }}</span>
+                  <span class="text-gray-500">Terkumpul</span>
                   <span class="font-bold text-emerald-700">{{ formatCurrency(campaign.collected_amount) }}</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
-                  <span class="text-gray-500">{{ $t('campaign.target') }}</span>
+                  <span class="text-gray-500">Target</span>
                   <span class="font-semibold text-gray-800">{{ formatCurrency(campaign.target_amount) }}</span>
                 </div>
               </div>
 
               <ProgressBar :value="campaign.progress" class="!h-3 !rounded-full" />
               <div class="flex items-center justify-between text-xs mt-1.5">
-                <span class="text-gray-500">{{ $t('campaign.percentCollected', { percent: campaign.progress }) }}</span>
+                <span class="text-gray-500">{{ campaign.progress }}% terkumpul</span>
                 <span class="flex items-center gap-1 text-orange-600 font-medium">
                   <i class="pi pi-clock"></i>
-                  {{ $t('common.daysLeft', { days: campaign.days_remaining }) }}
+                  {{ campaign.days_remaining }} hari lagi
                 </span>
               </div>
 
               <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
                 <div class="flex items-center gap-4 text-xs text-gray-500">
-                  <span class="flex items-center gap-1"><i class="pi pi-users"></i> {{ campaign.backer_count }} {{ $t('admin.backer') }}</span>
-                  <span class="flex items-center gap-1"><i class="pi pi-calendar"></i> {{ $t('admin.deadline') }} {{ formatDate(campaign.deadline) }}</span>
-                </div>                  <Button icon="pi pi-ban" class="!w-7 !h-7 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !shadow-sm !text-white !text-[10px]" v-tooltip.left="$t('admin.ban')" @click="confirmBanCampaign(campaign)" />
+                  <span class="flex items-center gap-1"><i class="pi pi-users"></i> {{ campaign.backer_count }} Backer</span>
+                  <span class="flex items-center gap-1"><i class="pi pi-calendar"></i> Tenggat {{ formatDate(campaign.deadline) }}</span>
+                </div>                  <Button icon="pi pi-ban" class="!w-7 !h-7 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !shadow-sm !text-white !text-[10px]" v-tooltip.left="'Ban'" @click="confirmBanCampaign(campaign)" />
               </div>
             </div>
           </div>
@@ -335,24 +335,24 @@
       <!-- ==================== SECTION: ENDED CAMPAIGNS ==================== -->
       <div v-if="activeSection === 'ended'">
         <div class="mb-6">
-          <h1 class="text-2xl font-bold text-gray-900">{{ $t('admin.endedTitle') }}</h1>
-          <p class="text-sm text-gray-400 mt-1">{{ $t('admin.endedSub') }}</p>
+          <h1 class="text-2xl font-bold text-gray-900">Kampanye Berakhir</h1>
+          <p class="text-sm text-gray-400 mt-1">Riwayat kampanye yang telah selesai, baik sukses maupun gagal</p>
         </div>
 
         <!-- Ended Summary Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl p-5 text-white shadow-sm">
-            <p class="text-emerald-100 text-xs font-medium">{{ $t('admin.successCount') }}</p>
+            <p class="text-emerald-100 text-xs font-medium">Sukses</p>
             <p class="text-2xl font-bold mt-1">{{ endedSuccessCount }}</p>
-            <p class="text-xs text-emerald-100 mt-1">{{ $t('admin.endedSuccess') }}</p>
+            <p class="text-xs text-emerald-100 mt-1">Mencapai target</p>
           </div>
           <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-xl p-5 text-white shadow-sm">
-            <p class="text-red-100 text-xs font-medium">{{ $t('admin.failedCount') }}</p>
+            <p class="text-red-100 text-xs font-medium">Gagal</p>
             <p class="text-2xl font-bold mt-1">{{ endedFailedCount }}</p>
-            <p class="text-xs text-red-100 mt-1">{{ $t('admin.endedFailed') }}</p>
+            <p class="text-xs text-red-100 mt-1">Tidak mencapai target</p>
           </div>
           <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <p class="text-xs text-gray-500 font-medium">{{ $t('admin.totalCollected') }}</p>
+            <p class="text-xs text-gray-500 font-medium">Total Terkumpul</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ formatCurrency(endedTotalCollected) }}</p>
           </div>
         </div>
@@ -365,37 +365,37 @@
           <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
             <i class="pi pi-flag text-4xl text-gray-300"></i>
           </div>
-          <p class="text-gray-500 text-lg font-medium">{{ $t('admin.noEnded') }}</p>
-          <p class="text-gray-400 text-sm mt-1">{{ $t('admin.noEndedSub') }}</p>
+          <p class="text-gray-500 text-lg font-medium">Belum ada kampanye berakhir</p>
+          <p class="text-gray-400 text-sm mt-1">Kampanye yang sukses atau gagal akan muncul di sini</p>
         </div>
 
         <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <DataTable :value="endedCampaigns" class="!text-sm" stripedRows responsiveLayout="scroll" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]">
-            <Column field="id" :header="$t('admin.id')" :style="{ width: '60px' }" />
-            <Column :header="$t('admin.name')">
+            <Column field="id" header="ID" :style="{ width: '60px' }" />
+            <Column header="Nama">
               <template #body="{ data }">
                 <div class="max-w-[180px]">
                   <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                  <p class="text-xs text-gray-400 truncate">{{ $t('categories.' + (data.category?.slug || 'general')) }}</p>
+                  <p class="text-xs text-gray-400 truncate">{{ data.category?.name || 'Umum' }}</p>
                 </div>
               </template>
             </Column>
-            <Column :header="$t('admin.creator')">
+            <Column header="Creator">
               <template #body="{ data }">
                 <span class="text-sm text-gray-600">{{ data.user?.name || 'N/A' }}</span>
               </template>
             </Column>
-            <Column :header="$t('admin.target')" :style="{ width: '110px' }">
+            <Column header="Target" :style="{ width: '110px' }">
               <template #body="{ data }">
                 <span class="font-medium text-gray-800 text-sm">{{ formatCurrency(data.target_amount) }}</span>
               </template>
             </Column>
-            <Column :header="$t('admin.collected')" :style="{ width: '110px' }">
+            <Column header="Terkumpul" :style="{ width: '110px' }">
               <template #body="{ data }">
                 <span class="font-semibold" :class="data.status === 'success' ? 'text-emerald-700' : 'text-red-600'">{{ formatCurrency(data.collected_amount) }}</span>
               </template>
             </Column>
-            <Column :header="$t('admin.progress')" :style="{ width: '100px' }">
+            <Column header="Progress" :style="{ width: '100px' }">
               <template #body="{ data }">
                 <div class="flex items-center gap-2">
                   <ProgressBar :value="data.progress" class="!h-2 !rounded-full flex-1" />
@@ -403,17 +403,17 @@
                 </div>
               </template>
             </Column>
-            <Column :header="$t('admin.backer')" :style="{ width: '70px' }">
+            <Column header="Backer" :style="{ width: '70px' }">
               <template #body="{ data }">
                 <span class="text-sm text-gray-600">{{ data.backer_count }}</span>
               </template>
             </Column>
-            <Column field="status" :header="$t('campaign.status')" :style="{ width: '90px' }">
+            <Column field="status" header="Status" :style="{ width: '90px' }">
               <template #body="{ data }">
                 <Badge :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5" />
               </template>
             </Column>
-            <Column :header="$t('admin.conclusion')" :style="{ width: '160px' }">
+            <Column header="Kesimpulan" :style="{ width: '160px' }">
               <template #body="{ data }">
                 <div class="flex items-center gap-1.5">
                   <i :class="data.status === 'success' ? 'pi pi-check-circle text-emerald-500' : 'pi pi-times-circle text-red-400'" class="text-xs"></i>
@@ -428,7 +428,7 @@
 
     <!-- ==================== DIALOGS ==================== -->
 
-    <!-- Reject Campaign Dialog -->      <Dialog v-model:visible="campaignRejectDialogVisible" :header="$t('admin.rejectDialogTitle')" :modal="true" class="!rounded-2xl" :style="{ width: '450px' }">
+    <!-- Reject Campaign Dialog -->      <Dialog v-model:visible="campaignRejectDialogVisible" header="Tolak Kampanye" :modal="true" class="!rounded-2xl" :style="{ width: '450px' }">
       <div class="space-y-4">
         <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
           <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
@@ -436,30 +436,30 @@
           </div>
           <div>
             <p class="text-sm font-semibold text-gray-800">{{ campaignRejectTarget?.title }}</p>
-            <p class="text-xs text-gray-400">{{ $t('admin.byCreator', { name: campaignRejectTarget?.user?.name || 'N/A' }) }}</p>
+            <p class="text-xs text-gray-400">Oleh {{ campaignRejectTarget?.user?.name || 'N/A' }}</p>
           </div>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-gray-700">{{ $t('admin.rejectReason') }} <span class="text-red-500">*</span></label>
-          <Textarea v-model="campaignRejectReason" rows="3" :placeholder="$t('admin.rejectReasonPlaceholder')" class="w-full !rounded-xl !text-sm" :class="{ 'p-invalid': !campaignRejectReason && campaignSubmitted }" />
-          <small v-if="!campaignRejectReason && campaignSubmitted" class="text-red-500 text-xs flex items-center gap-1"><i class="pi pi-exclamation-circle"></i> {{ $t('admin.rejectReasonRequired') }}</small>
+          <label class="text-sm font-semibold text-gray-700">Alasan Penolakan <span class="text-red-500">*</span></label>
+          <Textarea v-model="campaignRejectReason" rows="3" placeholder="Masukkan alasan mengapa kampanye ditolak..." class="w-full !rounded-xl !text-sm" :class="{ 'p-invalid': !campaignRejectReason && campaignSubmitted }" />
+          <small v-if="!campaignRejectReason && campaignSubmitted" class="text-red-500 text-xs flex items-center gap-1"><i class="pi pi-exclamation-circle"></i> Alasan penolakan wajib diisi</small>
         </div>
       </div>
       <template #footer>
         <div class="flex gap-2 justify-end">
-          <Button :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="campaignRejectDialogVisible = false" />
-          <Button :label="$t('admin.rejectAction')" icon="pi pi-check" class="!bg-slate-600 !border-slate-600 !text-white !rounded-xl" :loading="campaignRejectLoading" @click="executeCampaignReject" />
+          <Button label="Batal" icon="pi pi-times" class="p-button-text" @click="campaignRejectDialogVisible = false" />
+          <Button label="Tolak" icon="pi pi-check" class="!bg-slate-600 !border-slate-600 !text-white !rounded-xl" :loading="campaignRejectLoading" @click="executeCampaignReject" />
         </div>
       </template>
     </Dialog>
 
-    <!-- Ban Campaign Confirmation Dialog -->      <Dialog v-model:visible="banDialogVisible" :header="$t('admin.banDialogTitle')" :modal="true" class="!rounded-2xl !bg-white" :style="{ width: '450px' }">
+    <!-- Ban Campaign Confirmation Dialog -->      <Dialog v-model:visible="banDialogVisible" header="Ban Kampanye" :modal="true" class="!rounded-2xl !bg-white" :style="{ width: '450px' }">
       <div class="space-y-4">
         <div class="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
           <i class="pi pi-exclamation-triangle text-red-500 text-xl mt-0.5"></i>
           <div>
-            <p class="text-sm font-semibold text-red-800">{{ $t('admin.banWarning') }}</p>
-            <p class="text-xs text-red-600 mt-1">{{ $t('admin.banWarningSub') }}</p>
+            <p class="text-sm font-semibold text-red-800">Tindakan ini tidak dapat dibatalkan</p>
+            <p class="text-xs text-red-600 mt-1">Memban kampanye akan mengubah status menjadi gagal dan menghentikan semua pendanaan yang masuk.</p>
           </div>
         </div>
         <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
@@ -468,18 +468,18 @@
           </div>
           <div>
             <p class="text-sm font-semibold text-gray-800">{{ banTarget?.title }}</p>
-            <p class="text-xs text-gray-400">{{ $t('admin.currentStatus', { status: banTarget?.status }) }}</p>
+            <p class="text-xs text-gray-400">Status saat ini: {{ banTarget?.status }}</p>
           </div>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-gray-700">{{ $t('admin.banReason') }}</label>
-          <Textarea v-model="banReason" rows="2" :placeholder="$t('admin.banReasonPlaceholder')" class="w-full !rounded-xl !text-sm" />
+          <label class="text-sm font-semibold text-gray-700">Alasan Ban</label>
+          <Textarea v-model="banReason" rows="2" placeholder="Catatan internal untuk ban..." class="w-full !rounded-xl !text-sm" />
         </div>
       </div>
       <template #footer>
         <div class="flex gap-2 justify-end">
-          <Button :label="$t('common.cancel')" icon="pi pi-times" class="p-button-text" @click="banDialogVisible = false" />
-          <Button :label="$t('admin.banAction')" icon="pi pi-ban" class="!bg-red-600 !border-red-600 !text-white !rounded-xl" :loading="banLoading" @click="executeBan" />
+          <Button label="Batal" icon="pi pi-times" class="p-button-text" @click="banDialogVisible = false" />
+          <Button label="Ban" icon="pi pi-ban" class="!bg-red-600 !border-red-600 !text-white !rounded-xl" :loading="banLoading" @click="executeBan" />
         </div>
       </template>
     </Dialog>
@@ -496,20 +496,17 @@ import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
 import ProgressBar from 'primevue/progressbar'
 import { useToast } from 'primevue/usetoast'
-import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 
 const toast = useToast()
 const activeSection = ref('overview')
 
-const { t } = useI18n()
-
-const sidebarItems = computed(() => [
-  { id: 'overview', label: t('admin.overview'), desc: t('admin.overviewDesc'), icon: 'pi pi-chart-bar' },
-  { id: 'approval', label: t('admin.approval'), desc: t('admin.approvalDesc'), icon: 'pi pi-check-circle' },
-  { id: 'active', label: t('admin.activeCampaigns'), desc: t('admin.activeDesc'), icon: 'pi pi-play-circle' },
-  { id: 'ended', label: t('admin.endedCampaigns'), desc: t('admin.endedDesc'), icon: 'pi pi-flag' },
-])
+const sidebarItems = [
+  { id: 'overview', label: 'Overview', desc: 'Statistik platform', icon: 'pi pi-chart-bar' },
+  { id: 'approval', label: 'Approval', desc: 'Persetujuan kampanye', icon: 'pi pi-check-circle' },
+  { id: 'active', label: 'Kampanye Aktif', desc: 'Kampanye berjalan', icon: 'pi pi-play-circle' },
+  { id: 'ended', label: 'Kampanye Berakhir', desc: 'Riwayat kampanye', icon: 'pi pi-flag' },
+]
 
 // ==================== Section 1: Overview ====================
 const allCampaigns = ref([])
@@ -620,7 +617,7 @@ async function executeBan() {
 
 // ==================== Utility Functions ====================
 function statusLabel(status) {
-  const labels = { draft: t('campaign.statusDraft'), review: t('campaign.statusReview'), active: t('campaign.statusActive'), success: t('campaign.statusSuccess'), failed: t('campaign.statusFailed') }
+  const labels = { draft: 'Draft', review: 'Review', active: 'Aktif', success: 'Sukses', failed: 'Gagal' }
   return labels[status] || status || '-'
 }
 
