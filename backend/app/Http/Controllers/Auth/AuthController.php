@@ -23,12 +23,15 @@ class AuthController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role' => RoleEnum::GUEST->value,
+            'role' => RoleEnum::BACKER->value,
         ]);
 
         $user->sendEmailVerificationNotification();
 
-        return response()->json(['message' => 'User registered. Verification email sent.'], 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Registrasi berhasil. Silakan cek email untuk verifikasi.',
+        ], 201);
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -36,13 +39,17 @@ class AuthController extends Controller
         $credentials = $request->validated();
 
         if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'Email atau password salah.',
+            ], 401);
         }
 
         $user = Auth::user();
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
+            'success' => true,
             'user' => $user,
             'token' => $token,
             'role' => $user->role,
@@ -53,12 +60,33 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Logout berhasil.',
+        ]);
     }
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json($request->user());
+        $user = $request->user()->loadCount([
+            'backings as total_backings' => function ($query) {
+                $query->where('status', 'completed');
+            },
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'balance' => $user->balance,
+                'email_verified_at' => $user->email_verified_at,
+                'created_at' => $user->created_at,
+                'total_backings' => $user->total_backings,
+            ],
+        ]);
     }
 
     public function verify(Request $request, int $id, string $hash): JsonResponse
@@ -66,16 +94,25 @@ class AuthController extends Controller
         $user = User::findOrFail($id);
 
         if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            return response()->json(['message' => 'Invalid verification link.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Link verifikasi tidak valid.',
+            ], 403);
         }
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Email sudah diverifikasi sebelumnya.',
+            ]);
         }
 
         $user->markEmailAsVerified();
 
-        return response()->json(['message' => 'Email verified successfully.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Email berhasil diverifikasi.',
+        ]);
     }
 
     public function resend(Request $request): JsonResponse
@@ -83,12 +120,18 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Email sudah diverifikasi.',
+            ], 400);
         }
 
         $user->sendEmailVerificationNotification();
 
-        return response()->json(['message' => 'Verification email resent.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Email verifikasi telah dikirim ulang.',
+        ]);
     }
 
     public function forgotPassword(Request $request): JsonResponse
@@ -96,10 +139,16 @@ class AuthController extends Controller
         $status = Password::sendResetLink($request->only('email'));
 
         if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['message' => 'Password reset link sent.']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Link reset password telah dikirim ke email Anda.',
+            ]);
         }
 
-        return response()->json(['message' => __($status)], 422);
+        return response()->json([
+            'success' => false,
+            'message' => __($status),
+        ], 422);
     }
 
     public function resetPassword(Request $request): JsonResponse
@@ -119,9 +168,15 @@ class AuthController extends Controller
         });
 
         if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['message' => 'Password reset successfully.']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Password berhasil direset.',
+            ]);
         }
 
-        return response()->json(['message' => __($status)], 422);
+        return response()->json([
+            'success' => false,
+            'message' => __($status),
+        ], 422);
     }
 }

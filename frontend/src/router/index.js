@@ -39,6 +39,24 @@ const routes = [
     component: () => import('@/views/Auth/Dashboard.vue'),
   },
   {
+    path: '/profile',
+    name: 'Profile',
+    meta: { title: 'Profil Saya — CoFund', requiresAuth: true },
+    component: () => import('@/views/ProfilePage.vue'),
+  },
+  {
+    path: '/notifications',
+    name: 'Notifications',
+    meta: { title: 'Notifikasi — CoFund', requiresAuth: true },
+    component: () => import('@/views/NotificationPage.vue'),
+  },
+  {
+    path: '/admin',
+    name: 'AdminDashboard',
+    meta: { title: 'Panel Admin — CoFund', requiresAuth: true, requiresAdmin: true },
+    component: () => import('@/views/AdminDashboard.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     redirect: '/',
@@ -60,6 +78,10 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return next({ name: 'Login', query: { redirect: to.fullPath } })
+  }
+
+  if (to.meta.requiresAdmin && authStore.getUserRole !== 'admin') {
+    return next({ name: 'Dashboard' })
   }
 
   if (to.meta.guestOnly && authStore.isAuthenticated) {
