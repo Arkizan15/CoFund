@@ -37,7 +37,11 @@ class NotifikasiEmail extends Mailable
     public function content(): Content
     {
         return new Content(
+<<<<<<< HEAD
             view: 'emails.notifikasi',
+=======
+            view: 'view.name',
+>>>>>>> 2ccb525 (feat: add NotificationPage and ProfilePage components)
         );
     }
 

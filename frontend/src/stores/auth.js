@@ -59,7 +59,8 @@ export const useAuthStore = defineStore('auth', {
       if (!this.token) return;
       try {
         const response = await authService.getProfile();
-        this.user = response.data;
+        // Backend wraps user data in { success: true, data: { ... } }
+        this.user = response.data.data || response.data;
         localStorage.setItem('user', JSON.stringify(this.user));
       } catch (error) {
         if (error.response?.status === 401) {

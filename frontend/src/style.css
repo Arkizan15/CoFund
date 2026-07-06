@@ -36,14 +36,48 @@ body {
   opacity: 0;
 }
 
-/* PrimeVue overrides for sage-green consistency */
+/* ===== PrimeVue Override: Toast white background ===== */
+.p-toast .p-toast-message {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+.p-toast .p-toast-message .p-toast-message-content {
+  padding: 1rem !important;
+}
+.p-toast .p-toast-message .p-toast-icon-close {
+  align-self: flex-start !important;
+}
+
+/* ===== PrimeVue Override: Buttons ===== */
+.p-button {
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+.p-button:not(.p-button-text):not(.p-button-outlined) {
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.15) !important;
+}
+.p-button:not(.p-button-text):not(.p-button-outlined):hover {
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25) !important;
+  transform: translateY(-1px);
+}
+.p-button.p-button-text:hover {
+  background-color: #ecfdf5 !important;
+}
+
+/* Sage-green primary override */
 .p-button.p-button-success {
   background-color: #059669;
   border-color: #059669;
 }
 .p-button.p-button-success:hover {
-  background-color: #047857;
-  border-color: #047857;
+  background-color: #047857 !important;
+  border-color: #047857 !important;
+}
+.p-button.p-button-success:active {
+  background-color: #065f46 !important;
+  border-color: #065f46 !important;
 }
 .p-button.p-button-outlined.p-button-success {
   color: #059669;
@@ -54,21 +88,78 @@ body {
   background-color: #ecfdf5;
 }
 
+/* Danger button */
+.p-button.p-button-danger {
+  background-color: #ef4444;
+  border-color: #ef4444;
+}
+.p-button.p-button-danger:hover {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+/* ===== PrimeVue Override: Inputs ===== */
+.p-inputtext {
+  border-color: #d1d5db !important;
+  transition: all 0.2s ease !important;
+}
+.p-inputtext:hover {
+  border-color: #9ca3af !important;
+}
 .p-inputtext:focus {
   border-color: #059669 !important;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
+}
+.p-inputtext.p-invalid {
+  border-color: #ef4444 !important;
+}
+.p-inputtext.p-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
 }
 
+.p-inputnumber:hover .p-inputtext {
+  border-color: #9ca3af !important;
+}
+
+.p-dropdown:not(.p-disabled):hover {
+  border-color: #9ca3af !important;
+}
 .p-dropdown:not(.p-disabled).p-focus {
   border-color: #059669 !important;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
 }
 
+.p-textarea:hover {
+  border-color: #9ca3af !important;
+}
+.p-textarea:focus {
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
+}
+
+/* ===== PrimeVue Override: ProgressBar ===== */
 .p-progressbar .p-progressbar-value {
   background: linear-gradient(90deg, #10b981, #059669);
 }
 
+/* ===== PrimeVue Override: Badge ===== */
 .p-badge.p-badge-success {
   background-color: #d1fae5;
   color: #065f46;
 }
+
+/* ===== Global Interactive Styles ===== */
+a {
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: #059669;
+}
+
+button:focus-visible,
+a:focus-visible,
+.p-button:focus-visible {
+  outline: 2px solid #059669;
+  outline-offset: 2px;
+}
+

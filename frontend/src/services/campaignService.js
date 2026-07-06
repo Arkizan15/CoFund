@@ -10,8 +10,35 @@ export async function getCampaignDetail(slug) {
   return res.data
 }
 
-// Export default object for backward compatibility
-const campaignService = { getCampaigns, getCampaignDetail }
+export async function getCategories() {
+  const res = await api.get('/categories')
+  return res.data
+}
+
+export async function createCampaign(payload) {
+  const res = await api.post('/campaigns', payload)
+  return res.data
+}
+
+export async function submitForReview(campaignId) {
+  const res = await api.post(`/campaigns/${campaignId}/submit`)
+  return res.data
+}
+
+export async function getMyCampaigns() {
+  const res = await api.get('/my/campaigns')
+  return res.data
+}
+
+export async function postUpdate(campaignId, payload) {
+  const res = await api.post(`/campaigns/${campaignId}/updates`, payload)
+  return res.data
+}
+
+export async function backCampaign(payload) {
+  const res = await api.post('/backings', payload)
+  return res.data
+}
+
+const campaignService = { getCampaigns, getCampaignDetail, getCategories, createCampaign, submitForReview, getMyCampaigns, postUpdate, backCampaign }
 export default campaignService
-
-

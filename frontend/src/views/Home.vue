@@ -142,22 +142,107 @@
       </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="bg-gradient-to-r from-emerald-700 to-emerald-600 py-16">
+    <!-- Guest CTA -->
+    <section v-if="!authStore.isAuthenticated" class="bg-gradient-to-r from-emerald-700 to-emerald-600 py-16">
       <div class="max-w-4xl mx-auto px-4 text-center">
+        <div class="flex items-center justify-center gap-3 mb-6">
+          <div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center">
+            <i class="pi pi-wallet text-3xl text-white"></i>
+          </div>
+        </div>
         <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">Siap Mengembangkan Portofolio Investasi Anda?</h3>
         <p class="text-emerald-100 mb-8 max-w-2xl mx-auto">Bergabunglah bersama CoFund dan temukan berbagai peluang investasi sektor riil terbaik untuk masa depan Anda.</p>
-        <router-link :to="{ name: 'Register' }" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-10 py-4 rounded-xl shadow-lg hover:bg-emerald-50 transition-all duration-200 hover:-translate-y-0.5">
+        <router-link :to="{ name: 'Register' }" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-10 py-4 rounded-xl shadow-lg hover:bg-emerald-50 transition-all duration-200 hover:-translate-y-0.5 no-underline">
           <i class="pi pi-user-plus"></i>
           Daftar Sekarang
         </router-link>
+      </div>
+    </section>
+
+    <!-- Logged-in Campaign Cards -->
+    <section v-else class="py-16 bg-gradient-to-r from-emerald-700 to-emerald-600">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-10">
+          <div>
+            <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Kampanye Terbaru</h3>
+            <p class="text-emerald-100 text-sm">Temukan dan dukung kampanye yang sesuai dengan minat Anda</p>
+          </div>
+          <router-link :to="{ name: 'CampaignList' }" class="hidden sm:inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 no-underline">
+            Lihat Semua
+            <i class="pi pi-arrow-right text-sm"></i>
+          </router-link>
+        </div>
+
+        <div v-if="liveCampaignsLoading" class="flex items-center justify-center py-12">
+          <i class="pi pi-spin pi-spinner text-3xl text-white/70"></i>
+        </div>
+
+        <div v-else-if="liveCampaigns.length === 0" class="text-center py-12 bg-white/10 rounded-2xl">
+          <i class="pi pi-inbox text-4xl text-white/40 mb-3 block"></i>
+          <p class="text-white/70 text-sm">Belum ada kampanye aktif saat ini</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            v-for="campaign in liveCampaigns.slice(0, 3)"
+            :key="campaign.id"
+            class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+          >
+            <div class="relative overflow-hidden h-44 bg-gray-100">
+              <img
+                src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&q=80"
+                :alt="campaign.title"
+                class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+              />
+              <div class="absolute top-3 left-3">
+                <span class="bg-emerald-600/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                  {{ campaign.category?.name || 'Umum' }}
+                </span>
+              </div>
+            </div>
+            <div class="p-5 flex flex-col flex-1">
+              <h4 class="font-bold text-gray-800 text-sm line-clamp-2 mb-3">{{ campaign.title }}</h4>
+              <div class="mt-auto space-y-2.5">
+                <ProgressBar :value="progressPercent(campaign)" class="!h-2 !rounded-full" />
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-gray-500">
+                    {{ formatCurrency(campaign.collected_amount || 0) }}
+                  </span>
+                  <span class="flex items-center gap-1 text-orange-600 font-medium">
+                    <i class="pi pi-clock text-[10px]"></i>
+                    {{ remainingDays(campaign.deadline) }} hari
+                  </span>
+                </div>
+              </div>
+              <router-link
+                :to="`/campaigns/${campaign.slug}`"
+                class="mt-4 block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all duration-200 shadow-sm no-underline"
+              >
+                Lihat Detail
+                <i class="pi pi-arrow-right ml-1.5 text-xs"></i>
+              </router-link>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-8 sm:hidden">
+          <router-link :to="{ name: 'CampaignList' }" class="inline-flex items-center gap-2 text-white font-semibold hover:text-emerald-100 transition-colors">
+            Lihat Semua Kampanye
+            <i class="pi pi-arrow-right text-sm"></i>
+          </router-link>
+        </div>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import ProgressBar from 'primevue/progressbar'
+import * as campaignService from '@/services/campaignService'
+
+const authStore = useAuthStore()
 
 const featuredCampaigns = ref([
   {
@@ -188,4 +273,39 @@ const featuredCampaigns = ref([
     image: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=600&q=80'
   }
 ])
+
+const liveCampaigns = ref([])
+const liveCampaignsLoading = ref(true)
+
+function formatCurrency(val) {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0)
+}
+
+function remainingDays(deadline) {
+  if (!deadline) return '-'
+  const d = new Date(deadline)
+  const diff = Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24))
+  return diff > 0 ? diff : 0
+}
+
+function progressPercent(c) {
+  const col = Number(c.collected_amount || 0)
+  const tar = Number(c.target_amount || 1)
+  return Math.min(100, Math.round((col / tar) * 100))
+}
+
+onMounted(async () => {
+  if (authStore.isAuthenticated) {
+    try {
+      const data = await campaignService.getCampaigns()
+      liveCampaigns.value = data?.data || data || []
+    } catch (e) {
+      liveCampaigns.value = []
+    } finally {
+      liveCampaignsLoading.value = false
+    }
+  } else {
+    liveCampaignsLoading.value = false
+  }
+})
 </script>
