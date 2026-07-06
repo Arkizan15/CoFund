@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Category;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Campaign extends Model
 {
@@ -38,5 +38,25 @@ class Campaign extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function tiers(): HasMany
+    {
+        return $this->hasMany(CampaignTier::class);
+    }
+
+    public function backings(): HasMany
+    {
+        return $this->hasMany(Backing::class);
+    }
+
+    public function updates(): HasMany
+    {
+        return $this->hasMany(CampaignUpdate::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(CampaignImage::class);
     }
 }

@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enums\RoleEnum;
+use App\Models\CreatorRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class RoleRequestController extends Controller
+{
+    public function myRequests(): JsonResponse
+    {
+        $requests = CreatorRequest::where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $requests,
+        ], 200);
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        $existing = CreatorRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah memiliki permintaan yang menunggu verifikasi.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $creatorRequest = CreatorRequest::create([
+            'user_id' => $user->id,
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permintaan upgrade role berhasil dikirim. Menunggu verifikasi admin.',
+            'data' => $creatorRequest,
+        ], 201);
+    }
+
+    public function index(): JsonResponse
+    {
+        $user = Auth::user();
+
+        if ($user->role !== RoleEnum::ADMIN) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Hanya admin yang dapat mengakses.',
+            ], 403);
+        }
+
+        $requests = CreatorRequest::with('user')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $requests,
+        ], 200);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $user = Auth::user();
+
+        if ($user->role !== RoleEnum::ADMIN) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => ['required', 'in:approved,rejected'],
+            'rejection_reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $creatorRequest = CreatorRequest::findOrFail($id);
+
+        if ($creatorRequest->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Permintaan sudah diproses sebelumnya.',
+            ], 422);
+        }
+
+        $creatorRequest->status = $validated['status'];
+
+        if ($validated['status'] === 'approved') {
+            $creatorRequest->user->update(['role' => RoleEnum::CREATOR->value]);
+        } elseif ($validated['status'] === 'rejected') {
+            $creatorRequest->rejection_reason = $validated['rejection_reason'] ?? 'Permintaan ditolak oleh admin.';
+        }
+
+        $creatorRequest->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status permintaan berhasil diperbarui.',
+            'data' => $creatorRequest->load('user'),
+        ], 200);
+    }
+}

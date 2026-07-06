@@ -2,21 +2,74 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Enums\RoleEnum;
+use App\Models\Category;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Create categories
+        $categories = [
+            ['name' => 'Teknologi', 'slug' => 'teknologi'],
+            ['name' => 'Kemanusiaan', 'slug' => 'kemanusiaan'],
+            ['name' => 'Pendidikan', 'slug' => 'pendidikan'],
+            ['name' => 'Kreatif', 'slug' => 'kreatif'],
+        ];
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        foreach ($categories as $category) {
+            Category::create($category);
+        }
+
+        // Create 1 Admin
+        User::create([
+            'name' => 'Admin CoFund',
+            'email' => 'admin@cofund.com',
+            'password' => Hash::make('password'),
+            'role' => RoleEnum::ADMIN->value,
+            'email_verified_at' => now(),
+            'balance' => 0,
+        ]);
+
+        // Create 3 Creator accounts
+        $creators = [
+            ['name' => 'Rina Wijaya', 'email' => 'rina@cofund.com', 'balance' => 500000],
+            ['name' => 'Dimas Pratama', 'email' => 'dimas@cofund.com', 'balance' => 250000],
+            ['name' => 'Sari Indah', 'email' => 'sari@cofund.com', 'balance' => 750000],
+        ];
+
+        foreach ($creators as $creator) {
+            User::create([
+                'name' => $creator['name'],
+                'email' => $creator['email'],
+                'password' => Hash::make('password'),
+                'role' => RoleEnum::CREATOR->value,
+                'email_verified_at' => now(),
+                'balance' => $creator['balance'],
+            ]);
+        }
+
+        // Create 5 Backer accounts
+        $backers = [
+            ['name' => 'Budi Santoso', 'email' => 'budi@cofund.com', 'balance' => 1000000],
+            ['name' => 'Dewi Lestari', 'email' => 'dewi@cofund.com', 'balance' => 2500000],
+            ['name' => 'Adi Nugroho', 'email' => 'adi@cofund.com', 'balance' => 500000],
+            ['name' => 'Putri Ayu', 'email' => 'putri@cofund.com', 'balance' => 1500000],
+            ['name' => 'Hendra Gunawan', 'email' => 'hendra@cofund.com', 'balance' => 3000000],
+        ];
+
+        foreach ($backers as $backer) {
+            User::create([
+                'name' => $backer['name'],
+                'email' => $backer['email'],
+                'password' => Hash::make('password'),
+                'role' => RoleEnum::BACKER->value,
+                'email_verified_at' => now(),
+                'balance' => $backer['balance'],
+            ]);
+        }
     }
 }
