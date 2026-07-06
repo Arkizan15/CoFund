@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Mail\NotifikasiEmail;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +17,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/kirim-email', function () {
+    // Alamat email tujuan
+    $emailTujuan = "email_penerima@gmail.com"; 
+
+    // Perintah untuk mengirim email
+    Mail::to($emailTujuan)->send(new NotifikasiEmail());
+
+    return "Email berhasil dikirim!";
 });
