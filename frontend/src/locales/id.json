@@ -18,7 +18,8 @@
     "general": "Umum",
     "close": "Tutup",
     "optional": "(Opsional)",
-    "or": "atau"
+    "or": "atau",
+    "allRightsReserved": "Hak cipta dilindungi"
   },
   "nav": {
     "home": "Beranda",
@@ -172,6 +173,9 @@
     "role": "Role Akun",
     "createCampaign": "Buat Kampanye Baru",
     "createCampaignSub": "Lengkapi detail kampanye crowdfunding Anda",
+    "editCampaign": "Edit Kampanye",
+    "editCampaignSub": "Perbarui detail kampanye draft Anda",
+    "saveButton": "Simpan Perubahan",
     "campaignTitle": "Judul Kampanye",
     "campaignTitlePlaceholder": "Masukkan judul kampanye yang menarik",
     "category": "Kategori",
@@ -193,6 +197,7 @@
     "uploadingImage": "Mengunggah gambar...",
     "imageUploadError": "Gagal mengunggah gambar",
     "imageUploadSuccess": "Gambar berhasil diunggah!",
+    "deleteImage": "Hapus Gambar",
     "imageSizeError": "Ukuran gambar maksimal 5MB",
     "imageFormatError": "Format gambar tidak didukung. Gunakan JPEG, PNG, atau WebP",
     "description": "Deskripsi Kampanye",
@@ -352,6 +357,13 @@
     "conclusion": "Kesimpulan",
     "deadline": "Tenggat",
     "date": "Tanggal"
+  },
+  "categories": {
+    "teknologi": "Teknologi",
+    "kemanusiaan": "Kemanusiaan",
+    "pendidikan": "Pendidikan",
+    "kreatif": "Kreatif",
+    "general": "Umum"
   },
   "errors": {
     "titleRequired": "Judul kampanye wajib diisi",

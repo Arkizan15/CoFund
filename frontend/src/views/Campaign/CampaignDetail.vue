@@ -44,7 +44,7 @@
               </div>
               <div class="flex items-center gap-2">
                 <i class="pi pi-tag text-emerald-600"></i>
-                <span>{{ campaign.category?.name || $t('common.general') }}</span>
+                <span>{{ $t('categories.' + (campaign.category?.slug || 'general')) }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <i class="pi pi-calendar text-emerald-600"></i>

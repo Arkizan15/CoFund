@@ -152,7 +152,7 @@
               <template #body="{ data }">
                 <div class="max-w-[200px]">
                   <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                  <p class="text-xs text-gray-400 truncate">{{ data.category?.name || $t('dashboard.noCategory') }}</p>
+                  <p class="text-xs text-gray-400 truncate">{{ $t('categories.' + (data.category?.slug || 'general')) }}</p>
                 </div>
               </template>
             </Column>
@@ -213,7 +213,7 @@
               <template #body="{ data }">
                 <div class="max-w-[200px]">
                   <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                  <p class="text-xs text-gray-400 truncate">{{ data.category?.name || $t('dashboard.noCategory') }}</p>
+                  <p class="text-xs text-gray-400 truncate">{{ $t('categories.' + (data.category?.slug || 'general')) }}</p>
                 </div>
               </template>
             </Column>
@@ -312,7 +312,7 @@
                 </div>
               </div>
 
-              <ProgressBar :value="campaign.progress" class="!h-2.5 !rounded-full" />
+              <ProgressBar :value="campaign.progress" class="!h-3 !rounded-full" />
               <div class="flex items-center justify-between text-xs mt-1.5">
                 <span class="text-gray-500">{{ $t('campaign.percentCollected', { percent: campaign.progress }) }}</span>
                 <span class="flex items-center gap-1 text-orange-600 font-medium">
@@ -376,7 +376,7 @@
               <template #body="{ data }">
                 <div class="max-w-[180px]">
                   <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                  <p class="text-xs text-gray-400 truncate">{{ data.category?.name || $t('dashboard.noCategory') }}</p>
+                  <p class="text-xs text-gray-400 truncate">{{ $t('categories.' + (data.category?.slug || 'general')) }}</p>
                 </div>
               </template>
             </Column>
@@ -453,7 +453,7 @@
       </template>
     </Dialog>
 
-    <!-- Ban Campaign Confirmation Dialog -->      <Dialog v-model:visible="banDialogVisible" :header="$t('admin.banDialogTitle')" :modal="true" class="!rounded-2xl" :style="{ width: '450px' }">
+    <!-- Ban Campaign Confirmation Dialog -->      <Dialog v-model:visible="banDialogVisible" :header="$t('admin.banDialogTitle')" :modal="true" class="!rounded-2xl !bg-white" :style="{ width: '450px' }">
       <div class="space-y-4">
         <div class="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
           <i class="pi pi-exclamation-triangle text-red-500 text-xl mt-0.5"></i>

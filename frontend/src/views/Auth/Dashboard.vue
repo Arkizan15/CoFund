@@ -70,14 +70,14 @@
       </div>
 
       <!-- Creator: Campaign Creation Form -->
-      <div v-if="isCreator" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
+      <div v-if="isCreator || isEditing" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
             <i class="pi pi-plus-circle text-lg text-emerald-700"></i>
           </div>
           <div>
-            <h2 class="text-xl font-bold text-gray-800">{{ $t('dashboard.createCampaign') }}</h2>
-            <p class="text-xs text-gray-400">{{ $t('dashboard.createCampaignSub') }}</p>
+            <h2 class="text-xl font-bold text-gray-800">{{ isEditing ? $t('dashboard.editCampaign') : $t('dashboard.createCampaign') }}</h2>
+            <p class="text-xs text-gray-400">{{ isEditing ? $t('dashboard.editCampaignSub') : $t('dashboard.createCampaignSub') }}</p>
           </div>
         </div>
 
@@ -225,6 +225,25 @@
                 <p class="text-sm text-emerald-600 font-medium">{{ $t('dashboard.uploadingImage') }}</p>
               </div>
 
+              <div v-else-if="!selectedImage && existingImageUrl" class="relative">
+                <img
+                  :src="existingImageUrl"
+                  alt="Campaign image"
+                  class="max-h-40 mx-auto rounded-lg object-contain"
+                />
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/40 rounded-lg">
+                  <span class="text-white text-xs font-medium bg-black/60 px-3 py-1.5 rounded-full">Klik untuk ganti gambar</span>
+                </div>
+                <button
+                  v-if="isEditing"
+                  type="button"
+                  class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-sm hover:bg-red-600 transition-colors"
+                  v-tooltip.left="$t('dashboard.deleteImage')"
+                  @click.stop="handleDeleteImage"
+                >
+                  <i class="pi pi-trash text-[10px]"></i>
+                </button>
+              </div>
               <div v-else-if="!selectedImage" class="space-y-2">
                 <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
                   <i class="pi pi-cloud-upload text-lg text-gray-400"></i>
@@ -316,14 +335,14 @@
         <!-- Action Buttons -->
         <div v-if="!createdCampaign" class="mt-6 flex flex-col sm:flex-row gap-3 justify-end border-t border-gray-100 pt-6">
           <Button
-            :label="$t('dashboard.resetForm')"
-            icon="pi pi-refresh"
+            :label="isEditing ? $t('common.cancel') : $t('dashboard.resetForm')"
+            :icon="isEditing ? 'pi pi-times' : 'pi pi-refresh'"
             class="p-button-text !text-gray-500 !rounded-xl"
-            @click="resetForm"
+            @click="isEditing ? cancelEdit() : resetForm()"
           />
           <Button
-            :label="$t('dashboard.createButton')"
-            icon="pi pi-plus-circle"
+            :label="isEditing ? $t('dashboard.saveButton') : $t('dashboard.createButton')"
+            :icon="isEditing ? 'pi pi-save' : 'pi pi-plus-circle'"
             class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3 !px-8 !rounded-xl shadow-sm"
             :loading="createLoading"
             :disabled="createLoading"
@@ -333,7 +352,7 @@
       </div>
 
       <!-- Non-Creator: Upgrade prompt -->
-      <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
+      <div v-else-if="!isEditing" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
         <div class="flex items-start gap-4">
           <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
             <i class="pi pi-shield text-xl text-purple-700"></i>
@@ -394,7 +413,7 @@
             <template #body="{ data }">
               <div class="max-w-[220px]">
                 <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                <p class="text-xs text-gray-400 truncate">{{ data.category?.name || $t('dashboard.noCategory') }}</p>
+                <p class="text-xs text-gray-400 truncate">{{ $t('categories.' + (data.category?.slug || 'general')) }}</p>
               </div>
             </template>
           </Column>
@@ -428,6 +447,13 @@
                 </router-link>
                 <Button
                   v-if="data.status === 'draft'"
+                  icon="pi pi-pencil"
+                  class="!w-7 !h-7 !rounded-full !bg-sky-500 !border-sky-500 hover:!bg-sky-600 !text-white !text-[10px] !shadow-sm"
+                  v-tooltip.left="'Edit'"
+                  @click="handleEditCampaign(data)"
+                />
+                <Button
+                  v-if="data.status === 'draft'"
                   icon="pi pi-send"
                   class="!w-7 !h-7 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !text-white !text-[10px] !shadow-sm"
                   v-tooltip.left="'Kirim ke Review'"
@@ -446,6 +472,7 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 import Badge from 'primevue/badge'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -461,6 +488,7 @@ import campaignService from '@/services/campaignService'
 const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
+const { t } = useI18n()
 
 const isCreator = computed(() => authStore.getUserRole === 'creator')
 const isAdmin = computed(() => authStore.getUserRole === 'admin')
@@ -481,7 +509,13 @@ const myCampaignsLoading = ref(true)
 const myBackingsCount = computed(() => authStore.user?.total_backings || 0)
 
 // Categories
-const categories = ref([])
+const rawCategories = ref([])
+const categories = computed(() => {
+  return rawCategories.value.map(c => ({
+    ...c,
+    name: t('categories.' + c.slug)
+  }))
+})
 
 // Campaign Form
 const form = reactive({
@@ -497,6 +531,8 @@ const formError = ref('')
 const createLoading = ref(false)
 const submitLoading = ref(false)
 const createdCampaign = ref(null)
+const editingCampaignId = ref(null)
+const isEditing = computed(() => !!editingCampaignId.value)
 
 const thumbnailPreview = computed(() => {
   const url = form.video_url?.trim()
@@ -528,6 +564,7 @@ watch(thumbnailPreview, () => {
 const imageInputRef = ref(null)
 const selectedImage = ref(null)
 const selectedImagePreview = ref('')
+const existingImageUrl = ref('')
 const imageUploadError = ref('')
 const imageUploadSuccess = ref(false)
 const imageUploadLoading = ref(false)
@@ -567,6 +604,7 @@ function handleImageSelect(event) {
 function removeSelectedImage() {
   selectedImage.value = null
   selectedImagePreview.value = ''
+  existingImageUrl.value = ''
   if (imageInputRef.value) imageInputRef.value.value = ''
 }
 
@@ -589,6 +627,23 @@ async function uploadImageToCampaign(campaignId) {
   }
 }
 
+async function handleDeleteImage() {
+  if (!editingCampaignId.value) return
+
+  imageUploadLoading.value = true
+  imageUploadError.value = ''
+  try {
+    await campaignService.deleteCampaignImage(editingCampaignId.value)
+    existingImageUrl.value = ''
+    imageUploadSuccess.value = false
+    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Gambar berhasil dihapus.', life: 3000 })
+  } catch (error) {
+    imageUploadError.value = error.response?.data?.message || 'Gagal menghapus gambar'
+  } finally {
+    imageUploadLoading.value = false
+  }
+}
+
 const minDeadline = computed(() => {
   const date = new Date()
   date.setDate(date.getDate() + 7)
@@ -605,9 +660,35 @@ function resetForm() {
   Object.keys(formErrors).forEach(k => delete formErrors[k])
   formError.value = ''
   createdCampaign.value = null
+  editingCampaignId.value = null
+  existingImageUrl.value = ''
   removeSelectedImage()
   imageUploadError.value = ''
   imageUploadSuccess.value = false
+}
+
+function cancelEdit() {
+  resetForm()
+}
+
+async function handleEditCampaign(data) {
+  try {
+    const res = await campaignService.getCampaignDetail(data.slug)
+    const campaign = res?.data || {}
+    form.title = campaign.title || ''
+    form.category_id = campaign.category_id || null
+    form.description = campaign.description || ''
+    form.target_amount = campaign.target_amount || null
+    form.deadline = campaign.deadline ? new Date(campaign.deadline) : null
+    form.video_url = campaign.video_url || ''
+    editingCampaignId.value = data.id
+    // Set existing image preview
+    existingImageUrl.value = campaign.image_url || ''
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: 'Gagal memuat data kampanye.', life: 3000 })
+  }
 }
 
 function statusLabel(status) {
@@ -674,18 +755,33 @@ async function handleCreateCampaign() {
       payload.video_url = form.video_url.trim()
     }
 
-    const res = await campaignService.createCampaign(payload)
-    createdCampaign.value = res.data
+    if (isEditing.value) {
+      // Update existing campaign
+      const res = await campaignService.updateCampaign(editingCampaignId.value, payload)
 
-    // Upload image if selected
-    if (selectedImage.value) {
-      await uploadImageToCampaign(res.data.id)
+      // Upload image if selected
+      if (selectedImage.value) {
+        await uploadImageToCampaign(editingCampaignId.value)
+      }
+
+      toast.add({ severity: 'success', summary: 'Berhasil', detail: res.message || 'Kampanye berhasil diperbarui.', life: 4000 })
+      editingCampaignId.value = null
+    } else {
+      // Create new campaign
+      const res = await campaignService.createCampaign(payload)
+      createdCampaign.value = res.data
+
+      // Upload image if selected
+      if (selectedImage.value) {
+        await uploadImageToCampaign(res.data.id)
+      }
+
+      toast.add({ severity: 'success', summary: 'Berhasil', detail: res.message || 'Kampanye berhasil dibuat.', life: 4000 })
     }
 
-    toast.add({ severity: 'success', summary: 'Berhasil', detail: res.message || 'Kampanye berhasil dibuat.', life: 4000 })
     await fetchMyCampaigns()
   } catch (error) {
-    formError.value = error.response?.data?.message || 'Gagal membuat kampanye. Silakan coba lagi.'
+    formError.value = error.response?.data?.message || 'Gagal menyimpan kampanye. Silakan coba lagi.'
     toast.add({ severity: 'error', summary: 'Gagal', detail: formError.value, life: 4000 })
   } finally {
     createLoading.value = false
@@ -734,9 +830,9 @@ async function fetchMyCampaigns() {
 async function fetchCategories() {
   try {
     const res = await campaignService.getCategories()
-    categories.value = res?.data || []
+    rawCategories.value = res?.data || []
   } catch (e) {
-    categories.value = []
+    rawCategories.value = []
   }
 }
 

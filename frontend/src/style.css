@@ -140,6 +140,7 @@ body {
 /* ===== PrimeVue Override: ProgressBar ===== */
 .p-progressbar .p-progressbar-value {
   background: linear-gradient(90deg, #10b981, #059669);
+  height: 100rem;
 }
 
 /* ===== PrimeVue Override: Badge ===== */

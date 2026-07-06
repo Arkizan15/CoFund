@@ -195,14 +195,14 @@
               />
               <div class="absolute top-3 left-3">
                 <span class="bg-emerald-600/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
-                  {{ campaign.category?.name || $t('common.general') }}
+                  {{ $t('categories.' + (campaign.category?.slug || 'general')) }}
                 </span>
               </div>
             </div>
             <div class="p-5 flex flex-col flex-1">
               <h4 class="font-bold text-gray-800 text-sm line-clamp-2 mb-3">{{ campaign.title }}</h4>
               <div class="mt-auto space-y-2.5">
-                <ProgressBar :value="progressPercent(campaign)" class="!h-2 !rounded-full" />
+                <ProgressBar :value="progressPercent(campaign)" class="!h-7 !rounded-full" />
                 <div class="flex items-center justify-between text-xs">
                   <span class="text-gray-500">
                     {{ formatCurrency(campaign.collected_amount || 0) }}

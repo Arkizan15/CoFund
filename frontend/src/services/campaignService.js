@@ -20,6 +20,11 @@ export async function createCampaign(payload) {
   return res.data
 }
 
+export async function updateCampaign(campaignId, payload) {
+  const res = await api.put(`/campaigns/${campaignId}`, payload)
+  return res.data
+}
+
 export async function submitForReview(campaignId) {
   const res = await api.post(`/campaigns/${campaignId}/submit`)
   return res.data
@@ -47,5 +52,10 @@ export async function uploadCampaignImage(campaignId, formData) {
   return res.data
 }
 
-const campaignService = { getCampaigns, getCampaignDetail, getCategories, createCampaign, submitForReview, getMyCampaigns, postUpdate, backCampaign, uploadCampaignImage }
+export async function deleteCampaignImage(campaignId) {
+  const res = await api.delete(`/campaigns/${campaignId}/images`)
+  return res.data
+}
+
+const campaignService = { getCampaigns, getCampaignDetail, getCategories, createCampaign, updateCampaign, submitForReview, getMyCampaigns, postUpdate, backCampaign, uploadCampaignImage, deleteCampaignImage }
 export default campaignService

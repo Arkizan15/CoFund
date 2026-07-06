@@ -18,7 +18,8 @@
     "general": "General",
     "close": "Close",
     "optional": "(Optional)",
-    "or": "or"
+    "or": "or",
+    "allRightsReserved": "All rights reserved"
   },
   "nav": {
     "home": "Home",
@@ -172,6 +173,9 @@
     "role": "Account Role",
     "createCampaign": "Create New Campaign",
     "createCampaignSub": "Complete your crowdfunding campaign details",
+    "editCampaign": "Edit Campaign",
+    "editCampaignSub": "Update your draft campaign details",
+    "saveButton": "Save Changes",
     "campaignTitle": "Campaign Title",
     "campaignTitlePlaceholder": "Enter an appealing campaign title",
     "category": "Category",
@@ -193,6 +197,7 @@
     "uploadingImage": "Uploading image...",
     "imageUploadError": "Failed to upload image",
     "imageUploadSuccess": "Image uploaded successfully!",
+    "deleteImage": "Delete Image",
     "imageSizeError": "Maximum image size is 5MB",
     "imageFormatError": "Image format not supported. Use JPEG, PNG, or WebP",
     "description": "Campaign Description",
@@ -352,6 +357,13 @@
     "conclusion": "Conclusion",
     "deadline": "Deadline",
     "date": "Date"
+  },
+  "categories": {
+    "teknologi": "Technology",
+    "kemanusiaan": "Humanity",
+    "pendidikan": "Education",
+    "kreatif": "Creative",
+    "general": "General"
   },
   "errors": {
     "titleRequired": "Campaign title is required",

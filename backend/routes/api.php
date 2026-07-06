@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/campaigns/{id}/submit', [CampaignController::class, 'submitForReview']);
     Route::post('/campaigns/{id}/updates', [CampaignController::class, 'storeUpdate']);
     Route::post('/campaigns/{id}/images', [CampaignController::class, 'uploadImage']);
+    Route::delete('/campaigns/{id}/images', [CampaignController::class, 'deleteImage']);
     Route::get('/my/campaigns', [CampaignController::class, 'myCampaigns']);
 
     // Wallet

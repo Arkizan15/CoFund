@@ -50,7 +50,7 @@
             </div>
             <div class="absolute top-3 left-3">
               <span class="bg-white/90 backdrop-blur-sm text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
-                {{ campaign.category?.name || $t('common.general') }}
+                {{ $t('categories.' + (campaign.category?.slug || 'general')) }}
               </span>
             </div>
           </div>
@@ -267,6 +267,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
@@ -281,11 +282,18 @@ import * as campaignService from '@/services/campaignService'
 const route = useRoute()
 const authStore = useAuthStore()
 const toast = useToast()
+const { t } = useI18n()
 
 const campaigns = ref([])
 const search = ref('')
 const selectedCategory = ref(null)
-const categories = ref([])
+const rawCategories = ref([])
+const categories = computed(() => {
+  return rawCategories.value.map(cat => ({
+    label: t('categories.' + cat.label),
+    value: cat.value
+  }))
+})
 
 // Backing Dialog State
 const backingDialogVisible = ref(false)
@@ -381,10 +389,10 @@ onMounted(async () => {
     campaigns.value = data?.data || data || []
     const unique = {}
     campaigns.value.forEach(c => {
-      const name = c.category?.name || 'Umum'
-      if (!unique[name]) {
-        unique[name] = true
-        categories.value.push({ label: name, value: name })
+      const slug = c.category?.slug || 'general'
+      if (!unique[slug]) {
+        unique[slug] = true
+        rawCategories.value.push({ label: slug, value: slug })
       }
     })
   } catch (e) {
@@ -398,7 +406,7 @@ const filteredCampaigns = computed(() => {
     const matchesQuery = !q ||
       (c.title && c.title.toLowerCase().includes(q)) ||
       (c.description && c.description.toLowerCase().includes(q))
-    const matchesCategory = !selectedCategory.value || (c.category?.name === selectedCategory.value)
+    const matchesCategory = !selectedCategory.value || ((c.category?.slug || 'general') === selectedCategory.value)
     return matchesQuery && matchesCategory
   })
 })

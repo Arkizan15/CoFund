@@ -11,13 +11,23 @@
     </main>
     <footer class="bg-white border-t border-gray-100 py-6 text-center text-xs text-gray-400">
       <div class="max-w-7xl mx-auto px-4">
-        &copy; {{ new Date().getFullYear() }} CoFund. {{ $t('common.all') }} rights reserved.
+        &copy; {{ new Date().getFullYear() }} CoFund. {{ $t('common.allRightsReserved') }}.
       </div>
     </footer>
   </div>
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import Navbar from '@/components/Navbar.vue'
 import Toast from 'primevue/toast'
+
+const authStore = useAuthStore()
+
+onMounted(() => {
+  if (authStore.token) {
+    authStore.fetchUser()
+  }
+})
 </script>

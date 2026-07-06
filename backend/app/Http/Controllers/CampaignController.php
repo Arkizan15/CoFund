@@ -224,6 +224,51 @@ class CampaignController extends Controller
         ], 201);
     }
 
+    public function deleteImage(int $id): JsonResponse
+    {
+        $campaign = Campaign::findOrFail($id);
+
+        if ($campaign->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        if ($campaign->status !== 'draft') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gambar hanya bisa dihapus saat status draft.',
+            ], 422);
+        }
+
+        // Find and delete the primary non-thumbnail image
+        $image = $campaign->images()
+            ->where('is_primary', true)
+            ->where('title', '!=', 'Video Thumbnail')
+            ->first();
+
+        if (!$image) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada gambar yang dapat dihapus.',
+            ], 404);
+        }
+
+        // Delete physical file if it's a local upload (not external URL)
+        $localPath = str_replace('/storage/', 'public/', $image->image_url);
+        if (Storage::exists($localPath)) {
+            Storage::delete($localPath);
+        }
+
+        $image->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Gambar berhasil dihapus.',
+        ], 200);
+    }
+
     public function submitForReview(int $id): JsonResponse
     {
         $campaign = Campaign::findOrFail($id);
