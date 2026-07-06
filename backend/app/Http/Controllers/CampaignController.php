@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoleEnum;
 use App\Models\Campaign;
+use App\Models\CampaignImage;
 use App\Models\CampaignUpdate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CampaignController extends Controller
@@ -70,6 +72,19 @@ class CampaignController extends Controller
 
         $campaign = Campaign::create($validated);
 
+        // Extract YouTube thumbnail and save as campaign image
+        if (!empty($validated['video_url'])) {
+            $thumbnailUrl = $this->extractYouTubeThumbnail($validated['video_url']);
+            if ($thumbnailUrl) {
+                CampaignImage::create([
+                    'campaign_id' => $campaign->id,
+                    'title' => 'Video Thumbnail',
+                    'image_url' => $thumbnailUrl,
+                    'is_primary' => true,
+                ]);
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Kampanye berhasil dibuat sebagai draft.',
@@ -110,11 +125,103 @@ class CampaignController extends Controller
 
         $campaign->update($validated);
 
+        // Handle thumbnail for video_url
+        if (!empty($validated['video_url'])) {
+            $thumbnailUrl = $this->extractYouTubeThumbnail($validated['video_url']);
+            if ($thumbnailUrl) {
+                // Remove old video thumbnail if exists
+                $campaign->images()
+                    ->where('title', 'Video Thumbnail')
+                    ->delete();
+
+                CampaignImage::create([
+                    'campaign_id' => $campaign->id,
+                    'title' => 'Video Thumbnail',
+                    'image_url' => $thumbnailUrl,
+                    'is_primary' => true,
+                ]);
+            }
+        } elseif ($campaign->wasChanged('video_url')) {
+            // video_url was cleared, remove the old thumbnail
+            $campaign->images()
+                ->where('title', 'Video Thumbnail')
+                ->delete();
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Kampanye berhasil diperbarui.',
             'data' => $campaign,
         ], 200);
+    }
+
+    /**
+     * Extract YouTube video thumbnail URL from various YouTube URL formats.
+     */
+    private function extractYouTubeThumbnail(string $url): ?string
+    {
+        $patterns = [
+            '/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/',
+            '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
+            '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+            '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $url, $matches)) {
+                return 'https://img.youtube.com/vi/' . $matches[1] . '/maxresdefault.jpg';
+            }
+        }
+
+        return null;
+    }
+
+    public function uploadImage(Request $request, int $id): JsonResponse
+    {
+        $campaign = Campaign::findOrFail($id);
+
+        if ($campaign->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
+        ]);
+
+        $file = $request->file('image');
+        $filename = 'campaign_' . $campaign->id . '_' . time() . '.' . $file->extension();
+        $path = $file->storeAs('public/campaigns', $filename);
+
+        if (!$path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengunggah gambar.',
+            ], 500);
+        }
+
+        $imageUrl = Storage::url($path);
+
+        // Remove old primary image (non-thumbnail)
+        $campaign->images()
+            ->where('is_primary', true)
+            ->where('title', '!=', 'Video Thumbnail')
+            ->delete();
+
+        $campaignImage = CampaignImage::create([
+            'campaign_id' => $campaign->id,
+            'title' => 'Uploaded Image',
+            'image_url' => $imageUrl,
+            'is_primary' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Gambar berhasil diunggah.',
+            'data' => $campaignImage,
+        ], 201);
     }
 
     public function submitForReview(int $id): JsonResponse

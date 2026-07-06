@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-slate-50 py-8">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="mb-8">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Profil Saya</h1>
-        <p class="text-gray-500 text-sm mt-1">Kelola akun, saldo, dan pengaturan Creator Anda</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ $t('profile.title') }}</h1>
+        <p class="text-gray-500 text-sm mt-1">{{ $t('profile.subtitle') }}</p>
       </div>
 
       <!-- Profile Banner -->
@@ -23,7 +23,7 @@
             </div>
             <p class="text-gray-500 text-sm mt-1">{{ authStore.user?.email }}</p>
             <p class="text-xs text-gray-400 mt-1">
-              <i class="pi pi-calendar mr-1"></i>Bergabung sejak {{ formatDate(authStore.user?.created_at) }}
+              <i class="pi pi-calendar mr-1"></i>{{ $t('profile.joinedDate', { date: formatDate(authStore.user?.created_at) }) }}
             </p>
           </div>
         </div>
@@ -37,21 +37,21 @@
               <i class="pi pi-wallet text-lg text-emerald-700"></i>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-gray-800">Dompet Virtual</h3>
-              <p class="text-xs text-gray-400">Saldo tersedia untuk mendukung kampanye</p>
+              <h3 class="text-lg font-bold text-gray-800">{{ $t('profile.digitalWallet') }}</h3>
+              <p class="text-xs text-gray-400">{{ $t('profile.walletSub') }}</p>
             </div>
           </div>
 
           <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl p-6 text-white mb-6 shadow-sm">
             <p class="text-emerald-100 text-sm font-medium flex items-center gap-2">
-              <i class="pi pi-credit-card"></i>Saldo Saat Ini
+              <i class="pi pi-credit-card"></i>{{ $t('profile.currentBalance') }}
             </p>
             <p class="text-3xl font-bold mt-1 tracking-tight">{{ formatCurrency(currentBalance) }}</p>
           </div>
 
           <div class="space-y-4">
             <div class="flex flex-col gap-1.5">
-              <label for="topup-amount" class="text-sm font-semibold text-gray-700">Tambah Saldo</label>
+              <label for="topup-amount" class="text-sm font-semibold text-gray-700">{{ $t('profile.topUp') }}</label>
               <div class="flex gap-2">
                 <InputNumber
                   id="topup-amount"
@@ -60,13 +60,13 @@
                   :step="50000"
                   :max="999999999"
                   prefix="Rp "
-                  placeholder="Masukkan nominal"
+                  :placeholder="$t('campaign.amountPlaceholder')"
                   class="flex-1"
                   :class="{ 'p-invalid': topUpError }"
                   fluid
                 />
                 <Button
-                  label="Top Up"
+                  :label="$t('profile.topUpButton')"
                   icon="pi pi-plus"
                   class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !rounded-xl !px-6 shadow-sm"
                   :loading="topUpLoading"
@@ -77,19 +77,19 @@
               <small v-if="topUpError" class="text-red-500 text-xs flex items-center gap-1">
                 <i class="pi pi-exclamation-circle"></i>{{ topUpError }}
               </small>
-              <small v-else class="text-gray-400 text-xs">Minimal Rp 10.000</small>
+              <small v-else class="text-gray-400 text-xs">{{ $t('profile.topUpMinAmount') }}</small>
             </div>
 
             <div v-if="topUpSuccess" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-center gap-2 animate-pulse-once">
               <i class="pi pi-check-circle"></i>
-              <span>Saldo berhasil ditambahkan!</span>
+              <span>{{ $t('profile.topUpSuccess') }}</span>
             </div>
           </div>
 
           <Divider class="my-5" />
 
           <Button
-            label="Riwayat Transaksi"
+            :label="$t('profile.transactionHistory')"
             icon="pi pi-history"
             class="p-button-text w-full !text-emerald-600 !justify-start !rounded-xl"
             @click="showHistory = !showHistory"
@@ -98,7 +98,7 @@
           <div v-if="showHistory" class="mt-4 space-y-3 max-h-80 overflow-y-auto">
             <div v-if="transactions.length === 0" class="text-center py-6 text-gray-400 text-sm">
               <i class="pi pi-inbox text-2xl mb-2 block"></i>
-              Belum ada transaksi
+              {{ $t('profile.noTransactions') }}
             </div>
             <div
               v-for="tx in transactions"
@@ -146,8 +146,8 @@
               ></i>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-gray-800">Status Creator</h3>
-              <p class="text-xs text-gray-400">Tingkatkan akun Anda menjadi Creator</p>
+              <h3 class="text-lg font-bold text-gray-800">{{ $t('profile.creatorStatus') }}</h3>
+              <p class="text-xs text-gray-400">{{ $t('profile.creatorStatusSub') }}</p>
             </div>
           </div>
 
@@ -159,16 +159,16 @@
                   <i class="pi pi-check-circle text-emerald-700 text-lg"></i>
                 </div>
                 <div>
-                  <p class="text-base font-bold text-emerald-900">Anda adalah Creator</p>
+                  <p class="text-base font-bold text-emerald-900">{{ $t('profile.youAreCreator') }}</p>
                   <p class="text-sm text-emerald-700 mt-1 leading-relaxed">
-                    Selamat! Akun Anda telah terverifikasi sebagai Creator. Anda sudah dapat membuat dan mengelola kampanye crowdfunding sendiri.
+                    {{ $t('profile.youAreCreatorDesc') }}
                   </p>
                 </div>
               </div>
             </div>
             <router-link :to="{ name: 'Dashboard' }" class="block">
               <Button
-                label="Buat Kampanye Baru"
+                :label="$t('profile.createNewCampaign')"
                 icon="pi pi-plus-circle"
                 class="w-full !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3.5 !rounded-xl shadow-sm"
               />
@@ -183,12 +183,12 @@
                   <i class="pi pi-clock text-yellow-700 text-lg"></i>
                 </div>
                 <div>
-                  <p class="text-base font-bold text-yellow-900">Menunggu Verifikasi Admin</p>
+                  <p class="text-base font-bold text-yellow-900">{{ $t('profile.pendingVerification') }}</p>
                   <p class="text-sm text-yellow-700 mt-1 leading-relaxed">
-                    Permintaan upgrade Creator Anda sedang diproses oleh tim admin. Anda akan menerima notifikasi begitu status diperbarui.
+                    {{ $t('profile.pendingVerificationDesc') }}
                   </p>
                   <Badge
-                    value="Menunggu"
+                    :value="$t('profile.waiting')"
                     severity="warn"
                     class="mt-3 !bg-yellow-200 !text-yellow-800 !rounded-full !text-xs !font-semibold !px-3 !py-1"
                   />
@@ -205,20 +205,19 @@
                   <i class="pi pi-info-circle text-purple-700 text-lg"></i>
                 </div>
                 <div>
-                  <p class="text-base font-bold text-purple-900">Jadilah Creator</p>
+                  <p class="text-base font-bold text-purple-900">{{ $t('profile.becomeCreatorTitle') }}</p>
                   <p class="text-sm text-gray-600 mt-1 leading-relaxed">
-                    Sebagai Creator, Anda dapat membuat kampanye crowdfunding, mengelola tier reward,
-                    dan menerima pendanaan dari komunitas. Admin akan memverifikasi permintaan Anda.
+                    {{ $t('profile.becomeCreatorDesc2') }}
                   </p>
                   <ul class="mt-3 space-y-1.5">
                     <li class="flex items-center gap-2 text-xs text-gray-500">
-                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>Buat kampanye penggalangan dana
+                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>{{ $t('profile.benefit1') }}
                     </li>
                     <li class="flex items-center gap-2 text-xs text-gray-500">
-                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>Kelola tier dan reward
+                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>{{ $t('profile.benefit2') }}
                     </li>
                     <li class="flex items-center gap-2 text-xs text-gray-500">
-                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>Pantau perkembangan pendanaan
+                      <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>{{ $t('profile.benefit3') }}
                     </li>
                   </ul>
                 </div>
@@ -227,13 +226,13 @@
 
             <div class="flex flex-col gap-1.5">
               <label for="reason" class="text-sm font-semibold text-gray-700">
-                Alasan Permohonan <span class="text-gray-400 font-normal">(Opsional)</span>
+                {{ $t('profile.reasonLabel') }} <span class="text-gray-400 font-normal">{{ $t('common.optional') }}</span>
               </label>
               <Textarea
                 id="reason"
                 v-model="upgradeReason"
                 rows="4"
-                placeholder="Ceritakan rencana kampanye Anda dan mengapa Anda layak menjadi Creator..."
+                :placeholder="$t('profile.reasonPlaceholder')"
                 class="w-full !rounded-xl !text-sm"
                 :maxlength="500"
               />
@@ -241,7 +240,7 @@
             </div>
 
             <Button
-              label="Ajukan Upgrade ke Creator"
+              :label="$t('profile.requestUpgrade')"
               icon="pi pi-shield"
               class="w-full !bg-purple-600 !border-none hover:!bg-purple-700 !text-white !font-semibold !py-3.5 !rounded-xl shadow-sm"
               :loading="upgradeLoading"
@@ -255,16 +254,16 @@
           <!-- Quick Stats -->
           <div class="space-y-3">
             <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-              <i class="pi pi-chart-bar text-xs"></i>Statistik Akun
+              <i class="pi pi-chart-bar text-xs"></i>{{ $t('profile.stats') }}
             </h4>
             <div class="grid grid-cols-2 gap-4">
               <div class="bg-slate-50 rounded-xl p-4 text-center hover:bg-slate-100 transition-colors">
                 <p class="text-2xl font-bold text-gray-800">{{ totalBackings }}</p>
-                <p class="text-xs text-gray-500 mt-1">Total Backing</p>
+                <p class="text-xs text-gray-500 mt-1">{{ $t('profile.totalBackings') }}</p>
               </div>
               <div class="bg-slate-50 rounded-xl p-4 text-center hover:bg-slate-100 transition-colors">
                 <p class="text-2xl font-bold text-emerald-700">{{ formatCurrency(totalDonated) }}</p>
-                <p class="text-xs text-gray-500 mt-1">Total Donasi</p>
+                <p class="text-xs text-gray-500 mt-1">{{ $t('profile.totalDonated') }}</p>
               </div>
             </div>
           </div>
@@ -282,6 +281,7 @@ import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import Textarea from 'primevue/textarea'
 import Divider from 'primevue/divider'
+import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import walletService from '@/services/walletService'
 import roleService from '@/services/roleService'
@@ -296,9 +296,11 @@ const isAdmin = computed(() => authStore.user?.role === 'admin')
 const totalBackings = computed(() => authStore.user?.total_backings || 0)
 const totalDonated = computed(() => authStore.user?.total_backings || 0)
 
+const { t } = useI18n()
+
 const roleLabel = computed(() => {
-  const labels = { admin: 'Admin', creator: 'Creator', backer: 'Backer', guest: 'Tamu' }
-  return labels[authStore.user?.role] || 'Backer'
+  const labels = { admin: t('dashboard.admin'), creator: t('dashboard.creator'), backer: t('auth.backer'), guest: t('auth.guest') }
+  return labels[authStore.user?.role] || t('auth.backer')
 })
 
 const roleSeverity = computed(() => {
@@ -327,7 +329,6 @@ async function handleTopUp() {
   try {
     const res = await walletService.postTopUp(topUpAmount.value)
     authStore.user.balance = res.data.data.balance
-    localStorage.setItem('user', JSON.stringify(authStore.user))
     topUpSuccess.value = true
     topUpAmount.value = null
     toast.add({ severity: 'success', summary: 'Top Up Berhasil', detail: 'Saldo berhasil ditambahkan.', life: 3000 })
@@ -371,8 +372,14 @@ async function handleUpgradeRequest() {
 }
 
 function formatTypeLabel(type) {
-  const labels = { top_up: 'Top Up', backing: 'Backing', disbursement: 'Pencairan', refund: 'Refund', platform_fee: 'Biaya Platform' }
-  return labels[type] || type || '-'
+  const map = {
+    top_up: t('profile.typeTopUp'),
+    backing: t('profile.typeBacking'),
+    disbursement: t('profile.typeDisbursement'),
+    refund: t('profile.typeRefund'),
+    platform_fee: t('profile.typePlatformFee'),
+  }
+  return map[type] || t('common.general')
 }
 
 function formatCurrency(val) {

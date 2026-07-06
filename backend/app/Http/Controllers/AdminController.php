@@ -116,6 +116,19 @@ class AdminController extends Controller
         ], 200);
     }
 
+    public function allCampaigns(): JsonResponse
+    {
+        $campaigns = Campaign::with(['user', 'category', 'images'])
+            ->whereNotIn('status', ['review', 'draft'])
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $campaigns,
+        ], 200);
+    }
+
     public function banCampaign(int $id): JsonResponse
     {
         $campaign = Campaign::findOrFail($id);
@@ -134,6 +147,74 @@ class AdminController extends Controller
             'success' => true,
             'message' => 'Kampanye berhasil diban. Status diubah menjadi failed.',
             'data' => $campaign,
+        ], 200);
+    }
+
+    public function activeCampaigns(): JsonResponse
+    {
+        $campaigns = Campaign::with(['user', 'category', 'backings'])
+            ->where('status', 'active')
+            ->latest()
+            ->get()
+            ->map(function ($campaign) {
+                $deadline = \Carbon\Carbon::parse($campaign->deadline);
+                return [
+                    'id' => $campaign->id,
+                    'title' => $campaign->title,
+                    'slug' => $campaign->slug,
+                    'user' => $campaign->user,
+                    'category' => $campaign->category,
+                    'target_amount' => $campaign->target_amount,
+                    'collected_amount' => $campaign->collected_amount,
+                    'progress' => $campaign->target_amount > 0
+                        ? min(100, round(($campaign->collected_amount / $campaign->target_amount) * 100, 1))
+                        : 0,
+                    'backer_count' => $campaign->backings->where('status', 'completed')->count(),
+                    'deadline' => $campaign->deadline,
+                    'days_remaining' => max(0, $deadline->diffInDays(now(), false)),
+                    'status' => $campaign->status,
+                    'created_at' => $campaign->created_at,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $campaigns,
+        ], 200);
+    }
+
+    public function endedCampaigns(): JsonResponse
+    {
+        $campaigns = Campaign::with(['user', 'category', 'backings'])
+            ->whereIn('status', ['success', 'failed'])
+            ->latest()
+            ->get()
+            ->map(function ($campaign) {
+                $deadline = \Carbon\Carbon::parse($campaign->deadline);
+                return [
+                    'id' => $campaign->id,
+                    'title' => $campaign->title,
+                    'slug' => $campaign->slug,
+                    'user' => $campaign->user,
+                    'category' => $campaign->category,
+                    'target_amount' => $campaign->target_amount,
+                    'collected_amount' => $campaign->collected_amount,
+                    'progress' => $campaign->target_amount > 0
+                        ? min(100, round(($campaign->collected_amount / $campaign->target_amount) * 100, 1))
+                        : 0,
+                    'backer_count' => $campaign->backings->where('status', 'completed')->count(),
+                    'deadline' => $campaign->deadline,
+                    'ended_at' => $campaign->updated_at,
+                    'status' => $campaign->status,
+                    'conclusion' => $campaign->status === 'success'
+                        ? 'Mencapai target sebelum deadline'
+                        : 'Gagal mencapai target',
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $campaigns,
         ], 200);
     }
 }

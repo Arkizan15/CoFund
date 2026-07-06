@@ -8,8 +8,8 @@
             <i class="pi pi-chart-bar text-emerald-700 text-lg"></i>
           </div>
           <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p class="text-gray-500 text-sm">Selamat datang kembali, <strong class="text-emerald-700">{{ authStore.user?.name || 'User' }}</strong></p>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ $t('dashboard.title') }}</h1>
+            <p class="text-gray-500 text-sm">{{ $t('dashboard.welcomeBack', { name: authStore.user?.name || 'User' }) }}</p>
           </div>
         </div>
       </div>
@@ -22,7 +22,7 @@
               <i class="pi pi-wallet text-lg text-emerald-700"></i>
             </div>
             <div>
-              <p class="text-xs text-gray-500 font-medium">Saldo Tersedia</p>
+              <p class="text-xs text-gray-500 font-medium">{{ $t('dashboard.availableBalance') }}</p>
               <p class="text-xl font-bold text-gray-900">{{ formatCurrency(authStore.user?.balance || 0) }}</p>
             </div>
           </div>
@@ -34,7 +34,7 @@
               <i class="pi pi-heart text-lg text-blue-700"></i>
             </div>
             <div>
-              <p class="text-xs text-gray-500 font-medium">Total Backing</p>
+              <p class="text-xs text-gray-500 font-medium">{{ $t('dashboard.totalBackings') }}</p>
               <p class="text-xl font-bold text-gray-900">{{ myBackingsCount }}</p>
             </div>
           </div>
@@ -46,7 +46,7 @@
               <i class="pi pi-flag text-lg text-purple-700"></i>
             </div>
             <div>
-              <p class="text-xs text-gray-500 font-medium">Kampanye Saya</p>
+              <p class="text-xs text-gray-500 font-medium">{{ $t('dashboard.myCampaigns') }}</p>
               <p class="text-xl font-bold text-gray-900">{{ myCampaigns.length }}</p>
             </div>
           </div>
@@ -58,7 +58,7 @@
               <i class="pi pi-shield text-lg text-emerald-700"></i>
             </div>
             <div>
-              <p class="text-xs text-gray-500 font-medium">Role Akun</p>
+              <p class="text-xs text-gray-500 font-medium">{{ $t('dashboard.role') }}</p>
               <Badge
                 :value="roleLabel"
                 :severity="roleSeverity"
@@ -76,19 +76,19 @@
             <i class="pi pi-plus-circle text-lg text-emerald-700"></i>
           </div>
           <div>
-            <h2 class="text-xl font-bold text-gray-800">Buat Kampanye Baru</h2>
-            <p class="text-xs text-gray-400">Lengkapi detail kampanye crowdfunding Anda</p>
+            <h2 class="text-xl font-bold text-gray-800">{{ $t('dashboard.createCampaign') }}</h2>
+            <p class="text-xs text-gray-400">{{ $t('dashboard.createCampaignSub') }}</p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5">
           <!-- Title -->
           <div class="flex flex-col gap-1.5 lg:col-span-2">
-            <label for="form-title" class="text-sm font-semibold text-gray-700">Judul Kampanye <span class="text-red-400">*</span></label>
+            <label for="form-title" class="text-sm font-semibold text-gray-700">{{ $t('dashboard.campaignTitle') }} <span class="text-red-400">*</span></label>
             <InputText
               id="form-title"
               v-model="form.title"
-              placeholder="Masukkan judul kampanye yang menarik"
+              :placeholder="$t('dashboard.campaignTitlePlaceholder')"
               class="w-full !rounded-xl !text-sm"
               :class="{ 'p-invalid': formErrors.title }"
               :maxlength="100"
@@ -101,16 +101,20 @@
 
           <!-- Category -->
           <div class="flex flex-col gap-1.5">
-            <label for="form-category" class="text-sm font-semibold text-gray-700">Kategori <span class="text-red-400">*</span></label>
+            <label for="form-category" class="text-sm font-semibold text-gray-700">{{ $t('dashboard.category') }} <span class="text-red-400">*</span></label>
             <Dropdown
               id="form-category"
               v-model="form.category_id"
               :options="categories"
               optionLabel="name"
               optionValue="id"
-              placeholder="Pilih kategori"
+              :placeholder="$t('dashboard.categoryPlaceholder')"
               class="w-full"
               :class="{ 'p-invalid': formErrors.category_id }"
+              showClear
+              :filter="true"
+              :filterPlaceholder="$t('dashboard.searchCategory')"
+              panelClass="!bg-white !rounded-xl !shadow-lg !border !border-gray-100"
             />
             <small v-if="formErrors.category_id" class="text-red-500 text-xs flex items-center gap-1">
               <i class="pi pi-exclamation-circle"></i>{{ formErrors.category_id }}
@@ -119,33 +123,34 @@
 
           <!-- Deadline -->
           <div class="flex flex-col gap-1.5">
-            <label for="form-deadline" class="text-sm font-semibold text-gray-700">Tenggat Waktu <span class="text-red-400">*</span></label>
+            <label for="form-deadline" class="text-sm font-semibold text-gray-700">{{ $t('dashboard.deadline') }} <span class="text-red-400">*</span></label>
             <Calendar
               id="form-deadline"
               v-model="form.deadline"
               :minDate="minDeadline"
               dateFormat="dd/mm/yy"
-              placeholder="Pilih tanggal"
+              :placeholder="$t('dashboard.deadlinePlaceholder')"
               class="w-full"
               :class="{ 'p-invalid': formErrors.deadline }"
               showIcon
+              panelClass="!bg-white !rounded-xl !shadow-lg !border !border-gray-100"
             />
             <small v-if="formErrors.deadline" class="text-red-500 text-xs flex items-center gap-1">
               <i class="pi pi-exclamation-circle"></i>{{ formErrors.deadline }}
             </small>
-            <small v-else class="text-gray-400 text-xs">Minimal 7 hari dari sekarang</small>
+            <small v-else class="text-gray-400 text-xs">{{ $t('dashboard.deadlineHint') }}</small>
           </div>
 
           <!-- Target Amount -->
           <div class="flex flex-col gap-1.5">
-            <label for="form-target" class="text-sm font-semibold text-gray-700">Target Dana <span class="text-red-400">*</span></label>
+            <label for="form-target" class="text-sm font-semibold text-gray-700">{{ $t('dashboard.targetAmount') }} <span class="text-red-400">*</span></label>
             <InputNumber
               id="form-target"
               v-model="form.target_amount"
               :min="100000"
               :step="500000"
               prefix="Rp "
-              placeholder="Masukkan target dana"
+              :placeholder="$t('dashboard.targetAmountPlaceholder')"
               class="w-full"
               :class="{ 'p-invalid': formErrors.target_amount }"
               fluid
@@ -153,32 +158,112 @@
             <small v-if="formErrors.target_amount" class="text-red-500 text-xs flex items-center gap-1">
               <i class="pi pi-exclamation-circle"></i>{{ formErrors.target_amount }}
             </small>
-            <small v-else class="text-gray-400 text-xs">Minimal Rp 100.000</small>
+            <small v-else class="text-gray-400 text-xs">{{ $t('dashboard.targetAmountHint') }}</small>
           </div>
 
           <!-- Video URL (optional) -->
           <div class="flex flex-col gap-1.5">
-            <label for="form-video" class="text-sm font-semibold text-gray-700">Video URL <span class="text-gray-400 font-normal">(Opsional)</span></label>
+            <label for="form-video" class="text-sm font-semibold text-gray-700">{{ $t('dashboard.videoUrl') }} <span class="text-gray-400 font-normal">{{ $t('common.optional') }}</span></label>
             <InputText
               id="form-video"
               v-model="form.video_url"
-              placeholder="https://youtube.com/watch?v=..."
+              :placeholder="$t('dashboard.videoUrlPlaceholder')"
               class="w-full !rounded-xl !text-sm"
               :class="{ 'p-invalid': formErrors.video_url }"
             />
             <small v-if="formErrors.video_url" class="text-red-500 text-xs flex items-center gap-1">
               <i class="pi pi-exclamation-circle"></i>{{ formErrors.video_url }}
             </small>
+
+            <!-- YouTube Thumbnail Preview -->
+            <div v-if="thumbnailPreview" class="mt-3 overflow-hidden rounded-xl border border-gray-200 bg-gray-50 relative group">
+              <img
+                :src="thumbnailPreview"
+                alt="YouTube Thumbnail Preview"
+                class="w-full h-44 object-cover transition-transform duration-300 group-hover:scale-105"
+                @load="thumbnailLoaded = true"
+                @error="thumbnailError = true"
+              />
+              <div v-if="!thumbnailLoaded && !thumbnailError" class="absolute inset-0 flex items-center justify-center bg-gray-50/80">
+                <i class="pi pi-spin pi-spinner text-xl text-emerald-600"></i>
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                  <i class="pi pi-play text-white text-lg ml-0.5"></i>
+                </div>
+              </div>
+              <div v-if="thumbnailLoaded" class="absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                <i class="pi pi-check text-[8px]"></i> {{ $t('dashboard.thumbnailFound') }}
+              </div>
+              <div v-if="thumbnailError" class="absolute inset-0 flex items-center justify-center bg-red-50/90">
+                <div class="text-center">
+                  <i class="pi pi-exclamation-circle text-2xl text-red-400 mb-1 block"></i>
+                  <p class="text-xs text-red-600 font-medium">{{ $t('dashboard.thumbnailNotFound') }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Image -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-semibold text-gray-700">{{ $t('dashboard.uploadImage') }} <span class="text-gray-400 font-normal">{{ $t('common.optional') }}</span></label>
+            <div
+              class="relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 hover:border-emerald-400 hover:bg-emerald-50/30"
+              :class="selectedImage ? 'border-emerald-400 bg-emerald-50/30' : 'border-gray-200 bg-gray-50'"
+              @click="triggerImageInput"
+            >
+              <input
+                ref="imageInputRef"
+                type="file"
+                accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                class="hidden"
+                @change="handleImageSelect"
+              />
+
+              <div v-if="imageUploadLoading" class="space-y-2">
+                <i class="pi pi-spin pi-spinner text-2xl text-emerald-500 block mx-auto"></i>
+                <p class="text-sm text-emerald-600 font-medium">{{ $t('dashboard.uploadingImage') }}</p>
+              </div>
+
+              <div v-else-if="!selectedImage" class="space-y-2">
+                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
+                  <i class="pi pi-cloud-upload text-lg text-gray-400"></i>
+                </div>
+                <p class="text-sm text-gray-500 font-medium">{{ $t('dashboard.uploadImageSub') }}</p>
+                <p class="text-xs text-gray-400">{{ $t('dashboard.uploadImageHint') }}</p>
+              </div>
+
+              <div v-else class="relative">
+                <img
+                  :src="selectedImagePreview"
+                  alt="Preview"
+                  class="max-h-40 mx-auto rounded-lg object-contain"
+                />
+                <button
+                  type="button"
+                  class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-sm hover:bg-red-600 transition-colors"
+                  @click.stop="removeSelectedImage"
+                >
+                  <i class="pi pi-times text-[10px]"></i>
+                </button>
+              </div>
+            </div>
+            <small v-if="imageUploadError" class="text-red-500 text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle"></i>{{ imageUploadError }}
+            </small>
+            <small v-if="imageUploadSuccess" class="text-emerald-600 text-xs flex items-center gap-1">
+              <i class="pi pi-check-circle"></i>{{ $t('dashboard.imageUploadSuccess') }}
+            </small>
           </div>
 
           <!-- Description -->
           <div class="flex flex-col gap-1.5 lg:col-span-2">
-            <label for="form-desc" class="text-sm font-semibold text-gray-700">Deskripsi Kampanye <span class="text-red-400">*</span></label>
+            <label for="form-desc" class="text-sm font-semibold text-gray-700">{{ $t('dashboard.description') }} <span class="text-red-400">*</span></label>
             <Textarea
               id="form-desc"
               v-model="form.description"
               rows="6"
-              placeholder="Jelaskan secara detail kampanye Anda — latar belakang, tujuan, rencana penggunaan dana, dan dampak yang akan dicapai..."
+              :placeholder="$t('dashboard.descriptionPlaceholder')"
               class="w-full !rounded-xl !text-sm"
               :class="{ 'p-invalid': formErrors.description }"
             />
@@ -207,18 +292,18 @@
               <i class="pi pi-check-circle text-emerald-700"></i>
             </div>
             <div class="flex-1">
-              <p class="text-sm font-semibold text-emerald-800">Kampanye berhasil dibuat sebagai draft!</p>
+              <p class="text-sm font-semibold text-emerald-800">{{ $t('dashboard.campaignCreated') }}</p>
               <p class="text-xs text-emerald-600 mt-0.5">{{ createdCampaign.title }}</p>
               <div class="mt-3 flex gap-2">
                 <Button
-                  label="Kirim ke Review"
+                  :label="$t('dashboard.sendToReview')"
                   icon="pi pi-send"
                   class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !rounded-xl !text-sm !px-5"
                   :loading="submitLoading"
                   @click="handleSubmitForReview"
                 />
                 <Button
-                  label="Edit Lagi"
+                  :label="$t('dashboard.editAgain')"
                   icon="pi pi-pencil"
                   class="p-button-text !text-emerald-700 !rounded-xl !text-sm"
                   @click="createdCampaign = null"
@@ -231,13 +316,13 @@
         <!-- Action Buttons -->
         <div v-if="!createdCampaign" class="mt-6 flex flex-col sm:flex-row gap-3 justify-end border-t border-gray-100 pt-6">
           <Button
-            label="Reset Form"
+            :label="$t('dashboard.resetForm')"
             icon="pi pi-refresh"
             class="p-button-text !text-gray-500 !rounded-xl"
             @click="resetForm"
           />
           <Button
-            label="Buat Kampanye"
+            :label="$t('dashboard.createButton')"
             icon="pi pi-plus-circle"
             class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3 !px-8 !rounded-xl shadow-sm"
             :loading="createLoading"
@@ -254,14 +339,13 @@
             <i class="pi pi-shield text-xl text-purple-700"></i>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-gray-800">Jadilah Creator untuk Membuat Kampanye</h2>
+            <h2 class="text-lg font-bold text-gray-800">{{ $t('dashboard.becomeCreator') }}</h2>
             <p class="text-sm text-gray-500 mt-1 max-w-2xl">
-              Anda saat ini terdaftar sebagai <strong>Backer</strong>. Untuk membuat kampanye crowdfunding,
-              ajukan upgrade akun menjadi Creator melalui halaman Profil Saya.
+              {{ $t('dashboard.becomeCreatorDesc', { role: $t('auth.backer') }) }}
             </p>
             <router-link :to="{ name: 'Profile' }">
               <Button
-                label="Ajukan Upgrade ke Creator"
+                :label="$t('dashboard.upgradeToCreator')"
                 icon="pi pi-shield"
                 class="mt-4 !bg-purple-600 !border-none hover:!bg-purple-700 !text-white !rounded-xl"
               />
@@ -274,11 +358,11 @@
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-bold text-gray-800">Kampanye Saya</h2>
-            <p class="text-xs text-gray-400 mt-0.5">Riwayat kampanye yang telah Anda buat</p>
+            <h2 class="text-lg font-bold text-gray-800">{{ $t('dashboard.myCampaigns') }}</h2>
+            <p class="text-xs text-gray-400 mt-0.5">{{ $t('dashboard.myCampaignsSub') }}</p>
           </div>
           <Badge
-            :value="myCampaigns.length + ' kampanye'"
+            :value="$t('admin.campaignCount', { count: myCampaigns.length })"
             severity="info"
             class="!bg-emerald-50 !text-emerald-700 !rounded-full !text-xs !font-medium !px-3"
           />
@@ -292,8 +376,8 @@
           <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
             <i class="pi pi-flag text-2xl text-gray-300"></i>
           </div>
-          <p class="text-gray-500 text-sm font-medium">Belum ada kampanye</p>
-          <p class="text-gray-400 text-xs mt-1">Kampanye yang Anda buat akan muncul di sini</p>
+          <p class="text-gray-500 text-sm font-medium">{{ $t('dashboard.noCampaigns') }}</p>
+          <p class="text-gray-400 text-xs mt-1">{{ $t('dashboard.noCampaignsSub') }}</p>
         </div>
 
         <DataTable
@@ -305,26 +389,26 @@
           :paginator="true"
           :rows="10"
         >
-          <Column field="id" header="ID" :style="{ width: '60px' }" />
-          <Column field="title" header="Judul">
+          <Column field="id" :header="$t('dashboard.id')" :style="{ width: '60px' }" />
+          <Column field="title" :header="$t('dashboard.title')">
             <template #body="{ data }">
               <div class="max-w-[220px]">
                 <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                <p class="text-xs text-gray-400 truncate">{{ data.category?.name || 'Tanpa Kategori' }}</p>
+                <p class="text-xs text-gray-400 truncate">{{ data.category?.name || $t('dashboard.noCategory') }}</p>
               </div>
             </template>
           </Column>
-          <Column header="Target" :style="{ width: '120px' }">
+          <Column :header="$t('dashboard.target')" :style="{ width: '120px' }">
             <template #body="{ data }">
               <span class="font-medium text-gray-800">{{ formatCurrency(data.target_amount) }}</span>
             </template>
           </Column>
-          <Column header="Terkumpul" :style="{ width: '120px' }">
+          <Column :header="$t('dashboard.collected')" :style="{ width: '120px' }">
             <template #body="{ data }">
               <span class="font-semibold text-emerald-700">{{ formatCurrency(data.collected_amount || 0) }}</span>
             </template>
           </Column>
-          <Column header="Status" :style="{ width: '100px' }">
+          <Column :header="$t('campaign.status')" :style="{ width: '100px' }">
             <template #body="{ data }">
               <Badge
                 :value="statusLabel(data.status)"
@@ -333,14 +417,14 @@
               />
             </template>
           </Column>
-          <Column header="Aksi" :style="{ width: '120px' }">
+          <Column :header="$t('dashboard.actions')" :style="{ width: '120px' }">
             <template #body="{ data }">
               <div class="flex items-center gap-1.5">
                 <router-link
                   :to="`/campaigns/${data.slug}`"
                   class="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium no-underline px-2 py-1 rounded-lg hover:bg-emerald-50 transition-colors"
                 >
-                  <i class="pi pi-eye text-[10px]"></i>Lihat
+                  <i class="pi pi-eye text-[10px]"></i>{{ $t('dashboard.view') }}
                 </router-link>
                 <Button
                   v-if="data.status === 'draft'"
@@ -359,7 +443,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import Badge from 'primevue/badge'
@@ -414,6 +498,97 @@ const createLoading = ref(false)
 const submitLoading = ref(false)
 const createdCampaign = ref(null)
 
+const thumbnailPreview = computed(() => {
+  const url = form.video_url?.trim()
+  if (!url) return null
+  const patterns = [
+    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ]
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match) {
+      return `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg`
+    }
+  }
+  return null
+})
+
+const thumbnailLoaded = ref(false)
+const thumbnailError = ref(false)
+
+watch(thumbnailPreview, () => {
+  thumbnailLoaded.value = false
+  thumbnailError.value = false
+})
+
+// Image Upload State
+const imageInputRef = ref(null)
+const selectedImage = ref(null)
+const selectedImagePreview = ref('')
+const imageUploadError = ref('')
+const imageUploadSuccess = ref(false)
+const imageUploadLoading = ref(false)
+
+function triggerImageInput() {
+  imageInputRef.value?.click()
+}
+
+function handleImageSelect(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  imageUploadError.value = ''
+
+  // Validate file size (5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    imageUploadError.value = 'Ukuran gambar maksimal 5MB'
+    return
+  }
+
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    imageUploadError.value = 'Format gambar tidak didukung. Gunakan JPEG, PNG, atau WebP'
+    return
+  }
+
+  selectedImage.value = file
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    selectedImagePreview.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+  imageUploadSuccess.value = false
+}
+
+function removeSelectedImage() {
+  selectedImage.value = null
+  selectedImagePreview.value = ''
+  if (imageInputRef.value) imageInputRef.value.value = ''
+}
+
+async function uploadImageToCampaign(campaignId) {
+  if (!selectedImage.value) return
+  imageUploadLoading.value = true
+  imageUploadError.value = ''
+  imageUploadSuccess.value = false
+  try {
+    const formData = new FormData()
+    formData.append('image', selectedImage.value)
+    await campaignService.uploadCampaignImage(campaignId, formData)
+    imageUploadSuccess.value = true
+    selectedImage.value = null
+    selectedImagePreview.value = ''
+  } catch (error) {
+    imageUploadError.value = error.response?.data?.message || 'Gagal mengunggah gambar'
+  } finally {
+    imageUploadLoading.value = false
+  }
+}
+
 const minDeadline = computed(() => {
   const date = new Date()
   date.setDate(date.getDate() + 7)
@@ -430,6 +605,9 @@ function resetForm() {
   Object.keys(formErrors).forEach(k => delete formErrors[k])
   formError.value = ''
   createdCampaign.value = null
+  removeSelectedImage()
+  imageUploadError.value = ''
+  imageUploadSuccess.value = false
 }
 
 function statusLabel(status) {
@@ -498,6 +676,12 @@ async function handleCreateCampaign() {
 
     const res = await campaignService.createCampaign(payload)
     createdCampaign.value = res.data
+
+    // Upload image if selected
+    if (selectedImage.value) {
+      await uploadImageToCampaign(res.data.id)
+    }
+
     toast.add({ severity: 'success', summary: 'Berhasil', detail: res.message || 'Kampanye berhasil dibuat.', life: 4000 })
     await fetchMyCampaigns()
   } catch (error) {

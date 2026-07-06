@@ -24,11 +24,18 @@ class Campaign extends Model
         'status',
     ];
 
+    protected $appends = ['image_url'];
+
     protected $casts = [
         'target_amount' => 'decimal:2',
         'collected_amount' => 'decimal:2',
         'deadline' => 'date',
     ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->images->sortByDesc('is_primary')->first()?->image_url;
+    }
 
     public function user(): BelongsTo
     {

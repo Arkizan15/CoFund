@@ -40,5 +40,12 @@ export async function backCampaign(payload) {
   return res.data
 }
 
-const campaignService = { getCampaigns, getCampaignDetail, getCategories, createCampaign, submitForReview, getMyCampaigns, postUpdate, backCampaign }
+export async function uploadCampaignImage(campaignId, formData) {
+  const res = await api.post(`/campaigns/${campaignId}/images`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return res.data
+}
+
+const campaignService = { getCampaigns, getCampaignDetail, getCategories, createCampaign, submitForReview, getMyCampaigns, postUpdate, backCampaign, uploadCampaignImage }
 export default campaignService

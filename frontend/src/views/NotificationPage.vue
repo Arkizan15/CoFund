@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-slate-50 py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="mb-8">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Notifikasi</h1>
-        <p class="text-gray-500 text-sm mt-1">Pesan dan pemberitahuan untuk akun Anda</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ $t('notifications.title') }}</h1>
+        <p class="text-gray-500 text-sm mt-1">{{ $t('notifications.subtitle') }}</p>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-20">
@@ -12,8 +12,8 @@
 
       <div v-else-if="notifications.length === 0" class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
         <i class="pi pi-inbox text-5xl text-gray-300 mb-4"></i>
-        <p class="text-gray-500 text-lg">Belum ada notifikasi</p>
-        <p class="text-gray-400 text-sm mt-1">Notifikasi akan muncul di sini saat ada aktivitas baru</p>
+        <p class="text-gray-500 text-lg">{{ $t('notifications.noNotifications') }}</p>
+        <p class="text-gray-400 text-sm mt-1">{{ $t('notifications.noNotificationsSub') }}</p>
       </div>
 
       <div v-else class="space-y-4">
@@ -35,14 +35,13 @@
                 <div>
                   <p class="text-sm font-semibold text-gray-800">{{ notification.title || 'Notifikasi' }}</p>
                   <p class="text-sm text-gray-500 mt-1">{{ notification.body || 'Tidak ada pesan.' }}</p>
-                </div>
-                <Badge v-if="!notification.read_at" value="Baru" severity="success" class="!bg-emerald-100 !text-emerald-700 !text-xs !px-2 !py-0.5 !rounded-full flex-shrink-0" />
+                </div>                  <Badge v-if="!notification.read_at" :value="$t('notifications.new')" severity="success" class="!bg-emerald-100 !text-emerald-700 !text-xs !px-2 !py-0.5 !rounded-full flex-shrink-0" />
               </div>
               <div class="flex items-center justify-between mt-3">
                 <span class="text-xs text-gray-400">{{ formatDate(notification.created_at) }}</span>
                 <Button
                   v-if="!notification.read_at"
-                  label="Tandai Dibaca"
+                  :label="$t('notifications.markAsRead')"
                   icon="pi pi-check"
                   class="p-button-text p-button-sm !text-emerald-600 !p-1 !text-xs"
                   @click="markAsRead(notification)"
@@ -55,7 +54,7 @@
         <div class="text-center pt-4">
           <Button
             v-if="hasUnread"
-            label="Tandai Semua Dibaca"
+            :label="$t('notifications.markAllAsRead')"
             icon="pi pi-check-circle"
             class="p-button-text text-emerald-600"
             @click="markAllAsRead"

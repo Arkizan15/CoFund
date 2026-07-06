@@ -34,6 +34,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/campaigns/{id}', [CampaignController::class, 'update']);
     Route::post('/campaigns/{id}/submit', [CampaignController::class, 'submitForReview']);
     Route::post('/campaigns/{id}/updates', [CampaignController::class, 'storeUpdate']);
+    Route::post('/campaigns/{id}/images', [CampaignController::class, 'uploadImage']);
     Route::get('/my/campaigns', [CampaignController::class, 'myCampaigns']);
 
     // Wallet
@@ -58,6 +59,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Admin
     Route::get('/admin/overview', [AdminController::class, 'platformOverview']);
     Route::get('/admin/pending-approvals', [AdminController::class, 'pendingApprovals']);
+    Route::get('/admin/campaigns/all', [AdminController::class, 'allCampaigns']);
+    Route::get('/admin/campaigns/active', [AdminController::class, 'activeCampaigns']);
+    Route::get('/admin/campaigns/ended', [AdminController::class, 'endedCampaigns']);
     Route::post('/admin/campaigns/{id}/approve', [AdminController::class, 'approveCampaign']);
     Route::post('/admin/campaigns/{id}/reject', [AdminController::class, 'rejectCampaign']);
     Route::post('/admin/campaigns/{id}/ban', [AdminController::class, 'banCampaign']);

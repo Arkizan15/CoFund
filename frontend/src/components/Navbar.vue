@@ -18,25 +18,48 @@
               class="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors duration-200 no-underline"
               active-class="text-emerald-600 font-semibold"
             >
-              <i class="pi pi-home mr-1.5 text-xs"></i>Home
+              <i class="pi pi-home mr-1.5 text-xs"></i>{{ $t('nav.home') }}
             </router-link>
             <router-link
               :to="{ name: 'CampaignList' }"
               class="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors duration-200 no-underline"
               active-class="text-emerald-600 font-semibold"
             >
-              <i class="pi pi-th-large mr-1.5 text-xs"></i>Campaign
+              <i class="pi pi-th-large mr-1.5 text-xs"></i>{{ $t('nav.campaigns') }}
             </router-link>
           </div>
         </div>
 
         <!-- Right: Auth Actions -->
         <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Language Toggle (always visible) -->
+          <button
+            @click="toggleLanguage"
+            class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-sm font-medium text-emerald-700 hover:bg-emerald-50 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            :title="currentLang === 'id' ? $t('nav.switchToEn') : $t('nav.switchToId')"
+          >
+            <svg v-if="currentLang === 'id'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 4" class="w-5 h-3.5 rounded-sm shadow-sm">
+              <rect width="6" height="2" fill="#ce1126"/>
+              <rect y="2" width="6" height="2" fill="#fff"/>
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" class="w-5 h-3.5 rounded-sm shadow-sm">
+              <clipPath id="uk-clip"><rect width="60" height="30"/></clipPath>
+              <g clip-path="url(#uk-clip)">
+                <rect width="60" height="30" fill="#012169"/>
+                <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/>
+                <path d="M0 0l60 30m0-30L0 30" stroke="#c8102e" stroke-width="3"/>
+                <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/>
+                <path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="5"/>
+              </g>
+            </svg>
+            <span class="text-xs font-semibold uppercase tracking-wide">{{ currentLang }}</span>
+          </button>
+
           <!-- Guest Mode -->
           <template v-if="!authStore.isAuthenticated">
             <router-link :to="{ name: 'Login' }">
               <Button
-                label="Masuk"
+                :label="$t('nav.login')"
                 icon="pi pi-sign-in"
                 severity="success"
                 class="p-button-text p-button-sm !text-emerald-600 !font-medium !p-2 !px-3"
@@ -44,7 +67,7 @@
             </router-link>
             <router-link :to="{ name: 'Register' }">
               <Button
-                label="Daftar"
+                :label="$t('nav.register')"
                 icon="pi pi-user-plus"
                 class="p-button-sm !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !p-2 !px-3 shadow-sm"
               />
@@ -75,7 +98,7 @@
               class="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors no-underline px-2 py-1.5 rounded-lg hover:bg-emerald-50"
             >
               <i class="pi pi-chart-bar text-xs"></i>
-              Dashboard
+              {{ $t('nav.dashboard') }}
             </router-link>
 
             <!-- Profile Dropdown -->
@@ -87,7 +110,7 @@
                 <div class="w-9 h-9 rounded-full bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center overflow-hidden">
                   <i class="pi pi-user text-emerald-600 text-sm"></i>
                 </div>
-                <span class="hidden sm:inline text-sm font-medium text-gray-700 max-w-[100px] truncate">{{ authStore.user?.name || 'User' }}</span>
+                <span class="hidden sm:inline text-sm font-medium text-gray-700 max-w-[100px] truncate">{{ authStore.user?.name || $t('nav.userGreeting') }}</span>
                 <i class="pi pi-chevron-down text-xs text-gray-400 transition-transform" :class="{ 'rotate-180': dropdownOpen }"></i>
               </button>
 
@@ -97,7 +120,7 @@
                   class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
                 >
                   <div class="px-4 py-2 border-b border-gray-100">
-                    <p class="text-sm font-medium text-gray-800 truncate">{{ authStore.user?.name || 'User' }}</p>
+                    <p class="text-sm font-medium text-gray-800 truncate">{{ authStore.user?.name || 'Pengguna' }}</p>
                     <p class="text-xs text-gray-400 truncate">{{ authStore.user?.email || '' }}</p>
                   </div>
 
@@ -106,21 +129,21 @@
                     @click="dropdownOpen = false"
                     class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors no-underline"
                   >
-                    <i class="pi pi-chart-bar text-xs"></i> Dashboard
+                    <i class="pi pi-chart-bar text-xs"></i> {{ $t('nav.dashboard') }}
                   </router-link>
                   <router-link
                     :to="{ name: 'Profile' }"
                     @click="dropdownOpen = false"
                     class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors no-underline"
                   >
-                    <i class="pi pi-user text-xs"></i> Profil Saya
+                    <i class="pi pi-user text-xs"></i> {{ $t('nav.profile') }}
                   </router-link>
                   <router-link
                     :to="{ name: 'Notifications' }"
                     @click="dropdownOpen = false"
                     class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors no-underline"
                   >
-                    <i class="pi pi-bell text-xs"></i> Notifikasi
+                    <i class="pi pi-bell text-xs"></i> {{ $t('nav.notifications') }}
                     <span v-if="unreadCount > 0" class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ unreadCount }}</span>
                   </router-link>
                   <router-link
@@ -129,14 +152,14 @@
                     @click="dropdownOpen = false"
                     class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors no-underline"
                   >
-                    <i class="pi pi-shield text-xs"></i> Panel Admin
+                    <i class="pi pi-shield text-xs"></i> {{ $t('nav.adminPanel') }}
                   </router-link>
                   <hr class="my-1 border-gray-100" />
                   <button
                     @click="handleLogout"
                     class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >
-                    <i class="pi pi-sign-out text-xs"></i> Logout
+                    <i class="pi pi-sign-out text-xs"></i> {{ $t('nav.logout') }}
                   </button>
                 </div>
               </Transition>
@@ -162,7 +185,7 @@
             class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
             active-class="text-emerald-600 bg-emerald-50 font-semibold"
           >
-            <i class="pi pi-home text-xs"></i> Home
+            <i class="pi pi-home text-xs"></i> {{ $t('nav.home') }}
           </router-link>
           <router-link
             :to="{ name: 'CampaignList' }"
@@ -170,7 +193,7 @@
             class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
             active-class="text-emerald-600 bg-emerald-50 font-semibold"
           >
-            <i class="pi pi-th-large text-xs"></i> Campaign
+            <i class="pi pi-th-large text-xs"></i> {{ $t('nav.campaigns') }}
           </router-link>
           <template v-if="authStore.isAuthenticated">
             <hr class="border-gray-100" />
@@ -180,7 +203,7 @@
               class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
               active-class="text-emerald-600 bg-emerald-50 font-semibold"
             >
-              <i class="pi pi-chart-bar text-xs"></i> Dashboard
+              <i class="pi pi-chart-bar text-xs"></i> {{ $t('nav.dashboard') }}
             </router-link>
             <router-link
               :to="{ name: 'Profile' }"
@@ -188,7 +211,7 @@
               class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
               active-class="text-emerald-600 bg-emerald-50 font-semibold"
             >
-              <i class="pi pi-user text-xs"></i> Profil Saya
+              <i class="pi pi-user text-xs"></i> {{ $t('nav.profile') }}
             </router-link>
             <router-link
               :to="{ name: 'Notifications' }"
@@ -196,7 +219,7 @@
               class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
               active-class="text-emerald-600 bg-emerald-50 font-semibold"
             >
-              <i class="pi pi-bell text-xs"></i> Notifikasi
+              <i class="pi pi-bell text-xs"></i> {{ $t('nav.notifications') }}
               <span v-if="unreadCount > 0" class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ unreadCount }}</span>
             </router-link>
             <router-link
@@ -206,14 +229,14 @@
               class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
               active-class="text-emerald-600 bg-emerald-50 font-semibold"
             >
-              <i class="pi pi-shield text-xs"></i> Panel Admin
+              <i class="pi pi-shield text-xs"></i> {{ $t('nav.adminPanel') }}
             </router-link>
             <hr class="border-gray-100" />
             <button
               @click="handleLogout"
               class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             >
-              <i class="pi pi-sign-out text-xs"></i> Logout
+              <i class="pi pi-sign-out text-xs"></i> {{ $t('nav.logout') }}
             </button>
           </template>
         </div>
@@ -226,6 +249,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { notificationService } from '@/services/notificationService'
@@ -233,13 +257,22 @@ import { notificationService } from '@/services/notificationService'
 const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
+const { locale } = useI18n()
 
 const dropdownOpen = ref(false)
 const mobileOpen = ref(false)
 const dropdownRef = ref(null)
 const unreadCount = ref(0)
+const currentLang = ref(locale.value)
 
 const isAdmin = computed(() => authStore.getUserRole === 'admin')
+
+function toggleLanguage() {
+  const newLang = currentLang.value === 'id' ? 'en' : 'id'
+  currentLang.value = newLang
+  locale.value = newLang
+  localStorage.setItem('app-lang', newLang)
+}
 
 function handleClickOutside(event) {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {

@@ -1,59 +1,62 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import i18n from '@/i18n'
+
+const { t } = i18n.global
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    meta: { title: 'CoFund — Crowdfunding Platform' },
+    meta: { title: () => t('routes.home') },
     component: () => import('@/views/Home.vue'),
   },
   {
     path: '/campaigns',
     name: 'CampaignList',
-    meta: { title: 'Jelajahi Kampanye — CoFund' },
+    meta: { title: () => t('routes.campaigns') },
     component: () => import('@/views/Campaign/CampaignList.vue'),
   },
   {
     path: '/campaigns/:slug',
     name: 'CampaignDetail',
-    meta: { title: 'Detail Kampanye — CoFund' },
+    meta: { title: () => t('routes.campaignDetail') },
     component: () => import('@/views/Campaign/CampaignDetail.vue'),
   },
   {
     path: '/login',
     name: 'Login',
-    meta: { title: 'Masuk — CoFund', guestOnly: true },
+    meta: { title: () => t('routes.login'), guestOnly: true },
     component: () => import('@/views/Auth/Login.vue'),
   },
   {
     path: '/register',
     name: 'Register',
-    meta: { title: 'Daftar — CoFund', guestOnly: true },
+    meta: { title: () => t('routes.register'), guestOnly: true },
     component: () => import('@/views/Auth/Register.vue'),
   },
   {
     path: '/dashboard',
     name: 'Dashboard',
-    meta: { title: 'Dashboard — CoFund', requiresAuth: true },
+    meta: { title: () => t('routes.dashboard'), requiresAuth: true },
     component: () => import('@/views/Auth/Dashboard.vue'),
   },
   {
     path: '/profile',
     name: 'Profile',
-    meta: { title: 'Profil Saya — CoFund', requiresAuth: true },
+    meta: { title: () => t('routes.profile'), requiresAuth: true },
     component: () => import('@/views/ProfilePage.vue'),
   },
   {
     path: '/notifications',
     name: 'Notifications',
-    meta: { title: 'Notifikasi — CoFund', requiresAuth: true },
+    meta: { title: () => t('routes.notifications'), requiresAuth: true },
     component: () => import('@/views/NotificationPage.vue'),
   },
   {
     path: '/admin',
     name: 'AdminDashboard',
-    meta: { title: 'Panel Admin — CoFund', requiresAuth: true, requiresAdmin: true },
+    meta: { title: () => t('routes.admin'), requiresAuth: true, requiresAdmin: true },
     component: () => import('@/views/AdminDashboard.vue'),
   },
   {
@@ -72,7 +75,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'CoFund'
+  const titleFn = to.meta.title
+  document.title = typeof titleFn === 'function' ? titleFn() : 'CoFund'
 
   const authStore = useAuthStore()
 

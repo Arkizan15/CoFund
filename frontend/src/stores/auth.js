@@ -4,7 +4,7 @@ import api from '@/services/api';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null,
+    user: null,
     token: localStorage.getItem('token') || null,
   }),
 
@@ -17,14 +17,13 @@ export const useAuthStore = defineStore('auth', {
     async login(credentials) {
       try {
         const response = await authService.login(credentials);
-        
+
         // Simpan ke state
         this.token = response.data.token;
         this.user = response.data.user;
 
-        // Simpan ke localStorage agar tidak hilang saat refresh
+        // Simpan token ke localStorage agar tidak hilang saat refresh
         localStorage.setItem('token', this.token);
-        localStorage.setItem('user', JSON.stringify(this.user));
 
         return response;
       } catch (error) {
@@ -51,7 +50,6 @@ export const useAuthStore = defineStore('auth', {
         this.token = null;
         this.user = null;
         localStorage.removeItem('token');
-        localStorage.removeItem('user');
       }
     },
 
@@ -61,7 +59,6 @@ export const useAuthStore = defineStore('auth', {
         const response = await authService.getProfile();
         // Backend wraps user data in { success: true, data: { ... } }
         this.user = response.data.data || response.data;
-        localStorage.setItem('user', JSON.stringify(this.user));
       } catch (error) {
         if (error.response?.status === 401) {
           this.logout(); // Token tidak valid, paksa logout

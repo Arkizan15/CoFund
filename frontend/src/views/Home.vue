@@ -10,11 +10,11 @@
         <div class="grid md:grid-cols-2 gap-12 items-center">
           <div class="space-y-6">
             <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-              Bangun Masa Depan<br />
-              <span class="text-emerald-200">Bersama Komunitas</span>
+              {{ $t('home.heroTitle') }}<br />
+              <span class="text-emerald-200">{{ $t('home.heroTitleHighlight') }}</span>
             </h1>
             <p class="text-lg md:text-xl text-emerald-50 leading-relaxed max-w-lg">
-              CoFund menghubungkan para pengusaha UMKM dengan pendukung finansial. Wujudkan ide bisnis Anda melalui crowdfunding yang transparan, aman, dan terpercaya.
+              {{ $t('home.heroSubtitle') }}
             </p>
             <div class="flex flex-wrap gap-4 pt-2">
               <router-link
@@ -22,14 +22,14 @@
                 class="inline-flex items-center gap-2 bg-white text-emerald-700 font-semibold px-8 py-3.5 rounded-xl shadow-lg hover:bg-emerald-50 transition-all duration-200 hover:-translate-y-0.5"
               >
                 <i class="pi pi-search"></i>
-                Jelajahi Kampanye
+                {{ $t('home.exploreCampaigns') }}
               </router-link>
               <router-link
                 :to="{ name: 'Register' }"
                 class="inline-flex items-center gap-2 border-2 border-white/40 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-white/10 transition-all duration-200"
               >
                 <i class="pi pi-user-plus"></i>
-                Mulai Sekarang
+                {{ $t('home.startCampaign') }}
               </router-link>
             </div>
           </div>
@@ -48,8 +48,8 @@
     <section class="py-20 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Mengapa CoFund?</h2>
-          <p class="text-gray-500 max-w-2xl mx-auto">Platform crowdfunding terpercaya dengan sistem escrow otomatis dan transparansi penuh</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ $t('home.howItWorks') }}</h2>
+          <p class="text-gray-500 max-w-2xl mx-auto">{{ $t('home.howItWorksSubtitle') }}</p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
@@ -57,9 +57,9 @@
             <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors">
               <i class="pi pi-shield text-2xl text-emerald-700"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Perlindungan Escrow</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $t('home.step1Title') }}</h3>
             <p class="text-gray-500 text-sm leading-relaxed">
-              Dana donasi diamankan dalam rekening escrow terverifikasi. Pencairan hanya dilakukan saat kampanye mencapai target yang ditentukan.
+              {{ $t('home.step1Desc') }}
             </p>
           </div>
 
@@ -67,9 +67,9 @@
             <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors">
               <i class="pi pi-chart-line text-2xl text-emerald-700"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Transparansi Penuh</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $t('home.step2Title') }}</h3>
             <p class="text-gray-500 text-sm leading-relaxed">
-              Pantau perkembangan kampanye secara real-time. Setiap transaksi tercatat dan dapat diaudit oleh seluruh pihak.
+              {{ $t('home.step2Desc') }}
             </p>
           </div>
 
@@ -77,9 +77,9 @@
             <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors">
               <i class="pi pi-globe text-2xl text-emerald-700"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Dampak Nyata</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $t('home.step3Title') }}</h3>
             <p class="text-gray-500 text-sm leading-relaxed">
-              Setiap kontribusi Anda berdampak langsung pada pertumbuhan UMKM dan perekonomian masyarakat lokal.
+              {{ $t('home.step3Desc') }}
             </p>
           </div>
         </div>
@@ -91,11 +91,11 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-10">
           <div>
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Kampanye Populer</h2>
-            <p class="text-gray-500 mt-2">Temukan peluang investasi terbaik dari berbagai sektor</p>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900">{{ $t('home.featuredCampaigns') }}</h2>
+            <p class="text-gray-500 mt-2">{{ $t('home.featuredSubtitle') }}</p>
           </div>
           <router-link :to="{ name: 'CampaignList' }" class="hidden sm:inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors group">
-            Lihat Semua
+            {{ $t('common.viewAll') }}
             <i class="pi pi-arrow-right text-sm transition-transform group-hover:translate-x-1"></i>
           </router-link>
         </div>
@@ -121,11 +121,11 @@
                 </div>
                 <div class="flex items-center justify-between text-sm">
                   <span class="text-gray-500">
-                    Terkumpul <strong class="text-gray-800">{{ campaign.progress }}%</strong>
+                    {{ $t('home.collected') }} <strong class="text-gray-800">{{ campaign.progress }}%</strong>
                   </span>
                   <span class="flex items-center gap-1.5 text-orange-600 font-medium">
                     <i class="pi pi-clock text-xs"></i>
-                    {{ campaign.daysLeft }} hari lagi
+                    {{ $t('common.daysLeft', { days: campaign.daysLeft }) }}
                   </span>
                 </div>
               </div>
@@ -135,7 +135,7 @@
 
         <div class="text-center mt-10 sm:hidden">
           <router-link :to="{ name: 'CampaignList' }" class="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors group">
-            Lihat Semua Kampanye
+            {{ $t('common.viewAll') }}
             <i class="pi pi-arrow-right text-sm transition-transform group-hover:translate-x-1"></i>
           </router-link>
         </div>
@@ -149,13 +149,12 @@
           <div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center">
             <i class="pi pi-wallet text-3xl text-white"></i>
           </div>
-        </div>
-        <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">Siap Mengembangkan Portofolio Investasi Anda?</h3>
-        <p class="text-emerald-100 mb-8 max-w-2xl mx-auto">Bergabunglah bersama CoFund dan temukan berbagai peluang investasi sektor riil terbaik untuk masa depan Anda.</p>
-        <router-link :to="{ name: 'Register' }" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-10 py-4 rounded-xl shadow-lg hover:bg-emerald-50 transition-all duration-200 hover:-translate-y-0.5 no-underline">
-          <i class="pi pi-user-plus"></i>
-          Daftar Sekarang
-        </router-link>
+        </div>          <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">{{ $t('home.ctaTitle') }}</h3>
+          <p class="text-emerald-100 mb-8 max-w-2xl mx-auto">{{ $t('home.ctaSubtitle') }}</p>
+          <router-link :to="{ name: 'Register' }" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-10 py-4 rounded-xl shadow-lg hover:bg-emerald-50 transition-all duration-200 hover:-translate-y-0.5 no-underline">
+            <i class="pi pi-user-plus"></i>
+            {{ $t('home.ctaRegister') }}
+          </router-link>
       </div>
     </section>
 
@@ -164,11 +163,11 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-10">
           <div>
-            <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Kampanye Terbaru</h3>
-            <p class="text-emerald-100 text-sm">Temukan dan dukung kampanye yang sesuai dengan minat Anda</p>
+            <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ $t('home.exploreLoggedTitle') }}</h3>
+            <p class="text-emerald-100 text-sm">{{ $t('home.exploreLoggedSubtitle') }}</p>
           </div>
           <router-link :to="{ name: 'CampaignList' }" class="hidden sm:inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 no-underline">
-            Lihat Semua
+            {{ $t('common.viewAll') }}
             <i class="pi pi-arrow-right text-sm"></i>
           </router-link>
         </div>
@@ -179,7 +178,7 @@
 
         <div v-else-if="liveCampaigns.length === 0" class="text-center py-12 bg-white/10 rounded-2xl">
           <i class="pi pi-inbox text-4xl text-white/40 mb-3 block"></i>
-          <p class="text-white/70 text-sm">Belum ada kampanye aktif saat ini</p>
+          <p class="text-white/70 text-sm">{{ $t('common.noData') }}</p>
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -196,7 +195,7 @@
               />
               <div class="absolute top-3 left-3">
                 <span class="bg-emerald-600/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
-                  {{ campaign.category?.name || 'Umum' }}
+                  {{ campaign.category?.name || $t('common.general') }}
                 </span>
               </div>
             </div>
@@ -210,7 +209,7 @@
                   </span>
                   <span class="flex items-center gap-1 text-orange-600 font-medium">
                     <i class="pi pi-clock text-[10px]"></i>
-                    {{ remainingDays(campaign.deadline) }} hari
+                    {{ $t('common.daysLeft', { days: remainingDays(campaign.deadline) }) }}
                   </span>
                 </div>
               </div>
@@ -218,7 +217,7 @@
                 :to="`/campaigns/${campaign.slug}`"
                 class="mt-4 block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all duration-200 shadow-sm no-underline"
               >
-                Lihat Detail
+                {{ $t('home.supportNow') }}
                 <i class="pi pi-arrow-right ml-1.5 text-xs"></i>
               </router-link>
             </div>
@@ -227,7 +226,7 @@
 
         <div class="text-center mt-8 sm:hidden">
           <router-link :to="{ name: 'CampaignList' }" class="inline-flex items-center gap-2 text-white font-semibold hover:text-emerald-100 transition-colors">
-            Lihat Semua Kampanye
+            {{ $t('common.viewAll') }}
             <i class="pi pi-arrow-right text-sm"></i>
           </router-link>
         </div>
