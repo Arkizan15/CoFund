@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -122,6 +124,27 @@ body {
   flex-direction: column;
 }
 
+.goog-te-banner-frame,
+.goog-te-menu-frame,
+.goog-te-ftab-frame,
+.goog-logo-link {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.goog-te-gadget {
+  font-size: 0 !important;
+}
+
+.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
 /* Smooth transitions for route changes */
 .page-enter-active,
 .page-leave-active {
@@ -228,6 +251,22 @@ body {
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
 }
 
+.p-dropdown-panel {
+  background: #fff !important;
+}
+
+.p-dropdown-items {
+  background: #fff !important;
+}
+
+.p-dropdown-item {
+  background: #fff !important;
+}
+
+.p-dropdown-item:hover {
+  background: #f0fdf4 !important;
+}
+
 .p-textarea:hover {
   border-color: #9ca3af !important;
 }
@@ -260,5 +299,184 @@ a:focus-visible,
 .p-button:focus-visible {
   outline: 2px solid #059669;
   outline-offset: 2px;
+}
+
+/* ===== ChatBubble Design System ===== */
+
+/* Bubble base styles */
+.chat-bubble {
+  position: relative;
+  border-radius: 20px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.chat-bubble:hover {
+  transform: translateY(-1px);
+}
+
+/* Sent bubble tail (right side) */
+.chat-bubble-sent::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: -8px;
+  width: 16px;
+  height: 16px;
+  background: inherit;
+  border-radius: 0 0 4px 0;
+  transform: rotate(45deg);
+  box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* Received bubble tail (left side) */
+.chat-bubble-received::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: -8px;
+  width: 16px;
+  height: 16px;
+  background: inherit;
+  border-radius: 0 0 0 4px;
+  transform: rotate(45deg);
+  box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* ===== Success Transaction Animation ===== */
+
+@keyframes success-pop {
+  0% {
+    transform: scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15) rotate(3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes success-slide-up {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes confetti-1 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 1; }
+  50% { transform: translate(-30px, -50px) rotate(180deg) scale(1.2); opacity: 1; }
+  100% { transform: translate(-60px, -80px) rotate(360deg) scale(0); opacity: 0; }
+}
+
+@keyframes confetti-2 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 1; }
+  50% { transform: translate(30px, -40px) rotate(-180deg) scale(1.2); opacity: 1; }
+  100% { transform: translate(60px, -70px) rotate(-360deg) scale(0); opacity: 0; }
+}
+
+@keyframes confetti-3 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 1; }
+  50% { transform: translate(-10px, -60px) rotate(120deg) scale(1); opacity: 1; }
+  100% { transform: translate(-20px, -90px) rotate(240deg) scale(0); opacity: 0; }
+}
+
+.animate-success-pop {
+  animation: success-pop 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+.animate-success-slide {
+  animation: success-slide-up 0.5s ease-out forwards;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  top: 50%;
+  left: 50%;
+}
+
+.confetti-piece:nth-child(1) {
+  animation: confetti-1 0.8s ease-out forwards;
+  background: #22C55E;
+}
+.confetti-piece:nth-child(2) {
+  animation: confetti-2 0.8s ease-out 0.1s forwards;
+  background: #3B82F6;
+}
+.confetti-piece:nth-child(3) {
+  animation: confetti-3 0.8s ease-out 0.2s forwards;
+  background: #A855F7;
+}
+
+/* ===== Modal Dialog Styles ===== */
+.app-dialog {
+  outline: 2px solid #10b981 !important;
+  outline-offset: -2px !important;
+}
+.app-dialog .p-dialog-header {
+  padding: 1.5rem 1.5rem 0.25rem !important;
+}
+.app-dialog .p-dialog-content {
+  padding: 1.25rem 1.5rem !important;
+}
+.app-dialog .p-dialog-footer {
+  padding: 0.25rem 1.5rem 1.5rem !important;
+}
+.app-dialog-danger {
+  outline-color: #f87171 !important;
+}
+
+/* ===== PrimeVue Override: Paginator (borderless) ===== */
+.p-paginator {
+  border: none !important;
+  background: transparent !important;
+}
+.p-paginator .p-paginator-pages .p-paginator-page {
+  border: none !important;
+}
+.p-datatable-paginator-top,
+.p-datatable-paginator-bottom {
+  border: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+}
+
+/* ===== 44px touch targets for mobile ===== */
+@media (max-width: 640px) {
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  button, 
+  a,
+  .p-button,
+  [role="button"] {
+    min-height: 44px;
+  }
+  /* Override for inline text buttons */
+  .p-button.p-button-text {
+    min-height: 44px;
+  }
+  /* Input elements */
+  input,
+  textarea,
+  select,
+  .p-inputtext,
+  .p-dropdown,
+  .p-inputnumber {
+    min-height: 44px;
+  }
 }
 

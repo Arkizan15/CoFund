@@ -18,34 +18,41 @@
 
       <div v-else class="space-y-4">
         <div
-          v-for="notification in notifications"
+          v-for="(notification, idx) in notifications"
           :key="notification.id"
-          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-all duration-200"
-          :class="{ 'border-l-4 border-l-emerald-500 bg-emerald-50/30': !notification.read_at }"
+          class="animate-fade-in transition-all duration-200"
+          :style="{ animationDelay: idx * 50 + 'ms' }"
         >
-          <div class="flex items-start gap-4">
-            <div
-              class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              :class="getIconBg(notification.type)"
-            >
-              <i :class="getIcon(notification.type)" class="text-sm"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <p class="text-sm font-semibold text-gray-800">{{ notification.title || 'Notifikasi' }}</p>
-                  <p class="text-sm text-gray-500 mt-1">{{ notification.body || 'Tidak ada pesan.' }}</p>
-                </div>                  <Badge v-if="!notification.read_at" value="Baru" severity="success" class="!bg-emerald-100 !text-emerald-700 !text-xs !px-2 !py-0.5 !rounded-full flex-shrink-0" />
+          <div
+            class="bg-white rounded-2xl shadow-sm border p-4 md:p-5"
+            :class="!notification.read_at ? 'border-l-4 border-l-emerald-500 bg-emerald-50/30' : 'border-gray-100'"
+          >
+            <div class="flex items-start gap-4">
+              <!-- ChatBubble-style avatar -->
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ring-2 ring-white"
+                :class="getIconBg(notification.type)"
+              >
+                <i :class="getIcon(notification.type)" class="text-sm"></i>
               </div>
-              <div class="flex items-center justify-between mt-3">
-                <span class="text-xs text-gray-400">{{ formatDate(notification.created_at) }}</span>
-                <Button
-                  v-if="!notification.read_at"
-                  label="Tandai Dibaca"
-                  icon="pi pi-check"
-                  class="p-button-text p-button-sm !text-emerald-600 !p-1 !text-xs"
-                  @click="markAsRead(notification)"
-                />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800">{{ notification.title || 'Notifikasi' }}</p>
+                    <p class="text-sm text-gray-500 mt-1">{{ notification.body || 'Tidak ada pesan.' }}</p>
+                  </div>
+                  <Badge v-if="!notification.read_at" value="Baru" severity="success" class="!bg-emerald-100 !text-emerald-700 !text-xs !px-2 !py-0.5 !rounded-full flex-shrink-0" />
+                </div>
+                <div class="flex items-center justify-between mt-3">
+                  <span class="text-xs text-gray-400">{{ formatDate(notification.created_at) }}</span>
+                  <Button
+                    v-if="!notification.read_at"
+                    label="Tandai Dibaca"
+                    icon="pi pi-check"
+                    class="p-button-text p-button-sm !text-emerald-600 !p-1 !text-xs touch-target"
+                    @click="markAsRead(notification)"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -56,7 +63,7 @@
             v-if="hasUnread"
             label="Tandai Semua Dibaca"
             icon="pi pi-check-circle"
-            class="p-button-text text-emerald-600"
+            class="p-button-text text-emerald-600 touch-target"
             @click="markAllAsRead"
           />
         </div>

@@ -31,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'role' => RoleEnum::class,
         'balance' => 'decimal:2',
+        'suspended_at' => 'datetime',
     ];
 
     public function campaigns(): HasMany

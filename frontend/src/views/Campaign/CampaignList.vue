@@ -8,8 +8,8 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-8">
-        <div class="flex flex-col sm:flex-row gap-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 mb-8">
+        <div class="flex flex-col md:flex-row gap-4">
           <div class="flex-1 relative">
             <i class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
             <InputText
@@ -18,13 +18,23 @@
               class="w-full pl-10 !border-gray-200 !rounded-xl !py-3 !text-sm"
             />
           </div>
-          <div class="w-full sm:w-56">
+          <div class="w-full md:w-44">
             <Dropdown
               v-model="selectedCategory"
               :options="categories"
               optionLabel="label"
               optionValue="value"
               placeholder="Semua Kategori"
+              class="w-full"
+            />
+          </div>
+          <div class="w-full md:w-44">
+            <Dropdown
+              v-model="selectedSort"
+              :options="sortOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Urutkan"
               class="w-full"
             />
           </div>
@@ -36,7 +46,7 @@
         <p class="text-gray-500">Tidak ada kampanye ditemukan</p>
       </div>
 
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <div v-for="campaign in filteredCampaigns" :key="campaign.id" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
           <div class="relative h-48 overflow-hidden bg-gray-100">
             <img
@@ -106,7 +116,8 @@
         v-model:visible="backingDialogVisible"            :header="'Dukung Kampanye Ini: ' + (backingCampaign?.title || '')"
         :modal="true"
         :closable="true"
-        class="!rounded-2xl !w-full !max-w-md"
+        class="app-dialog !rounded-[15px] !bg-white !border-2 !border-emerald-300 !shadow-lg !w-full !max-w-md"
+        @show="onDialogShow"
         @hide="resetBackingForm"
       >
         <div v-if="backingCampaign" class="space-y-5 py-2">
@@ -138,7 +149,7 @@
           <!-- Backing Form -->
           <template v-else>
             <!-- Balance Info -->
-            <div class="p-3 bg-slate-50 rounded-xl flex items-center justify-between">
+            <div class="p-3 bg-white rounded-[15px] border border-emerald-200 flex items-center justify-between">
               <span class="text-xs text-gray-500 font-medium">Saldo Anda</span>
               <span class="text-sm font-bold text-gray-800">{{ formatCurrency(userBalance) }}</span>
             </div>
@@ -180,8 +191,7 @@
               <small v-else class="text-gray-400 text-xs">Minimal Rp 10.000</small>
             </div>
 
-            <!-- Success Message -->
-            <div v-if="backingSuccess" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+            <!-- Success Message -->              <div v-if="backingSuccess" class="p-4 bg-emerald-50 border border-emerald-200 rounded-[15px]">
               <div class="flex items-start gap-3">
                 <div class="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center flex-shrink-0">
                   <i class="pi pi-check-circle text-emerald-700"></i>
@@ -213,19 +223,17 @@
         header="Konfirmasi Donasi"
         :modal="true"
         :closable="true"
-        class="!rounded-2xl !w-full !max-w-sm"
+        class="app-dialog !rounded-[15px] !bg-white !border-2 !border-emerald-300 !shadow-lg !w-full !max-w-sm"
+        @show="onDialogShow"
         @hide="confirmAmount = 0"
       >
-        <div class="space-y-5 py-2">
-          <div class="bg-emerald-50 rounded-xl p-4 text-center">
+        <div class="space-y-5 py-2">            <div class="bg-emerald-50 rounded-[15px] border border-emerald-200 p-4 text-center">
             <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
               <i class="pi pi-heart text-xl text-emerald-600"></i>
             </div>
             <p class="text-sm text-gray-500">Anda akan mendukung</p>
             <p class="text-base font-bold text-gray-800 mt-1 line-clamp-2">{{ backingCampaign?.title }}</p>
-          </div>
-
-          <div class="bg-slate-50 rounded-xl p-4 space-y-3">
+          </div>            <div class="bg-white rounded-[15px] border border-emerald-200 p-4 space-y-3">
             <div class="flex items-center justify-between text-sm">
               <span class="text-gray-500">Nominal Donasi</span>
               <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(confirmAmount) }}</span>
@@ -266,7 +274,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useGenieEffect } from '@/composables/useGenieEffect'
 import { useRoute } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
@@ -281,10 +290,12 @@ import * as campaignService from '@/services/campaignService'
 const route = useRoute()
 const authStore = useAuthStore()
 const toast = useToast()
+const { onDialogShow } = useGenieEffect()
 
 const campaigns = ref([])
 const search = ref('')
 const selectedCategory = ref(null)
+const selectedSort = ref('newest')
 const rawCategories = ref([])
 const categories = computed(() => {
   return rawCategories.value.map(cat => ({
@@ -292,6 +303,12 @@ const categories = computed(() => {
     value: cat.value
   }))
 })
+
+const sortOptions = [
+  { label: 'Terbaru', value: 'newest' },
+  { label: 'Terpopuler', value: 'popular' },
+  { label: 'Segera Berakhir', value: 'ending_soon' },
+]
 
 // Backing Dialog State
 const backingDialogVisible = ref(false)
@@ -354,13 +371,14 @@ function openConfirmDialog() {
 }
 
 async function confirmBacking() {
+  const backedAmount = confirmAmount.value
   confirmDialogVisible.value = false
   backingLoading.value = true
   backingSuccess.value = false
   try {
     const payload = {
       campaign_id: backingCampaign.value.id,
-      amount: confirmAmount.value,
+      amount: backedAmount,
     }
     const res = await campaignService.backCampaign(payload)
     // Update collected amount locally
@@ -370,7 +388,7 @@ async function confirmBacking() {
     }
     // Update user balance
     authStore.user.balance = res.data.balance
-    lastBackingAmount.value = confirmAmount.value
+    lastBackingAmount.value = backedAmount
     backingSuccess.value = true
     toast.add({ severity: 'success', summary: 'Dukungan Berhasil!', detail: res.message || 'Dana telah masuk ke escrow.', life: 5000 })
   } catch (error) {
@@ -381,11 +399,13 @@ async function confirmBacking() {
   }
 }
 
-onMounted(async () => {
+async function fetchCampaigns() {
   try {
-    const data = await campaignService.getCampaigns()
+    const sort = selectedSort.value
+    const data = await campaignService.getCampaigns(sort)
     campaigns.value = data?.data || data || []
     const unique = {}
+    rawCategories.value = []
     campaigns.value.forEach(c => {
       const slug = c.category?.slug || 'general'
       if (!unique[slug]) {
@@ -396,6 +416,15 @@ onMounted(async () => {
   } catch (e) {
     campaigns.value = []
   }
+}
+
+// Watch for sort changes and re-fetch
+watch(selectedSort, () => {
+  fetchCampaigns()
+})
+
+onMounted(() => {
+  fetchCampaigns()
 })
 
 const filteredCampaigns = computed(() => {

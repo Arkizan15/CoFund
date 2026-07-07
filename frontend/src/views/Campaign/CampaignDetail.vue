@@ -14,22 +14,51 @@
         <i class="pi pi-spin pi-spinner text-4xl text-emerald-600"></i>
       </div>
 
-      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Hero Image -->
-          <div class="relative rounded-2xl overflow-hidden h-64 md:h-80 bg-gray-100 shadow-md">
-            <img
-              :src="campaign.image_url || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80'"
-              :alt="campaign.title"
-              class="w-full h-full object-cover"
-            />
-            <div class="absolute top-4 left-4">
-              <Badge
-                :value="statusLabel(campaign.status)"
-                :severity="statusSeverity(campaign.status)"
-                class="!bg-white/90 !text-xs !px-3 !py-1 !rounded-full !font-semibold shadow-sm"
+          <!-- Hero Image Gallery -->
+          <div class="relative rounded-2xl overflow-hidden bg-gray-100 shadow-md">
+            <!-- Main Image -->
+            <div class="relative h-64 md:h-80">
+              <img
+                :src="activeImageUrl"
+                :alt="campaign.title"
+                class="w-full h-full object-cover transition-opacity duration-300"
+                :key="activeImageIndex"
               />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
+              <div class="absolute top-4 left-4">
+                <Badge
+                  :value="statusLabel(campaign.status)"
+                  :severity="statusSeverity(campaign.status)"
+                  class="!bg-white/90 !text-xs !px-3 !py-1 !rounded-full !font-semibold shadow-sm"
+                />
+              </div>
+
+              <!-- Image Counter -->
+              <div v-if="galleryImages.length > 1" class="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full">
+                {{ activeImageIndex + 1 }} / {{ galleryImages.length }}
+              </div>
+            </div>
+
+            <!-- Thumbnail Strip -->
+            <div v-if="galleryImages.length > 1" class="flex gap-2 p-3 bg-gray-50 overflow-x-auto">
+              <button
+                v-for="(img, idx) in galleryImages"
+                :key="img.id || idx"
+                class="flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200"
+                :class="idx === activeImageIndex
+                  ? 'border-emerald-500 ring-2 ring-emerald-200 opacity-100'
+                  : 'border-transparent opacity-60 hover:opacity-100'"
+                @click="activeImageIndex = idx"
+              >
+                <img
+                  :src="img.image_url"
+                  :alt="'Gambar ' + (idx + 1)"
+                  class="w-full h-full object-cover"
+                />
+              </button>
             </div>
           </div>
 
@@ -202,7 +231,7 @@
         <!-- Sidebar -->
         <aside class="space-y-6">
           <!-- Funding Summary -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-6">
             <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Ringkasan Pendanaan</h4>
 
             <div class="space-y-4">
@@ -245,7 +274,7 @@
             <!-- Backing Flow -->
             <div class="mt-6 pt-6 border-t border-gray-100">
               <!-- User Balance Info -->
-              <div v-if="authStore.isAuthenticated && !isOwner" class="mb-4 p-3 bg-slate-50 rounded-xl flex items-center justify-between">
+              <div v-if="authStore.isAuthenticated && !isOwner" class="mb-4 p-3 bg-white rounded-[15px] border border-emerald-200 flex items-center justify-between">
                 <span class="text-xs text-gray-500 font-medium">Saldo Anda</span>
                 <span class="text-sm font-bold text-gray-800">{{ formatCurrency(userBalance) }}</span>
               </div>
@@ -318,7 +347,7 @@
                 </div>
 
                 <!-- Selected Tier Display -->
-                <div v-if="selectedTier" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <div v-if="selectedTier" class="p-3 bg-white border border-emerald-200 rounded-[15px]">
                   <div class="flex items-start justify-between">
                     <div>
                       <p class="text-xs font-semibold text-emerald-800">{{ selectedTier.name }}</p>
@@ -339,15 +368,32 @@
                   <span>{{ backingError }}</span>
                 </div>
 
-                <!-- Success Message -->
-                <div v-if="backingSuccess" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                  <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center flex-shrink-0">
-                      <i class="pi pi-check-circle text-emerald-700"></i>
-                    </div>
-                    <div>
-                      <p class="text-sm font-semibold text-emerald-800">Dukungan Berhasil!</p>
-                      <p class="text-xs text-emerald-600 mt-0.5">Dana sebesar {{ formatCurrency(lastBackingAmount) }} telah masuk ke escrow.</p>
+                <!-- Success Message with Animation -->
+                <div v-if="backingSuccess" class="relative overflow-hidden">
+                  <!-- Confetti decorations -->
+                  <div class="confetti-piece"></div>
+                  <div class="confetti-piece"></div>
+                  <div class="confetti-piece"></div>
+
+                  <div class="animate-success-slide p-5 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-lg text-white">
+                    <div class="flex items-start gap-4">
+                      <div class="animate-success-pop w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
+                        <i class="pi pi-check-circle text-2xl text-white"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-base font-bold text-white">Dukungan Berhasil! 🎉</p>
+                        <p class="text-sm text-emerald-100 mt-1">
+                          Dana sebesar <strong>{{ formatCurrency(lastBackingAmount) }}</strong> telah berhasil masuk ke escrow.
+                        </p>
+                        <div class="mt-3 flex items-center gap-3 text-xs text-emerald-100/80">
+                          <span class="flex items-center gap-1">
+                            <i class="pi pi-shield text-[10px]"></i> Escrow aman
+                          </span>
+                          <span class="flex items-center gap-1">
+                            <i class="pi pi-clock text-[10px]"></i> Selesai dicairkan
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -367,13 +413,13 @@
           </div>
 
           <!-- Tier Rewards -->
-          <div v-if="campaign.tiers?.length" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div v-if="campaign.tiers?.length" class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-6">
             <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Tier Reward</h4>
             <div class="space-y-3">
               <div
                 v-for="tier in campaign.tiers"
                 :key="tier.id"
-                class="border-2 rounded-xl p-4 transition-all duration-200 cursor-pointer"
+                class="border-2 rounded-[15px] p-4 transition-all duration-200 cursor-pointer"
                 :class="selectedTier?.id === tier.id
                   ? 'border-emerald-500 bg-emerald-50 shadow-sm'
                   : tier.remaining_quota === 0
@@ -425,6 +471,24 @@ const toast = useToast()
 const campaign = ref({})
 const backers = ref([])
 const loading = ref(true)
+
+// Gallery
+const activeImageIndex = ref(0)
+const galleryImages = computed(() => {
+  if (!campaign.value.images) return []
+  // Show uploaded images first, then video thumbnail
+  const uploaded = campaign.value.images.filter(img => img.title !== 'Video Thumbnail')
+  const videoThumb = campaign.value.images.filter(img => img.title === 'Video Thumbnail')
+  // Sort: primary first
+  const sorted = [...uploaded].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0))
+  return [...sorted, ...videoThumb]
+})
+const activeImageUrl = computed(() => {
+  if (galleryImages.value.length > 0) {
+    return galleryImages.value[activeImageIndex.value]?.image_url
+  }
+  return 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80'
+})
 
 const embedVideoUrl = computed(() => {
   const url = campaign.value.video_url
@@ -562,16 +626,19 @@ function validateBacking() {
 async function handleBacking() {
   if (!validateBacking()) return
 
+  const backedAmount = Number(backingAmount.value)
+  const backedTier = selectedTier.value
+
   backingLoading.value = true
   backingSuccess.value = false
 
   try {
     const payload = {
       campaign_id: campaign.value.id,
-      amount: Number(backingAmount.value),
+      amount: backedAmount,
     }
-    if (selectedTier.value) {
-      payload.tier_id = selectedTier.value.id
+    if (backedTier) {
+      payload.tier_id = backedTier.id
     }
 
     const res = await campaignService.backCampaign(payload)
@@ -580,12 +647,12 @@ async function handleBacking() {
     campaign.value.collected_amount = res.data.collected_amount
     authStore.user.balance = res.data.balance
 
-    lastBackingAmount.value = Number(backingAmount.value)
+    lastBackingAmount.value = backedAmount
     backingSuccess.value = true
 
     // If tier selected, decrement remaining_quota locally
-    if (selectedTier.value) {
-      const tier = campaign.value.tiers?.find(t => t.id === selectedTier.value.id)
+    if (backedTier) {
+      const tier = campaign.value.tiers?.find(t => t.id === backedTier.id)
       if (tier) tier.remaining_quota = Math.max(0, (tier.remaining_quota || 0) - 1)
     }
 

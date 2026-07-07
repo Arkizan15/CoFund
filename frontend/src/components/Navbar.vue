@@ -31,7 +31,7 @@
         </div>
 
         <!-- Right: Auth Actions -->
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-1 sm:gap-3">
           <!-- Guest Mode -->
           <template v-if="!authStore.isAuthenticated">
             <router-link :to="{ name: 'Login' }">
@@ -39,14 +39,14 @@
                 label="Masuk"
                 icon="pi pi-sign-in"
                 severity="success"
-                class="p-button-text p-button-sm !text-emerald-600 !font-medium !p-2 !px-3"
+                class="p-button-text p-button-sm !text-emerald-600 !font-medium !p-1.5 !px-2 sm:!p-2 sm:!px-3"
               />
             </router-link>
             <router-link :to="{ name: 'Register' }">
               <Button
                 label="Daftar"
                 icon="pi pi-user-plus"
-                class="p-button-sm !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !p-2 !px-3 shadow-sm"
+                class="p-button-sm !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !p-1.5 !px-2 sm:!p-2 sm:!px-3 shadow-sm"
               />
             </router-link>
           </template>
@@ -68,6 +68,8 @@
                 </span>
               </router-link>
             </div>
+
+            <LanguageSwitcher />
 
             <!-- Dashboard Quick Link (desktop only) -->
             <router-link
@@ -190,6 +192,9 @@
             >
               <i class="pi pi-user text-xs"></i> Profil
             </router-link>
+            <div class="px-3 py-2">
+              <LanguageSwitcher />
+            </div>
             <router-link
               :to="{ name: 'Notifications' }"
               @click="mobileOpen = false"
@@ -229,6 +234,7 @@ import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { notificationService } from '@/services/notificationService'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

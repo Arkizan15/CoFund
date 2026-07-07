@@ -33,6 +33,12 @@ const routes = [
     component: () => import('@/views/Auth/Register.vue'),
   },
   {
+    path: '/verify-email',
+    name: 'EmailVerification',
+    meta: { title: 'Verifikasi Email — CoFund' },
+    component: () => import('@/views/Auth/EmailVerification.vue'),
+  },
+  {
     path: '/dashboard',
     name: 'Dashboard',
     meta: { title: 'Dashboard — CoFund', requiresAuth: true },

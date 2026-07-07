@@ -7,7 +7,7 @@
       </div>
 
       <!-- Profile Banner -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
+      <div class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-4 md:p-6 mb-8">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div class="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 ring-4 ring-emerald-50">
             <i class="pi pi-user text-3xl text-emerald-700"></i>
@@ -29,9 +29,9 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Wallet Card -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <div class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-4 md:p-6">
           <div class="flex items-center gap-3 mb-6">
             <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center">
               <i class="pi pi-wallet text-lg text-emerald-700"></i>
@@ -42,7 +42,7 @@
             </div>
           </div>
 
-          <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl p-6 text-white mb-6 shadow-sm">
+          <div class="bg-emerald-700 rounded-[15px] p-6 text-white mb-6 shadow-sm">
             <p class="text-emerald-100 text-sm font-medium flex items-center gap-2">
               <i class="pi pi-credit-card"></i>Saldo Saat Ini
             </p>
@@ -52,7 +52,7 @@
           <div class="space-y-4">
             <div class="flex flex-col gap-1.5">
               <label for="topup-amount" class="text-sm font-semibold text-gray-700">Top Up Saldo</label>
-              <div class="flex gap-2">
+              <div class="flex flex-col sm:flex-row gap-2">
                 <InputNumber
                   id="topup-amount"
                   v-model="topUpAmount"
@@ -84,6 +84,36 @@
               <i class="pi pi-check-circle"></i>
               <span>Top up berhasil!</span>
             </div>
+          </div>
+
+          <!-- Withdraw Section -->
+          <div class="flex flex-col gap-1.5 mt-4">
+            <label class="text-sm font-semibold text-gray-700">Withdraw / Tarik Dana</label>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <InputNumber
+                v-model="withdrawAmount"
+                :min="10000"
+                :step="50000"
+                :max="currentBalance"
+                prefix="Rp "
+                placeholder="Masukkan nominal"
+                class="flex-1"
+                :class="{ 'p-invalid': withdrawError }"
+                fluid
+              />
+              <Button
+                label="Withdraw"
+                icon="pi pi-arrow-up-right"
+                class="!bg-orange-500 !border-none hover:!bg-orange-600 !text-white !font-medium !rounded-xl !px-6 shadow-sm"
+                :loading="withdrawLoading"
+                :disabled="!withdrawAmount || withdrawAmount < 10000 || withdrawAmount > currentBalance"
+                @click="handleWithdraw"
+              />
+            </div>
+            <small v-if="withdrawError" class="text-red-500 text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle"></i>{{ withdrawError }}
+            </small>
+            <small v-else class="text-gray-400 text-xs">Minimal withdraw Rp 10.000 (mock — simulasi penarikan)</small>
           </div>
 
           <Divider class="my-5" />
@@ -134,7 +164,7 @@
         </div>
 
         <!-- Creator Status Card -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <div class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-4 md:p-6">
           <div class="flex items-center gap-3 mb-6">
             <div
               class="w-11 h-11 rounded-xl flex items-center justify-center"
@@ -153,7 +183,7 @@
 
           <!-- State 1: Already a Creator -->
           <div v-if="isCreator" class="space-y-5">
-            <div class="p-5 bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-xl">
+            <div class="p-4 md:p-5 bg-emerald-50 border border-emerald-200 rounded-xl">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-full bg-emerald-200 flex items-center justify-center flex-shrink-0">
                   <i class="pi pi-check-circle text-emerald-700 text-lg"></i>
@@ -177,7 +207,7 @@
 
           <!-- State 2: Pending Verification -->
           <div v-else-if="hasPendingRequest" class="space-y-5">
-            <div class="p-5 bg-gradient-to-br from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl">
+            <div class="p-4 md:p-5 bg-amber-50 border border-amber-200 rounded-xl">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-full bg-yellow-200 flex items-center justify-center flex-shrink-0">
                   <i class="pi pi-clock text-yellow-700 text-lg"></i>
@@ -199,7 +229,7 @@
 
           <!-- State 3: Backer - Show Application Form -->
           <div v-else class="space-y-5">
-            <div class="p-5 bg-gradient-to-br from-purple-50 to-purple-100/30 border border-purple-100 rounded-xl">
+            <div class="p-4 md:p-5 bg-purple-50 border border-purple-100 rounded-xl">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0">
                   <i class="pi pi-info-circle text-purple-700 text-lg"></i>
@@ -257,11 +287,11 @@
               <i class="pi pi-chart-bar text-xs"></i>Statistik
             </h4>
             <div class="grid grid-cols-2 gap-4">
-              <div class="bg-slate-50 rounded-xl p-4 text-center hover:bg-slate-100 transition-colors">
+              <div class="bg-white rounded-[15px] border border-emerald-200 p-4 text-center hover:bg-emerald-50 transition-colors">
                 <p class="text-2xl font-bold text-gray-800">{{ totalBackings }}</p>
                 <p class="text-xs text-gray-500 mt-1">Total Dukungan</p>
               </div>
-              <div class="bg-slate-50 rounded-xl p-4 text-center hover:bg-slate-100 transition-colors">
+              <div class="bg-white rounded-[15px] border border-emerald-200 p-4 text-center hover:bg-emerald-50 transition-colors">
                 <p class="text-2xl font-bold text-emerald-700">{{ formatCurrency(totalDonated) }}</p>
                 <p class="text-xs text-gray-500 mt-1">Total Donasi</p>
               </div>
@@ -310,6 +340,9 @@ const topUpAmount = ref(null)
 const topUpLoading = ref(false)
 const topUpError = ref('')
 const topUpSuccess = ref(false)
+const withdrawAmount = ref(null)
+const withdrawLoading = ref(false)
+const withdrawError = ref('')
 const showHistory = ref(false)
 const transactions = ref([])
 
@@ -336,6 +369,32 @@ async function handleTopUp() {
     toast.add({ severity: 'error', summary: 'Top Up Gagal', detail: topUpError.value, life: 3000 })
   } finally {
     topUpLoading.value = false
+  }
+}
+
+async function handleWithdraw() {
+  withdrawError.value = ''
+  if (!withdrawAmount.value || withdrawAmount.value < 10000) {
+    withdrawError.value = 'Minimal withdraw Rp 10.000'
+    return
+  }
+  if (withdrawAmount.value > currentBalance.value) {
+    withdrawError.value = 'Saldo tidak mencukupi'
+    return
+  }
+  withdrawLoading.value = true
+  try {
+    const res = await walletService.postWithdraw(withdrawAmount.value)
+    authStore.user.balance = res.data.data.balance
+    withdrawAmount.value = null
+    toast.add({ severity: 'success', summary: 'Withdraw Berhasil', detail: res.data.message || 'Penarikan dana berhasil (mock).', life: 3000 })
+    const txRes = await walletService.getBalance()
+    transactions.value = txRes.data?.data?.transactions?.data || []
+  } catch (error) {
+    withdrawError.value = error.response?.data?.message || 'Gagal melakukan withdraw'
+    toast.add({ severity: 'error', summary: 'Withdraw Gagal', detail: withdrawError.value, life: 3000 })
+  } finally {
+    withdrawLoading.value = false
   }
 }
 

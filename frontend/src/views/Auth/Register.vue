@@ -8,7 +8,7 @@
         </router-link>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+      <div class="bg-white rounded-[15px] shadow-lg border border-emerald-200 p-8">
         <div class="text-center mb-8">
           <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mb-4">
             <i class="pi pi-user-plus text-2xl"></i>
@@ -96,12 +96,12 @@
             <small v-if="errors.password_confirmation" class="p-error text-xs">{{ errors.password_confirmation[0] }}</small>
           </div>
 
-          <div v-if="globalError" class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-start gap-3">
+          <div v-if="globalError" class="p-4 bg-red-50 border border-red-200 rounded-[15px] text-sm text-red-600 flex items-start gap-3">
             <i class="pi pi-exclamation-circle mt-0.5"></i>
             <span>{{ globalError }}</span>
           </div>
 
-          <div v-if="successMessage" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-start gap-3">
+          <div v-if="successMessage" class="p-4 bg-emerald-50 border border-emerald-200 rounded-[15px] text-sm text-emerald-700 flex items-start gap-3">
             <i class="pi pi-check-circle mt-0.5"></i>
             <span>{{ successMessage }}</span>
           </div>

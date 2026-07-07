@@ -8,31 +8,33 @@
         <div class="parallax-blur absolute top-1/3 right-1/4 w-56 h-56 rounded-full bg-emerald-300/15 blur-3xl" data-speed="0.34"></div>
       </div>
 
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-10 w-full">
-        <div class="grid md:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 md:py-10 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
           <div class="space-y-7">
             <div class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-medium text-emerald-50 backdrop-blur-sm">
               <i class="pi pi-bolt text-xs"></i>
-              Crowdfunding modern untuk UMKM Indonesia
+              Platform Crowdfunding Lokal
             </div>
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-white">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-white">
               Mulai Perjalanan<br />
               <span class="text-emerald-100">Bersama CoFund</span>
             </h1>
-            <p class="text-lg md:text-xl text-emerald-50/90 leading-relaxed max-w-xl">
-              CoFund menghubungkan para pengusaha UMKM dengan pendukung finansial. Wujudkan ide bisnis Anda melalui crowdfunding yang transparan, aman, dan terpercaya.
+            <p class="text-base sm:text-lg md:text-xl text-emerald-50/90 leading-relaxed max-w-lg sm:max-w-xl">
+              Sistem crowdfunding dengan virtual escrow, tier backer, campaign lifecycle otomatis, dan refund
+berbasis queue job. Dirancang sebagai proyek pelatihan magang dengan kompleksitas bisnis
+yang realistis.
             </p>
             <div class="flex flex-wrap gap-4 pt-2">
               <router-link
                 :to="{ name: 'CampaignList' }"
-                class="inline-flex items-center gap-2 bg-white text-emerald-700 font-semibold px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-950/20 hover:bg-emerald-50 transition-all duration-300 hover:-translate-y-0.5"
+                class="inline-flex items-center gap-2 bg-white text-emerald-700 font-semibold w-full sm:w-auto px-5 py-3 sm:px-8 sm:py-3.5 rounded-2xl shadow-lg shadow-emerald-950/20 hover:bg-emerald-50 transition-all duration-300 hover:-translate-y-0.5"
               >
                 <i class="pi pi-search"></i>
                 Jelajahi Campaign
               </router-link>
               <router-link
                 :to="{ name: 'Register' }"
-                class="inline-flex items-center gap-2 border border-white/40 text-white font-semibold px-8 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/15 transition-all duration-300"
+                class="inline-flex items-center gap-2 border border-white/40 text-white font-semibold w-full sm:w-auto px-5 py-3 sm:px-8 sm:py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/15 transition-all duration-300"
               >
                 <i class="pi pi-user-plus"></i>
                 Mulai Kampanye
@@ -63,12 +65,12 @@
       </button>
     </section>
 
-    <section ref="howItWorksSection" class="relative py-24 md:py-32 bg-white overflow-hidden">
+    <section ref="howItWorksSection" class="relative py-16 md:py-24 lg:py-32 bg-white overflow-hidden">
       <div class="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-emerald-50/80 to-transparent"></div>
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div ref="headingRef" class="text-center mb-16 md:mb-20">
+        <div ref="headingRef" class="text-center mb-10 md:mb-16 lg:mb-20">
           <div class="inline-block">
-            <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4 transition-all duration-700 ease-out" :class="headingRevealed ? 'reveal-text-visible' : 'reveal-text'">
+            <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4 transition-all duration-700 ease-out" :class="headingRevealed ? 'reveal-text-visible' : 'reveal-text'">
               Bagaimana Cara Kerjanya?
             </h2>
           </div>
@@ -79,20 +81,20 @@
           </div>
         </div>
 
-        <div class="perspective-container grid md:grid-cols-3 gap-6 md:gap-8">
+        <div class="perspective-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
           <div
             v-for="(card, index) in howItWorksCards"
             :key="index"
-            class="card-3d group relative p-8 bg-slate-50/90 backdrop-blur rounded-[1.75rem] border border-slate-200/70 shadow-[0_25px_70px_-35px_rgba(15,23,42,0.35)] transition-all duration-700"
+            class="card-3d group relative p-5 md:p-8 bg-slate-50/90 backdrop-blur rounded-[1.75rem] border border-slate-200/70 shadow-[0_25px_70px_-35px_rgba(15,23,42,0.35)] transition-all duration-700"
             :data-index="index"
             :style="{ transitionDelay: `${index * 140}ms` }"
             :class="{ 'card-visible': visibleCards[index] }"
           >
             <div class="card-3d-inner">
-              <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors duration-300">
-                <i :class="card.icon" class="text-2xl text-emerald-700"></i>
+              <div class="w-12 h-12 md:w-14 md:h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors duration-300">
+                <i :class="card.icon" class="text-xl md:text-2xl text-emerald-700"></i>
               </div>
-              <h3 class="text-xl font-bold text-slate-800 mb-3">{{ card.title }}</h3>
+              <h3 class="text-lg md:text-xl font-bold text-slate-800 mb-3">{{ card.title }}</h3>
               <p class="text-slate-500 text-sm leading-relaxed">{{ card.description }}</p>
               <div class="mt-6 flex items-center gap-2 text-emerald-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <span>Pelajari lebih lanjut</span>
@@ -104,11 +106,11 @@
       </div>
     </section>
 
-    <section class="py-20 bg-slate-50">
+    <section class="py-16 md:py-20 bg-slate-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-10">
           <div>
-            <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Kampanye Unggulan</h2>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900">Kampanye Unggulan</h2>
             <p class="text-slate-500 mt-2">Temukan peluang investasi terbaik dari berbagai sektor</p>
           </div>
           <router-link :to="{ name: 'CampaignList' }" class="hidden sm:inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors group">
@@ -159,27 +161,27 @@
       </div>
     </section>
 
-    <section v-if="!authStore.isAuthenticated" class="bg-gradient-to-r from-emerald-700 to-emerald-600 py-16">
+    <section v-if="!authStore.isAuthenticated" class="bg-gradient-to-r from-emerald-700 to-emerald-600 py-12 md:py-16">
       <div class="max-w-4xl mx-auto px-4 text-center">
         <div class="flex items-center justify-center gap-3 mb-6">
           <div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center">
             <i class="pi pi-wallet text-3xl text-white"></i>
           </div>
         </div>
-        <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">Mulai Kampanye</h3>
+        <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-4">Mulai Kampanye</h3>
         <p class="text-emerald-100 mb-8 max-w-2xl mx-auto">Jelajahi kampanye UMKM terbaik dan berikan dukungan dana sesuai kemampuan Anda.</p>
-        <router-link :to="{ name: 'Register' }" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-10 py-4 rounded-2xl shadow-lg hover:bg-emerald-50 transition-all duration-300 hover:-translate-y-0.5 no-underline">
+        <router-link :to="{ name: 'Register' }" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-3 sm:px-10 sm:py-4 rounded-2xl shadow-lg hover:bg-emerald-50 transition-all duration-300 hover:-translate-y-0.5 no-underline">
           <i class="pi pi-user-plus"></i>
           Daftar Sekarang
         </router-link>
       </div>
     </section>
 
-    <section v-else class="py-16 bg-gradient-to-r from-emerald-700 to-emerald-600">
+    <section v-else class="py-12 md:py-16 bg-gradient-to-r from-emerald-700 to-emerald-600">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center justify-between mb-6 md:mb-10">
           <div>
-            <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Jelajahi Kampanye</h3>
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">Jelajahi Kampanye</h3>
             <p class="text-emerald-100 text-sm">Temukan dan dukung kampanye yang sesuai dengan minat Anda</p>
           </div>
           <router-link :to="{ name: 'CampaignList' }" class="hidden sm:inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-2.5 rounded-2xl transition-all duration-300 no-underline">
@@ -256,15 +258,11 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import ProgressBar from 'primevue/progressbar'
 import * as campaignService from '@/services/campaignService'
-import Lenis from 'lenis'
 
 const authStore = useAuthStore()
 
-let lenis = null
-let rafId = null
 let headingObserver = null
 let cardObserver = null
-let parallaxElements = []
 
 const howItWorksSection = ref(null)
 const headingRef = ref(null)
@@ -341,49 +339,10 @@ function progressPercent(c) {
 
 function scrollToHowItWorks() {
   if (!howItWorksSection.value) return
-
-  if (lenis) {
-    lenis.scrollTo(howItWorksSection.value, {
-      offset: -80,
-      duration: 1.4,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    })
-    return
-  }
-
   howItWorksSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 onMounted(() => {
-  lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smoothWheel: true,
-    gestureOrientation: 'vertical',
-    touchMultiplier: 1.2,
-  })
-
-  parallaxElements = Array.from(document.querySelectorAll('.parallax-blur'))
-
-  const updateParallax = () => {
-    if (!lenis) return
-
-    const scrollY = lenis.scroll || 0
-    parallaxElements.forEach((el) => {
-      const speed = Number.parseFloat(el.dataset.speed || '0.3') || 0.3
-      const offset = scrollY * speed
-      el.style.transform = `translate3d(0, ${offset}px, 0)`
-    })
-  }
-
-  const raf = (time) => {
-    lenis.raf(time)
-    updateParallax()
-    rafId = window.requestAnimationFrame(raf)
-  }
-
-  rafId = window.requestAnimationFrame(raf)
-
   headingObserver = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
@@ -434,23 +393,11 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (rafId) {
-    window.cancelAnimationFrame(rafId)
-    rafId = null
-  }
-
   headingObserver?.disconnect()
   headingObserver = null
 
   cardObserver?.disconnect()
   cardObserver = null
-
-  if (lenis) {
-    lenis.destroy()
-    lenis = null
-  }
-
-  parallaxElements = []
 })
 </script>
 

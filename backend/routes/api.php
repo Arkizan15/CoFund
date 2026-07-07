@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BackingController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleRequestController;
 use App\Http\Controllers\WalletController;
@@ -16,7 +17,7 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/password/forgot', [AuthController::class, 'forgotPassword']);
 Route::post('/auth/password/reset', [AuthController::class, 'resetPassword']);
-Route::get('/auth/email/verify/{id}/{hash}', [AuthController::class, 'verify'])->middleware(['signed']);
+Route::get('/auth/email/verify/{id}/{hash}', [AuthController::class, 'verify'])->middleware(['signed'])->name('verification.verify');
 
 Route::get('/campaigns', [CampaignController::class, 'index']);
 Route::get('/campaigns/{slug}', [CampaignController::class, 'show']);
@@ -32,19 +33,29 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Campaign
     Route::post('/campaigns', [CampaignController::class, 'store']);
     Route::put('/campaigns/{id}', [CampaignController::class, 'update']);
+    Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy']);
     Route::post('/campaigns/{id}/submit', [CampaignController::class, 'submitForReview']);
     Route::post('/campaigns/{id}/updates', [CampaignController::class, 'storeUpdate']);
     Route::post('/campaigns/{id}/images', [CampaignController::class, 'uploadImage']);
+    Route::post('/campaigns/{id}/images/{imageId}/primary', [CampaignController::class, 'setPrimaryImage']);
+    Route::delete('/campaigns/{id}/images/{imageId}', [CampaignController::class, 'deleteImage']);
     Route::delete('/campaigns/{id}/images', [CampaignController::class, 'deleteImage']);
     Route::get('/my/campaigns', [CampaignController::class, 'myCampaigns']);
+
+    // Backing
+    Route::post('/backings', [BackingController::class, 'store']);
+    Route::post('/backings/{id}/pay', [BackingController::class, 'simulatePayment']);
+    Route::get('/my/backings', [BackingController::class, 'history']);
 
     // Wallet
     Route::post('/wallet/top-up', [WalletController::class, 'topUp']);
     Route::get('/wallet/balance', [WalletController::class, 'balance']);
+    Route::post('/wallet/withdraw', [WalletController::class, 'withdraw']);
 
-    // Backing
-    Route::post('/backings', [BackingController::class, 'store']);
-    Route::get('/my/backings', [BackingController::class, 'history']);
+    // Dashboard
+    Route::get('/creator/stats', [DashboardController::class, 'creatorStats']);
+    Route::get('/creator/funding-chart', [DashboardController::class, 'fundingChart']);
+    Route::get('/backer/stats', [DashboardController::class, 'backerStats']);
 
     // Role Request
     Route::post('/role-requests', [RoleRequestController::class, 'store']);
@@ -66,6 +77,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/campaigns/{id}/approve', [AdminController::class, 'approveCampaign']);
     Route::post('/admin/campaigns/{id}/reject', [AdminController::class, 'rejectCampaign']);
     Route::post('/admin/campaigns/{id}/ban', [AdminController::class, 'banCampaign']);
+    Route::get('/admin/users', [AdminController::class, 'users']);
+    Route::get('/admin/users/{id}', [AdminController::class, 'userDetail']);
+    Route::post('/admin/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

@@ -61,7 +61,7 @@
             <p class="text-xs text-gray-400">Manajemen platform</p>
           </div>
         </div>
-        <div class="flex gap-2 overflow-x-auto pb-2">
+        <div class="flex gap-2 overflow-x-auto flex-nowrap pb-2">
           <button
             v-for="item in sidebarItems"
             :key="item.id"
@@ -86,7 +86,7 @@
 
         <!-- Executive Metric Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 text-white shadow-sm">
+          <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-4 md:p-6 text-white shadow-sm">
             <div class="flex items-center justify-between mb-4">
               <p class="text-emerald-100 text-sm font-medium">Total Kampanye</p>
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -101,7 +101,7 @@
             </div>
           </div>
 
-          <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-6 text-white shadow-sm">
+          <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-4 md:p-6 text-white shadow-sm">
             <div class="flex items-center justify-between mb-4">
               <p class="text-blue-100 text-sm font-medium">Total Dana Escrow</p>
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -111,7 +111,7 @@
             <p class="text-3xl font-bold">{{ formatCurrency(overview.finance?.total_collected || 0) }}</p>                <p class="text-xs text-blue-100 mt-3">Fee Platform: {{ formatCurrency(overview.finance?.total_platform_fee || 0) }}</p>
           </div>
 
-          <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 text-white shadow-sm">
+          <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-4 md:p-6 text-white shadow-sm">
             <div class="flex items-center justify-between mb-4">
               <p class="text-purple-100 text-sm font-medium">Total Pengguna</p>
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -125,7 +125,7 @@
             </div>
           </div>
 
-          <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl p-6 text-white shadow-sm">
+          <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl p-4 md:p-6 text-white shadow-sm">
             <div class="flex items-center justify-between mb-4">
               <p class="text-orange-100 text-sm font-medium">Total Backing</p>
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -139,7 +139,7 @@
 
         <!-- All Campaigns Table -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div class="px-4 md:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
               <h3 class="text-lg font-bold text-gray-800">Semua Kampanye</h3>
               <p class="text-xs text-gray-400 mt-0.5">Seluruh kampanye yang pernah dibuat di platform</p>
@@ -255,6 +255,71 @@
         </div>
       </div>
 
+      <!-- ==================== SECTION: CREATOR REQUESTS ==================== -->
+      <div v-if="activeSection === 'creatorRequests'">
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-gray-900">Creator Requests</h1>
+          <p class="text-sm text-gray-400 mt-1">Setujui atau tolak permintaan user untuk upgrade menjadi Creator</p>
+        </div>
+
+        <div v-if="creatorRequestsLoading" class="flex items-center justify-center py-20">
+          <i class="pi pi-spin pi-spinner text-3xl text-emerald-600"></i>
+        </div>
+
+        <div v-else-if="pendingCreatorRequests.length === 0" class="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <div class="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+            <i class="pi pi-shield text-4xl text-emerald-300"></i>
+          </div>
+          <p class="text-gray-500 text-lg font-medium">Tidak ada permintaan creator baru</p>
+          <p class="text-gray-400 text-sm mt-1">Semua permintaan telah diproses</p>
+        </div>
+
+        <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <DataTable :value="pendingCreatorRequests" class="!text-sm" stripedRows responsiveLayout="scroll" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]">
+            <Column field="id" header="ID" :style="{ width: '60px' }" />
+            <Column header="User">
+              <template #body="{ data }">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <i class="pi pi-user text-[10px] text-purple-600"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-800 text-sm">{{ data.user?.name || 'N/A' }}</p>
+                    <p class="text-xs text-gray-400">{{ data.user?.email || '' }}</p>
+                  </div>
+                </div>
+              </template>
+            </Column>
+            <Column field="user.role" header="Role Saat Ini" :style="{ width: '120px' }">
+              <template #body="{ data }">
+                <Badge :value="formatRole(data.user?.role)" severity="info" class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5" />
+              </template>
+            </Column>
+            <Column field="reason" header="Alasan">
+              <template #body="{ data }">
+                <span class="text-sm text-gray-600">{{ data.reason || '-' }}</span>
+              </template>
+            </Column>
+            <Column header="Tanggal" :style="{ width: '120px' }">
+              <template #body="{ data }">
+                <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                  <i class="pi pi-calendar"></i>
+                  {{ formatDate(data.created_at) }}
+                </div>
+              </template>
+            </Column>
+            <Column header="Aksi" :style="{ width: '140px' }">
+              <template #body="{ data }">
+                <div class="flex items-center gap-1.5">
+                  <Button icon="pi pi-check" class="!w-8 !h-8 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !shadow-sm !text-white !text-xs" v-tooltip.left="'Setujui'" @click="approveCreatorRequest(data)" />
+                  <Button icon="pi pi-times" class="!w-8 !h-8 !rounded-full !bg-red-400 !border-red-400 hover:!bg-red-500 !shadow-sm !text-white !text-xs" v-tooltip.left="'Tolak'" @click="openRejectCreatorDialog(data)" />
+                </div>
+              </template>
+            </Column>
+          </DataTable>
+        </div>
+      </div>
+
       <!-- ==================== SECTION: ACTIVE CAMPAIGNS ==================== -->
       <div v-if="activeSection === 'active'">
         <div class="mb-6">
@@ -264,7 +329,7 @@
 
         <!-- Active Campaigns Summary Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 md:p-5">
             <p class="text-xs text-gray-500 font-medium">Total Aktif</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ activeCampaigns.length }}</p>
           </div>
@@ -272,7 +337,7 @@
             <p class="text-xs text-gray-500 font-medium">Total Terkumpul</p>
             <p class="text-2xl font-bold text-emerald-700 mt-1">{{ formatCurrency(activeTotalCollected) }}</p>
           </div>
-          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 md:p-5">
             <p class="text-xs text-gray-500 font-medium">Total Backer</p>
             <p class="text-2xl font-bold text-blue-700 mt-1">{{ activeTotalBackers }}</p>
           </div>
@@ -292,7 +357,7 @@
 
         <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div v-for="campaign in activeCampaigns" :key="campaign.id" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-            <div class="p-5">
+            <div class="p-4 md:p-5">
               <div class="flex items-start justify-between gap-3 mb-3">
                 <div>
                   <h3 class="font-bold text-gray-800 line-clamp-1">{{ campaign.title }}</h3>
@@ -341,17 +406,17 @@
 
         <!-- Ended Summary Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl p-5 text-white shadow-sm">
+          <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl p-4 md:p-5 text-white shadow-sm">
             <p class="text-emerald-100 text-xs font-medium">Sukses</p>
             <p class="text-2xl font-bold mt-1">{{ endedSuccessCount }}</p>
             <p class="text-xs text-emerald-100 mt-1">Mencapai target</p>
           </div>
-          <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-xl p-5 text-white shadow-sm">
+          <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-xl p-4 md:p-5 text-white shadow-sm">
             <p class="text-red-100 text-xs font-medium">Gagal</p>
             <p class="text-2xl font-bold mt-1">{{ endedFailedCount }}</p>
             <p class="text-xs text-red-100 mt-1">Tidak mencapai target</p>
           </div>
-          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 md:p-5">
             <p class="text-xs text-gray-500 font-medium">Total Terkumpul</p>
             <p class="text-2xl font-bold text-gray-900 mt-1">{{ formatCurrency(endedTotalCollected) }}</p>
           </div>
@@ -426,9 +491,140 @@
       </div>
     </div>
 
+    <!-- ==================== SECTION: USERS ==================== -->
+      <div v-if="activeSection === 'users'">
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-gray-900">Manajemen User</h1>
+          <p class="text-sm text-gray-400 mt-1">Kelola seluruh akun pengguna di platform</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex flex-wrap gap-3 items-center">
+          <Dropdown
+            v-model="userFilterRole"
+            :options="userRoleOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Semua Role"
+            class="!w-40 !rounded-xl !text-sm"
+            @change="fetchUsers"
+          />
+          <InputText
+            v-model="userFilterSearch"
+            placeholder="Cari nama atau email..."
+            class="!w-60 !rounded-xl !text-sm"
+            @keyup.enter="fetchUsers"
+          />
+          <Button icon="pi pi-search" class="!rounded-xl !bg-emerald-600 !border-emerald-600" @click="fetchUsers" />
+        </div>
+
+        <div v-if="usersLoading" class="flex items-center justify-center py-20">
+          <i class="pi pi-spin pi-spinner text-3xl text-emerald-600"></i>
+        </div>
+
+        <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <DataTable :value="usersData" class="!text-sm" stripedRows responsiveLayout="scroll" :paginator="true" :rows="10">
+            <Column field="id" header="ID" :style="{ width: '60px' }" />
+            <Column header="Nama">
+              <template #body="{ data }">
+                <div>
+                  <p class="font-medium text-gray-800">{{ data.name }}</p>
+                  <p class="text-xs text-gray-400">{{ data.email }}</p>
+                </div>
+              </template>
+            </Column>
+            <Column header="Role" :style="{ width: '100px' }">
+              <template #body="{ data }">
+                <Badge :value="formatRole(data.role)" :severity="data.role === 'admin' ? 'danger' : data.role === 'creator' ? 'success' : 'info'" class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5" />
+              </template>
+            </Column>
+            <Column header="Saldo" :style="{ width: '120px' }">
+              <template #body="{ data }">
+                <span class="font-medium text-gray-800 text-sm">{{ formatCurrency(data.balance) }}</span>
+              </template>
+            </Column>
+            <Column header="Kampanye" :style="{ width: '80px' }">
+              <template #body="{ data }">
+                <span class="text-sm text-gray-600">{{ data.campaigns_count }}</span>
+              </template>
+            </Column>
+            <Column header="Backing" :style="{ width: '80px' }">
+              <template #body="{ data }">
+                <span class="text-sm text-gray-600">{{ data.backings_count }}</span>
+              </template>
+            </Column>
+            <Column header="Status" :style="{ width: '100px' }">
+              <template #body="{ data }">
+                <Badge :value="data.suspended_at ? 'Dinonaktifkan' : 'Aktif'" :severity="data.suspended_at ? 'danger' : 'success'" class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5" />
+              </template>
+            </Column>
+            <Column header="Aksi" :style="{ width: '160px' }">
+              <template #body="{ data }">
+                <div class="flex items-center gap-1.5">
+                  <Button
+                    :icon="data.suspended_at ? 'pi pi-check-circle' : 'pi pi-ban'"
+                    :class="data.suspended_at ? '!w-7 !h-7 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !text-white !text-[10px]' : '!w-7 !h-7 !rounded-full !bg-orange-500 !border-orange-500 hover:!bg-orange-600 !text-white !text-[10px]'"
+                    @click="toggleUserStatus(data)"
+                  />
+                  <Button
+                    icon="pi pi-eye"
+                    class="!w-7 !h-7 !rounded-full !bg-sky-500 !border-sky-500 hover:!bg-sky-600 !text-white !text-[10px]"
+                    v-tooltip="'Lihat Detail'"
+                    @click="openUserDetail(data)"
+                  />
+                </div>
+              </template>
+            </Column>
+          </DataTable>
+        </div>
+
+        <Dialog v-model:visible="userDetailVisible" header="Detail User" :modal="true" class="app-dialog !rounded-[15px] !bg-white !max-w-full !w-[95vw] sm:!w-auto" :style="{ maxWidth: '600px' }" @show="onDialogShow">
+          <div v-if="userDetailData" class="space-y-4">
+            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+              <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                <i class="pi pi-user text-emerald-700"></i>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">{{ userDetailData.user.name }}</p>
+                <p class="text-xs text-gray-400">{{ userDetailData.user.email }}</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <p class="text-xs text-gray-400">Role</p>
+                <p class="text-sm font-semibold">{{ formatRole(userDetailData.user.role) }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <p class="text-xs text-gray-400">Saldo</p>
+                <p class="text-sm font-semibold">{{ formatCurrency(userDetailData.user.balance) }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <p class="text-xs text-gray-400">Kampanye Dibuat</p>
+                <p class="text-sm font-semibold">{{ userDetailData.user.campaigns_count }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <p class="text-xs text-gray-400">Backing Dilakukan</p>
+                <p class="text-sm font-semibold">{{ userDetailData.user.backings_count }}</p>
+              </div>
+            </div>
+            <Divider />
+            <h4 class="text-sm font-bold text-gray-700">Riwayat Transaksi Wallet</h4>
+            <div class="max-h-48 overflow-y-auto space-y-2">
+              <div v-if="!userDetailData.wallet_transactions?.length" class="text-center py-4 text-xs text-gray-400">Tidak ada transaksi</div>
+              <div v-for="tx in userDetailData.wallet_transactions" :key="tx.id" class="flex items-center justify-between p-2 bg-slate-50 rounded-lg text-xs">
+                <div>
+                  <span class="font-medium text-gray-700">{{ tx.type }}</span>
+                  <p class="text-gray-400">{{ tx.description || '-' }}</p>
+                </div>
+                <span class="font-semibold" :class="tx.type === 'top_up' || tx.type === 'refund' ? 'text-emerald-600' : 'text-gray-800'">{{ tx.type === 'top_up' || tx.type === 'refund' ? '+' : '-' }}{{ formatCurrency(tx.amount) }}</span>
+              </div>
+            </div>
+          </div>
+        </Dialog>
+      </div>
+
     <!-- ==================== DIALOGS ==================== -->
 
-    <!-- Reject Campaign Dialog -->      <Dialog v-model:visible="campaignRejectDialogVisible" header="Tolak Kampanye" :modal="true" class="!rounded-2xl" :style="{ width: '450px' }">
+    <!-- Reject Campaign Dialog -->      <Dialog v-model:visible="campaignRejectDialogVisible" header="Tolak Kampanye" :modal="true" class="app-dialog !rounded-[15px] !bg-white !border-2 !border-emerald-300 !shadow-lg !max-w-full !w-[95vw] sm:!w-auto" :style="{ maxWidth: '450px' }" @show="onDialogShow">
       <div class="space-y-4">
         <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
           <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
@@ -453,7 +649,33 @@
       </template>
     </Dialog>
 
-    <!-- Ban Campaign Confirmation Dialog -->      <Dialog v-model:visible="banDialogVisible" header="Ban Kampanye" :modal="true" class="!rounded-2xl !bg-white" :style="{ width: '450px' }">
+    <!-- Reject Creator Request Dialog -->
+    <Dialog v-model:visible="rejectCreatorDialogVisible" header="Tolak Creator Request" :modal="true" class="app-dialog !rounded-[15px] !bg-white !border-2 !border-emerald-300 !shadow-lg !max-w-full !w-[95vw] sm:!w-auto" :style="{ maxWidth: '450px' }" @show="onDialogShow">
+      <div class="space-y-4">
+        <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+          <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+            <i class="pi pi-user text-sm text-purple-600"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-gray-800">{{ rejectCreatorTarget?.user?.name || 'N/A' }}</p>
+            <p class="text-xs text-gray-400">{{ rejectCreatorTarget?.user?.email || '' }}</p>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-gray-700">Alasan Penolakan <span class="text-red-500">*</span></label>
+          <Textarea v-model="rejectCreatorReason" rows="3" placeholder="Masukkan alasan mengapa permintaan ditolak..." class="w-full !rounded-xl !text-sm" :class="{ 'p-invalid': !rejectCreatorReason && rejectCreatorSubmitted }" />
+          <small v-if="!rejectCreatorReason && rejectCreatorSubmitted" class="text-red-500 text-xs flex items-center gap-1"><i class="pi pi-exclamation-circle"></i> Alasan penolakan wajib diisi</small>
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex gap-2 justify-end">
+          <Button label="Batal" icon="pi pi-times" class="p-button-text" @click="rejectCreatorDialogVisible = false" />
+          <Button label="Tolak" icon="pi pi-check" class="!bg-red-400 !border-red-400 !text-white !rounded-xl" :loading="rejectCreatorLoading" @click="executeRejectCreator" />
+        </div>
+      </template>
+    </Dialog>
+
+    <!-- Ban Campaign Confirmation Dialog -->      <Dialog v-model:visible="banDialogVisible" header="Ban Kampanye" :modal="true" class="app-dialog app-dialog-danger !rounded-[15px] !bg-white !border-2 !border-red-400 !shadow-lg !max-w-full !w-[95vw] sm:!w-auto" :style="{ maxWidth: '450px' }" @show="onDialogShow">
       <div class="space-y-4">
         <div class="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
           <i class="pi pi-exclamation-triangle text-red-500 text-xl mt-0.5"></i>
@@ -488,6 +710,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useGenieEffect } from '@/composables/useGenieEffect'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -495,17 +718,24 @@ import Badge from 'primevue/badge'
 import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
 import ProgressBar from 'primevue/progressbar'
+import Dropdown from 'primevue/dropdown'
+import InputText from 'primevue/inputtext'
+import Divider from 'primevue/divider'
 import { useToast } from 'primevue/usetoast'
 import api from '@/services/api'
+import roleService from '@/services/roleService'
 
 const toast = useToast()
+const { onDialogShow } = useGenieEffect()
 const activeSection = ref('overview')
 
 const sidebarItems = [
   { id: 'overview', label: 'Overview', desc: 'Statistik platform', icon: 'pi pi-chart-bar' },
-  { id: 'approval', label: 'Approval', desc: 'Persetujuan kampanye', icon: 'pi pi-check-circle' },
+  { id: 'approval', label: 'Approval Campaign', desc: 'Persetujuan kampanye', icon: 'pi pi-check-circle' },
+  { id: 'creatorRequests', label: 'Creator Requests', desc: 'Persetujuan creator', icon: 'pi pi-shield' },
   { id: 'active', label: 'Kampanye Aktif', desc: 'Kampanye berjalan', icon: 'pi pi-play-circle' },
   { id: 'ended', label: 'Kampanye Berakhir', desc: 'Riwayat kampanye', icon: 'pi pi-flag' },
+  { id: 'users', label: 'Manajemen User', desc: 'Kelola akun pengguna', icon: 'pi pi-users' },
 ]
 
 // ==================== Section 1: Overview ====================
@@ -520,6 +750,107 @@ const overview = ref({
 // ==================== Section 2: Approval Campaign ====================
 const pendingApprovals = ref([])
 const approvalLoading = ref(true)
+
+// ==================== Section 2b: Creator Requests ====================
+const pendingCreatorRequests = ref([])
+const creatorRequestsLoading = ref(true)
+
+// ==================== Section 6: User Management ====================
+const usersData = ref([])
+const usersLoading = ref(false)
+const userFilterRole = ref(null)
+const userFilterSearch = ref('')
+const userRoleOptions = [
+  { label: 'Semua Role', value: null },
+  { label: 'Admin', value: 'admin' },
+  { label: 'Creator', value: 'creator' },
+  { label: 'Backer', value: 'backer' },
+]
+const userDetailVisible = ref(false)
+const userDetailData = ref(null)
+
+async function fetchUsers() {
+  usersLoading.value = true
+  try {
+    const params = {}
+    if (userFilterRole.value) params.role = userFilterRole.value
+    if (userFilterSearch.value.trim()) params.search = userFilterSearch.value.trim()
+    const res = await api.get('/admin/users', { params })
+    usersData.value = res.data?.data?.data || []
+  } catch (e) {
+    usersData.value = []
+  } finally {
+    usersLoading.value = false
+  }
+}
+
+async function toggleUserStatus(user) {
+  try {
+    const res = await api.post(`/admin/users/${user.id}/toggle-status`)
+    user.suspended_at = res.data?.data?.suspended_at || null
+    toast.add({ severity: 'success', summary: 'Berhasil', detail: res.data?.message, life: 2000 })
+  } catch (e) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: e.response?.data?.message || 'Terjadi kesalahan', life: 3000 })
+  }
+}
+
+async function openUserDetail(user) {
+  userDetailData.value = null
+  userDetailVisible.value = true
+  try {
+    const res = await api.get(`/admin/users/${user.id}`)
+    userDetailData.value = res.data?.data
+  } catch (e) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: 'Gagal memuat detail user', life: 3000 })
+  }
+}
+
+function formatRole(role) {
+  const labels = { admin: 'Admin', creator: 'Creator', backer: 'Backer', guest: 'Guest' }
+  return labels[role] || role || '-'
+}
+
+// Reject Creator Request Dialog
+const rejectCreatorDialogVisible = ref(false)
+const rejectCreatorTarget = ref(null)
+const rejectCreatorReason = ref('')
+const rejectCreatorLoading = ref(false)
+const rejectCreatorSubmitted = ref(false)
+
+function openRejectCreatorDialog(data) {
+  rejectCreatorTarget.value = data
+  rejectCreatorReason.value = ''
+  rejectCreatorSubmitted.value = false
+  rejectCreatorDialogVisible.value = true
+}
+
+async function executeRejectCreator() {
+  rejectCreatorSubmitted.value = true
+  if (!rejectCreatorReason.value.trim()) return
+  rejectCreatorLoading.value = true
+  try {
+    const data = rejectCreatorTarget.value
+    await roleService.updateRequestStatusAdmin(data.id, 'rejected', rejectCreatorReason.value)
+    pendingCreatorRequests.value = pendingCreatorRequests.value.filter(r => r.id !== data.id)
+    rejectCreatorDialogVisible.value = false
+    toast.add({ severity: 'info', summary: 'Ditolak', detail: 'Permintaan creator ditolak.', life: 3000 })
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: error.response?.data?.message || 'Terjadi kesalahan.', life: 3000 })
+  } finally {
+    rejectCreatorLoading.value = false
+  }
+}
+
+async function approveCreatorRequest(data) {
+  try {
+    await roleService.updateRequestStatusAdmin(data.id, 'approved')
+    data.user.role = 'creator'
+    pendingCreatorRequests.value = pendingCreatorRequests.value.filter(r => r.id !== data.id)
+    toast.add({ severity: 'success', summary: 'Disetujui', detail: `${data.user?.name} kini menjadi Creator!`, life: 4000 })
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: error.response?.data?.message || 'Terjadi kesalahan.', life: 3000 })
+  }
+}
 
 // ==================== Section 3: Active Campaigns ====================
 const activeCampaigns = ref([])
@@ -638,18 +969,20 @@ function formatDate(dateStr) {
 // ==================== Lifecycle ====================
 onMounted(async () => {
   try {
-    const [overviewRes, allCampaignsRes, approvalsRes, activeRes, endedRes] = await Promise.all([
+    const [overviewRes, allCampaignsRes, approvalsRes, activeRes, endedRes, creatorRequestsRes] = await Promise.all([
       api.get('/admin/overview').catch(() => ({ data: { data: overview.value } })),
       api.get('/admin/campaigns/all').catch(() => ({ data: { data: [] } })),
       api.get('/admin/pending-approvals').catch(() => ({ data: { data: [] } })),
       api.get('/admin/campaigns/active').catch(() => ({ data: { data: [] } })),
       api.get('/admin/campaigns/ended').catch(() => ({ data: { data: [] } })),
+      roleService.getPendingRequestsAdmin().catch(() => ({ data: { data: [] } })),
     ])
     overview.value = overviewRes.data?.data || overview.value
     allCampaigns.value = allCampaignsRes.data?.data || []
     pendingApprovals.value = approvalsRes.data?.data || []
     activeCampaigns.value = activeRes.data?.data || []
     endedCampaigns.value = endedRes.data?.data || []
+    pendingCreatorRequests.value = creatorRequestsRes.data?.data || []
   } catch (e) {
     allCampaigns.value = []
     activeCampaigns.value = []
@@ -658,6 +991,9 @@ onMounted(async () => {
     approvalLoading.value = false
     activeLoading.value = false
     endedLoading.value = false
+    creatorRequestsLoading.value = false
   }
+
+  fetchUsers()
 })
 </script>
