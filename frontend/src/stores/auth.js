@@ -60,8 +60,8 @@ export const useAuthStore = defineStore('auth', {
         // Backend wraps user data in { success: true, data: { ... } }
         this.user = response.data.data || response.data;
       } catch (error) {
-        if (error.response?.status === 401) {
-          this.logout(); // Token tidak valid, paksa logout
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this.logout();
         }
       }
     }

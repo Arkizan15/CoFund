@@ -365,6 +365,7 @@ class AdminController extends Controller
             $message = 'Akun user berhasil diaktifkan kembali.';
         } else {
             $user->suspended_at = now();
+            $user->tokens()->delete();
             $message = 'Akun user berhasil dinonaktifkan.';
         }
 

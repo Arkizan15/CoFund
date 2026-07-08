@@ -24,7 +24,7 @@ Route::get('/campaigns/{slug}', [CampaignController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
 // Authenticated routes
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'check.user.suspended'])->group(function () {
     // Auth
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);

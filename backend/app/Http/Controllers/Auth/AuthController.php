@@ -48,6 +48,16 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
+
+        if ($user->suspended_at) {
+            Auth::logout();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda telah dinonaktifkan oleh admin. Silakan hubungi admin untuk informasi lebih lanjut.',
+            ], 403);
+        }
+
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
