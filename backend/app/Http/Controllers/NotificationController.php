@@ -9,15 +9,33 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $notifications = Notification::where('user_id', Auth::id())
-            ->latest()
-            ->paginate(20);
+        $query = Notification::where('user_id', Auth::id());
+
+        // Filter by type
+        $type = $request->query('type');
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        $notifications = $query->latest()->paginate(30);
 
         return response()->json([
             'success' => true,
             'data' => $notifications,
+        ], 200);
+    }
+
+    public function unreadCount(): JsonResponse
+    {
+        $count = Notification::where('user_id', Auth::id())
+            ->whereNull('read_at')
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => ['unread_count' => $count],
         ], 200);
     }
 

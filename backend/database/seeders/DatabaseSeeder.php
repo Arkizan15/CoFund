@@ -21,6 +21,10 @@ class DatabaseSeeder extends Seeder
             Category::create($category);
         }
 
-        $this->call(UserSeeder::class);
+        $this->call([
+            UserSeeder::class,
+            CampaignSeeder::class,
+            NotificationSeeder::class,
+        ]);
     }
 }

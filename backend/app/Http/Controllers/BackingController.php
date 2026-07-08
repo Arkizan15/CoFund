@@ -12,13 +12,161 @@ use App\Models\Notification;
 use App\Models\Transaction;
 use App\Models\WalletTransaction;
 use App\Services\CampaignSettlementService;
+use App\Services\XenditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class BackingController extends Controller
 {
+    protected XenditService $xendit;
+
+    public function __construct(XenditService $xendit)
+    {
+        $this->xendit = $xendit;
+    }
+
+    /**
+     * Create a Xendit Invoice for backing a campaign.
+     * Returns the invoice URL for the frontend to redirect the user to Xendit checkout.
+     */
+    public function createBackingInvoice(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if ($user->hasVerifiedEmail() === false) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email harus diverifikasi sebelum melakukan backing.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'campaign_id' => ['required', 'exists:campaigns,id'],
+            'tier_id' => ['nullable', 'exists:campaign_tiers,id'],
+            'amount' => ['required', 'numeric', 'min:10000'],
+            'success_redirect_url' => ['nullable', 'url'],
+            'failure_redirect_url' => ['nullable', 'url'],
+        ]);
+
+        $campaign = Campaign::findOrFail($validated['campaign_id']);
+
+        if ($campaign->user_id === $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak bisa mendanai kampanye milik sendiri.',
+            ], 403);
+        }
+
+        if ($campaign->status !== CampaignStatus::ACTIVE) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya kampanye aktif yang dapat didanai.',
+            ], 422);
+        }
+
+        $amount = (float) $validated['amount'];
+
+        if (isset($validated['tier_id'])) {
+            $tier = CampaignTier::findOrFail($validated['tier_id']);
+
+            if ($tier->campaign_id !== $campaign->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tier tidak sesuai dengan kampanye ini.',
+                ], 422);
+            }
+
+            if ($tier->remaining_quota === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kuota tier ini sudah habis.',
+                ], 422);
+            }
+
+            if ($amount < (float) $tier->min_amount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nominal minimal untuk tier ini adalah Rp ' . number_format($tier->min_amount, 0, ',', '.'),
+                ], 422);
+            }
+        }
+
+        // Check if backing amount exceeds remaining campaign target
+        $collected = (float) $campaign->collected_amount;
+        $target = (float) $campaign->target_amount;
+        $remaining = max(0, $target - $collected);
+        if ($amount > $remaining) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nominal donasi melebihi sisa dana yang dibutuhkan kampanye. Sisa dana yang diperlukan: Rp ' . number_format($remaining, 0, ',', '.'),
+            ], 422);
+        }
+
+        // Create pending backing
+        $backing = Backing::create([
+            'user_id' => $user->id,
+            'campaign_id' => $campaign->id,
+            'tier_id' => $validated['tier_id'] ?? null,
+            'amount' => $amount,
+            'status' => BackingStatus::PENDING,
+        ]);
+
+        // External ID for Xendit — embedding backing ID so callback can find it
+        $externalId = 'COFUND-BACKING-' . $backing->id;
+
+        try {
+            $invoice = $this->xendit->createInvoice([
+                'external_id' => $externalId,
+                'amount' => $amount,
+                'payer_email' => $user->email,
+                'description' => 'Pendanaan Kampanye "' . $campaign->title . '" — Rp ' . number_format($amount, 0, ',', '.'),
+                'success_redirect_url' => $validated['success_redirect_url'] ?? null,
+                'failure_redirect_url' => $validated['failure_redirect_url'] ?? null,
+                'metadata' => [
+                    'user_id' => $user->id,
+                    'backing_id' => $backing->id,
+                    'campaign_id' => $campaign->id,
+                    'type' => 'backing',
+                ],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice pembayaran berhasil dibuat.',
+                'data' => [
+                    'invoice_url' => $invoice->getInvoiceUrl(),
+                    'invoice_id' => $invoice->getId(),
+                    'external_id' => $externalId,
+                    'amount' => $amount,
+                    'backing_id' => $backing->id,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            // Mark backing as failed
+            $backing->status = BackingStatus::REFUNDED;
+            $backing->save();
+
+            Log::error('Xendit backing invoice creation failed', [
+                'user_id' => $user->id,
+                'campaign_id' => $campaign->id,
+                'amount' => $amount,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat invoice pembayaran. Silakan coba lagi.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Legacy wallet-based backing (fallback — uses internal balance).
+     */
     public function store(Request $request): JsonResponse
     {
         $user = Auth::user();

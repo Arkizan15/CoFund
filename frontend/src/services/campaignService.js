@@ -1,7 +1,12 @@
 import api from '@/services/api'
 
-export async function getCampaigns(sort = 'newest') {
-  const res = await api.get('/campaigns', { params: { sort } })
+export async function getCampaigns(params = {}) {
+  const query = {}
+  if (params.sort) query.sort = params.sort
+  if (params.search) query.search = params.search
+  if (params.category_id) query.category_id = params.category_id
+  if (params.status) query.status = params.status
+  const res = await api.get('/campaigns', { params: query })
   return res.data
 }
 
@@ -45,6 +50,11 @@ export async function backCampaign(payload) {
   return res.data
 }
 
+export async function createBackingInvoice(payload) {
+  const res = await api.post('/backings/invoice', payload)
+  return res.data
+}
+
 export async function uploadCampaignImage(campaignId, formData) {
   const res = await api.post(`/campaigns/${campaignId}/images`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -82,5 +92,5 @@ export async function deleteCampaign(id) {
   return res.data
 }
 
-const campaignService = { getCampaigns, getCampaignDetail, getCategories, createCampaign, updateCampaign, submitForReview, getMyCampaigns, postUpdate, backCampaign, uploadCampaignImage, deleteCampaignImage, setPrimaryImage, deleteSpecificImage, simulatePayment, getMyBackings, deleteCampaign }
+const campaignService = { getCampaigns, getCampaignDetail, getCategories, createCampaign, updateCampaign, submitForReview, getMyCampaigns, postUpdate, backCampaign, createBackingInvoice, uploadCampaignImage, deleteCampaignImage, setPrimaryImage, deleteSpecificImage, simulatePayment, getMyBackings, deleteCampaign }
 export default campaignService

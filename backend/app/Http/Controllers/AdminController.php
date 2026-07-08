@@ -12,9 +12,11 @@ use App\Models\Notification;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\WalletTransaction;
+use App\Services\ActivityLoggerService;
 use App\Services\CampaignSettlementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -92,6 +94,14 @@ class AdminController extends Controller
         $campaign->status = CampaignStatus::ACTIVE;
         $campaign->save();
 
+        ActivityLoggerService::log(
+            Auth::id(),
+            'campaign.approve',
+            'campaign',
+            $campaign->id,
+            "Menyetujui kampanye: {$campaign->title}"
+        );
+
         $creator = $campaign->user;
 
         Notification::create([
@@ -145,6 +155,14 @@ class AdminController extends Controller
         $campaign->status = CampaignStatus::DRAFT;
         $campaign->rejection_reason = $validated['reason'];
         $campaign->save();
+
+        ActivityLoggerService::log(
+            Auth::id(),
+            'campaign.reject',
+            'campaign',
+            $campaign->id,
+            "Menolak kampanye: {$campaign->title}, alasan: {$validated['reason']}"
+        );
 
         $creator = $campaign->user;
 
@@ -210,6 +228,14 @@ class AdminController extends Controller
 
         $campaign->settled_at = now();
         $campaign->save();
+
+        ActivityLoggerService::log(
+            Auth::id(),
+            'campaign.ban',
+            'campaign',
+            $campaign->id,
+            "Memban kampanye: {$campaign->title}"
+        );
 
         return response()->json([
             'success' => true,
@@ -371,6 +397,14 @@ class AdminController extends Controller
 
         $user->save();
 
+        ActivityLoggerService::log(
+            Auth::id(),
+            $user->suspended_at ? 'user.suspend' : 'user.unsuspend',
+            'user',
+            $user->id,
+            $user->suspended_at ? "Menonaktifkan user: {$user->name} ({$user->email})" : "Mengaktifkan user: {$user->name} ({$user->email})"
+        );
+
         return response()->json([
             'success' => true,
             'message' => $message,
@@ -379,5 +413,43 @@ class AdminController extends Controller
                 'suspended_at' => $user->suspended_at,
             ],
         ]);
+    }
+
+    /**
+     * Send an announcement notification to all users (admin only).
+     */
+    public function sendAnnouncement(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:200'],
+            'body' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $users = User::all();
+        $count = 0;
+
+        foreach ($users as $user) {
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'announcement',
+                'title' => $validated['title'],
+                'body' => $validated['body'],
+                'data' => [
+                    'announced_at' => now()->toISOString(),
+                ],
+                'created_at' => now(),
+            ]);
+            $count++;
+        }
+
+        Log::info("Admin mengirim pengumuman ke {$count} user: {$validated['title']}");
+
+        return response()->json([
+            'success' => true,
+            'message' => "Pengumuman berhasil dikirim ke {$count} pengguna.",
+            'data' => [
+                'total_recipients' => $count,
+            ],
+        ], 201);
     }
 }

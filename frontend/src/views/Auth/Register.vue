@@ -20,53 +20,59 @@
         <form @submit.prevent="handleRegister" class="space-y-4">
           <div class="flex flex-col gap-1.5">
             <label for="name" class="text-sm font-semibold text-gray-700">Nama Lengkap</label>
-            <span class="p-input-icon-left w-full">
-              <i class="pi pi-user text-gray-400"></i>
+            <div class="relative">
+              <i class="pi pi-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10"></i>
               <InputText
                 id="name"
                 v-model="form.name"
                 placeholder="Masukkan nama lengkap"
-                class="w-full !rounded-xl !py-3 !text-sm"
+                class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.name }"
                 required
               />
-            </span>
-            <small v-if="errors.name" class="p-error text-xs">{{ errors.name[0] }}</small>
+            </div>
+            <small v-if="errors.name" class="p-error text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-[10px]"></i>{{ errors.name[0] }}
+            </small>
           </div>
 
           <div class="flex flex-col gap-1.5">
             <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
-            <span class="p-input-icon-left w-full">
-              <i class="pi pi-envelope text-gray-400"></i>
+            <div class="relative">
+              <i class="pi pi-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10"></i>
               <InputText
                 id="email"
                 v-model="form.email"
                 type="email"
                 placeholder="Masukkan alamat email"
-                class="w-full !rounded-xl !py-3 !text-sm"
+                class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.email }"
                 required
               />
-            </span>
-            <small v-if="errors.email" class="p-error text-xs">{{ errors.email[0] }}</small>
+            </div>
+            <small v-if="errors.email" class="p-error text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-[10px]"></i>{{ errors.email[0] }}
+            </small>
           </div>
 
           <div class="flex flex-col gap-1.5">
             <label for="password" class="text-sm font-semibold text-gray-700">Kata Sandi</label>
-            <span class="p-input-icon-left w-full">
-              <i class="pi pi-lock text-gray-400"></i>
+            <div class="relative">
+              <i class="pi pi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10"></i>
               <InputText
                 id="password"
                 v-model="form.password"
                 type="password"
                 placeholder="Minimal 6 karakter"
-                class="w-full !rounded-xl !py-3 !text-sm"
+                class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.password }"
                 minlength="6"
                 required
               />
-            </span>
-            <small v-if="errors.password" class="p-error text-xs">{{ errors.password[0] }}</small>
+            </div>
+            <small v-if="errors.password" class="p-error text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-[10px]"></i>{{ errors.password[0] }}
+            </small>
 
             <div v-if="form.password" class="mt-1">
               <div class="flex gap-1 mb-1">
@@ -80,20 +86,22 @@
 
           <div class="flex flex-col gap-1.5">
             <label for="password_confirmation" class="text-sm font-semibold text-gray-700">Konfirmasi Kata Sandi</label>
-            <span class="p-input-icon-left w-full">
-              <i class="pi pi-lock text-gray-400"></i>
+            <div class="relative">
+              <i class="pi pi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10"></i>
               <InputText
                 id="password_confirmation"
                 v-model="form.password_confirmation"
                 type="password"
                 placeholder="Ulangi kata sandi"
-                class="w-full !rounded-xl !py-3 !text-sm"
+                class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.password_confirmation }"
                 minlength="6"
                 required
               />
-            </span>
-            <small v-if="errors.password_confirmation" class="p-error text-xs">{{ errors.password_confirmation[0] }}</small>
+            </div>
+            <small v-if="errors.password_confirmation" class="p-error text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-[10px]"></i>{{ errors.password_confirmation[0] }}
+            </small>
           </div>
 
           <div v-if="globalError" class="p-4 bg-red-50 border border-red-200 rounded-[15px] text-sm text-red-600 flex items-start gap-3">

@@ -9,8 +9,27 @@
       <!-- Profile Banner -->
       <div class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-4 md:p-6 mb-8">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <div class="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 ring-4 ring-emerald-50">
-            <i class="pi pi-user text-3xl text-emerald-700"></i>
+          <div class="relative w-20 h-20 rounded-full flex-shrink-0 ring-4 ring-emerald-50 group">
+            <img
+              v-if="authStore.user?.avatar_url"
+              :src="authStore.user.avatar_url"
+              :alt="authStore.user?.name"
+              class="w-full h-full rounded-full object-cover"
+            />
+            <div v-else class="w-full h-full rounded-full bg-emerald-100 flex items-center justify-center">
+              <i class="pi pi-user text-3xl text-emerald-700"></i>
+            </div>
+            <label
+              class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+            >
+              <i class="pi pi-camera text-white text-lg"></i>
+              <input
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="handleAvatarUpload"
+              />
+            </label>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-3 flex-wrap">
@@ -51,69 +70,116 @@
 
           <div class="space-y-4">
             <div class="flex flex-col gap-1.5">
-              <label for="topup-amount" class="text-sm font-semibold text-gray-700">Top Up Saldo</label>
-              <div class="flex flex-col sm:flex-row gap-2">
+              <label class="text-sm font-semibold text-gray-700">Top Up Saldo</label>
+              <!-- Quick-select amount buttons -->
+              <div class="grid grid-cols-3 gap-2">
+                <button
+                  v-for="amt in topUpPresets"
+                  :key="amt"
+                  class="py-2.5 px-3 rounded-xl text-sm font-semibold border transition-all duration-150"
+                  :class="topUpAmount === amt
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-300 hover:text-emerald-700'"
+                  @click="topUpAmount = amt; showCustomTopUp = false"
+                >
+                  Rp {{ (amt / 1000).toLocaleString('id-ID') }}rb
+                </button>
+                <button
+                  class="py-2.5 px-3 rounded-xl text-sm font-semibold border transition-all duration-150"
+                  :class="showCustomTopUp
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                    : 'bg-white text-gray-500 border-dashed border-gray-300 hover:border-emerald-300 hover:text-emerald-600'"
+                  @click="topUpAmount = null; showCustomTopUp = !showCustomTopUp"
+                >
+                  <i class="pi pi-pencil mr-1 text-xs"></i>Lainnya
+                </button>
+              </div>
+              <!-- Custom amount input -->
+              <div v-if="showCustomTopUp" class="flex flex-col sm:flex-row gap-2 mt-1">
                 <InputNumber
-                  id="topup-amount"
                   v-model="topUpAmount"
                   :min="10000"
                   :step="50000"
-                  :max="999999999"
                   prefix="Rp "
-                  placeholder="Masukkan nominal"
+                  placeholder="Nominal custom"
                   class="flex-1"
                   :class="{ 'p-invalid': topUpError }"
                   fluid
                 />
-                <Button
-                  label="Top Up"
-                  icon="pi pi-plus"
-                  class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !rounded-xl !px-6 shadow-sm"
-                  :loading="topUpLoading"
-                  :disabled="!topUpAmount || topUpAmount < 10000"
-                  @click="handleTopUp"
-                />
               </div>
+              <!-- Submit button -->
+              <Button
+                label="Top Up via Xendit"
+                icon="pi pi-arrow-right"
+                class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !rounded-xl !py-3 shadow-sm w-full"
+                :loading="topUpLoading"
+                :disabled="!topUpAmount || topUpAmount < 10000"
+                @click="handleTopUp"
+              />
               <small v-if="topUpError" class="text-red-500 text-xs flex items-center gap-1">
                 <i class="pi pi-exclamation-circle"></i>{{ topUpError }}
               </small>
-              <small v-else class="text-gray-400 text-xs">Minimal top up Rp 10.000</small>
+              <small v-else class="text-gray-400 text-xs">Pilih nominal di atas, lalu bayar via Xendit</small>
             </div>
 
-            <div v-if="topUpSuccess" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-center gap-2 animate-pulse-once">
-              <i class="pi pi-check-circle"></i>
-              <span>Top up berhasil!</span>
-            </div>
+
           </div>
 
-          <!-- Withdraw Section -->
+          <!-- Withdraw Section (via Xendit Invoice / Staging) -->
           <div class="flex flex-col gap-1.5 mt-4">
             <label class="text-sm font-semibold text-gray-700">Withdraw / Tarik Dana</label>
-            <div class="flex flex-col sm:flex-row gap-2">
+
+            <!-- Quick-select amount buttons -->
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                v-for="amt in withdrawPresets"
+                :key="amt"
+                class="py-2.5 px-3 rounded-xl text-sm font-semibold border transition-all duration-150"
+                :class="withdrawAmount === amt
+                  ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300 hover:text-orange-600'"
+                @click="withdrawAmount = amt; showCustomWithdraw = false"
+                :disabled="amt > currentBalance"
+              >
+                Rp {{ (amt / 1000).toLocaleString('id-ID') }}rb
+              </button>
+              <button
+                class="py-2.5 px-3 rounded-xl text-sm font-semibold border-dashed border transition-all duration-150"
+                :class="showCustomWithdraw
+                  ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                  : 'bg-white text-gray-500 border-gray-300 hover:border-orange-300 hover:text-orange-600'"
+                @click="withdrawAmount = null; showCustomWithdraw = !showCustomWithdraw"
+              >
+                <i class="pi pi-pencil mr-1 text-xs"></i>Lainnya
+              </button>
+            </div>
+            <!-- Custom amount input -->
+            <div v-if="showCustomWithdraw" class="flex flex-col sm:flex-row gap-2">
               <InputNumber
                 v-model="withdrawAmount"
                 :min="10000"
                 :step="50000"
                 :max="currentBalance"
                 prefix="Rp "
-                placeholder="Masukkan nominal"
+                placeholder="Nominal custom"
                 class="flex-1"
                 :class="{ 'p-invalid': withdrawError }"
                 fluid
               />
-              <Button
-                label="Withdraw"
-                icon="pi pi-arrow-up-right"
-                class="!bg-orange-500 !border-none hover:!bg-orange-600 !text-white !font-medium !rounded-xl !px-6 shadow-sm"
-                :loading="withdrawLoading"
-                :disabled="!withdrawAmount || withdrawAmount < 10000 || withdrawAmount > currentBalance"
-                @click="handleWithdraw"
-              />
             </div>
+            <!-- Submit button -->
+            <Button
+              label="Tarik Dana via Xendit"
+              icon="pi pi-arrow-up-right"
+              class="!bg-orange-500 !border-none hover:!bg-orange-600 !text-white !font-medium !rounded-xl !py-3 shadow-sm w-full"
+              :loading="withdrawLoading"
+              :disabled="!withdrawAmount || withdrawAmount < 10000 || withdrawAmount > currentBalance"
+              @click="handleWithdraw"
+            />
             <small v-if="withdrawError" class="text-red-500 text-xs flex items-center gap-1">
               <i class="pi pi-exclamation-circle"></i>{{ withdrawError }}
             </small>
-            <small v-else class="text-gray-400 text-xs">Minimal withdraw Rp 10.000 (mock — simulasi penarikan)</small>
+            <small v-else class="text-gray-400 text-xs">Konfirmasi penarikan via halaman Xendit (staging)</small>
           </div>
 
           <Divider class="my-5" />
@@ -335,20 +401,24 @@ const roleSeverity = computed(() => {
   return severities[authStore.user?.role] || 'info'
 })
 
-// Wallet
+// Wallet — amount presets (in Rupiah)
+const topUpPresets = [50000, 100000, 200000, 500000, 1000000, 2000000]
+const withdrawPresets = [50000, 100000, 200000, 500000, 1000000, 2000000]
+
 const topUpAmount = ref(null)
 const topUpLoading = ref(false)
 const topUpError = ref('')
-const topUpSuccess = ref(false)
+const showCustomTopUp = ref(false)
+
 const withdrawAmount = ref(null)
 const withdrawLoading = ref(false)
 const withdrawError = ref('')
+const showCustomWithdraw = ref(false)
 const showHistory = ref(false)
 const transactions = ref([])
 
 async function handleTopUp() {
   topUpError.value = ''
-  topUpSuccess.value = false
 
   if (!topUpAmount.value || topUpAmount.value < 10000) {
     topUpError.value = 'Minimal top up Rp 10.000'
@@ -356,24 +426,64 @@ async function handleTopUp() {
   }
 
   topUpLoading.value = true
+  // Open blank window BEFORE the async call to avoid pop-up blockers
+  let xenditWindow = window.open('', '_blank')
+
   try {
-    const res = await walletService.postTopUp(topUpAmount.value)
-    authStore.user.balance = res.data.data.balance
-    topUpSuccess.value = true
-    topUpAmount.value = null
-    toast.add({ severity: 'success', summary: 'Top Up Berhasil', detail: 'Saldo berhasil ditambahkan.', life: 3000 })
-    const txRes = await walletService.getBalance()
-    transactions.value = txRes.data?.data?.transactions?.data || []
+    // Pass current page as redirect URLs so Xendit sends user back here
+    const baseUrl = window.location.origin
+    const res = await walletService.postTopUp(topUpAmount.value, {
+      success: baseUrl + '/profile',
+      failure: baseUrl + '/profile',
+    })
+
+    const invoiceUrl = res.data?.data?.invoice_url
+
+    if (invoiceUrl && xenditWindow) {
+      // Redirect the pre-opened window to Xendit checkout
+      xenditWindow.location = invoiceUrl
+      topUpAmount.value = null
+      await refreshBalanceOnly()
+      toast.add({
+        severity: 'success',
+        summary: 'Pembayaran Dibuka',
+        detail: 'Halaman pembayaran Xendit telah dibuka di tab baru.',
+        life: 5000,
+      })
+    } else if (res.data?.data?.balance !== undefined) {
+      // Fallback: direct top-up (legacy/admin mode)
+      authStore.user.balance = res.data.data.balance
+      topUpAmount.value = null
+      toast.add({ severity: 'success', summary: 'Top Up Berhasil', detail: 'Saldo berhasil ditambahkan.', life: 3000 })
+    } else {
+      topUpError.value = 'Gagal mendapatkan URL pembayaran'
+      if (xenditWindow) xenditWindow.close()
+    }
   } catch (error) {
-    topUpError.value = error.response?.data?.message || 'Gagal melakukan top up'
-    toast.add({ severity: 'error', summary: 'Top Up Gagal', detail: topUpError.value, life: 3000 })
+    topUpError.value = error.response?.data?.message || 'Gagal membuat invoice pembayaran'
+    toast.add({ severity: 'error', summary: 'Top Up Gagal', detail: topUpError.value, life: 5000 })
+    if (xenditWindow) xenditWindow.close()
   } finally {
     topUpLoading.value = false
   }
 }
 
+// Simple balance refresh (used after top-up/withdraw)
+async function refreshBalanceOnly() {
+  try {
+    const res = await walletService.getBalance()
+    if (res.data?.data) {
+      authStore.user.balance = res.data.data.balance
+      transactions.value = res.data.data.transactions?.data || []
+    }
+  } catch (e) {
+    // Ignore
+  }
+}
+
 async function handleWithdraw() {
   withdrawError.value = ''
+
   if (!withdrawAmount.value || withdrawAmount.value < 10000) {
     withdrawError.value = 'Minimal withdraw Rp 10.000'
     return
@@ -382,17 +492,40 @@ async function handleWithdraw() {
     withdrawError.value = 'Saldo tidak mencukupi'
     return
   }
+
   withdrawLoading.value = true
+  // Open blank window BEFORE the async call to avoid pop-up blockers
+  let xenditWindow = window.open('', '_blank')
+
   try {
-    const res = await walletService.postWithdraw(withdrawAmount.value)
-    authStore.user.balance = res.data.data.balance
-    withdrawAmount.value = null
-    toast.add({ severity: 'success', summary: 'Withdraw Berhasil', detail: res.data.message || 'Penarikan dana berhasil (mock).', life: 3000 })
-    const txRes = await walletService.getBalance()
-    transactions.value = txRes.data?.data?.transactions?.data || []
+    const baseUrl = window.location.origin
+    const res = await walletService.postWithdraw(withdrawAmount.value, {
+      success: baseUrl + '/profile',
+      failure: baseUrl + '/profile',
+    })
+
+    const invoiceUrl = res.data?.data?.invoice_url
+
+    if (invoiceUrl && xenditWindow) {
+      // Redirect the pre-opened window to Xendit checkout
+      xenditWindow.location = invoiceUrl
+      withdrawAmount.value = null
+      showCustomWithdraw.value = false
+      await refreshBalanceOnly()
+      toast.add({
+        severity: 'success',
+        summary: 'Penarikan Dibuka',
+        detail: 'Halaman konfirmasi penarihan Xendit telah dibuka di tab baru.',
+        life: 5000,
+      })
+    } else {
+      withdrawError.value = 'Gagal mendapatkan URL konfirmasi'
+      if (xenditWindow) xenditWindow.close()
+    }
   } catch (error) {
-    withdrawError.value = error.response?.data?.message || 'Gagal melakukan withdraw'
-    toast.add({ severity: 'error', summary: 'Withdraw Gagal', detail: withdrawError.value, life: 3000 })
+    withdrawError.value = error.response?.data?.message || 'Gagal memproses penarikan dana'
+    toast.add({ severity: 'error', summary: 'Withdraw Gagal', detail: withdrawError.value, life: 5000 })
+    if (xenditWindow) xenditWindow.close()
   } finally {
     withdrawLoading.value = false
   }
@@ -427,6 +560,43 @@ async function handleUpgradeRequest() {
   }
 }
 
+/**
+ * Upload/set avatar image via the backend.
+ * The backend returns the new avatar_url which we store back into the store.
+ */
+async function handleAvatarUpload(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Quick client-side validation
+  const maxSize = 2 * 1024 * 1024 // 2 MB
+  if (file.size > maxSize) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: 'Ukuran maksimal 2 MB.', life: 3000 })
+    return
+  }
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: 'Format gambar tidak didukung. Gunakan JPG, PNG, GIF, atau WebP.', life: 3000 })
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('avatar', file)
+
+  try {
+    const res = await api.post('/profile/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    const avatarUrl = res.data?.data?.avatar_url
+    if (avatarUrl && authStore.user) {
+      authStore.user.avatar_url = avatarUrl
+    }
+    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Foto profil berhasil diperbarui.', life: 3000 })
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: error.response?.data?.message || 'Gagal mengunggah avatar.', life: 4000 })
+  }
+}
+
 function formatTypeLabel(type) {
   const map = {
     top_up: 'Top Up',
@@ -447,15 +617,54 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+/**
+ * Detect redirect from Xendit checkout after payment/withdraw.
+ * Xendit redirects back with query params like ?status=PAID&external_id=COFUND-...
+ */
+function checkXenditRedirect() {
+  const params = new URLSearchParams(window.location.search)
+  const status = params.get('status')
+  const externalId = params.get('external_id')
+
+  if (status && externalId) {
+    // Clean up URL immediately (remove query params)
+    window.history.replaceState({}, '', window.location.pathname)
+
+    const isPaid = ['PAID', 'SETTLED'].includes(status.toUpperCase())
+    const isTopUp = externalId.startsWith('COFUND-TOPUP-')
+    const isWithdraw = externalId.startsWith('COFUND-WITHDRAW-')
+
+    if (isPaid) {
+      refreshBalanceOnly().then(() => {
+        toast.add({
+          severity: 'success',
+          summary: isTopUp ? 'Top Up Berhasil' : 'Withdraw Berhasil',
+          detail: isTopUp
+            ? 'Saldo berhasil ditambahkan.'
+            : 'Penarikan dana berhasil. Saldo Anda telah diperbarui.',
+          life: 6000,
+        })
+      })
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Pembayaran Gagal',
+        detail: 'Status: ' + status + '. Silakan coba lagi.',
+        life: 8000,
+      })
+    }
+  }
+}
+
 onMounted(async () => {
   try {
-    const [txRes] = await Promise.all([
-      walletService.getBalance().catch(() => ({ data: { data: { transactions: { data: [] } } } })),
-      checkPendingRequest(),
-    ])
-    transactions.value = txRes.data?.data?.transactions?.data || []
+    // Check if user was redirected back from Xendit checkout
+    // (this also calls refreshBalanceOnly internally)
+    checkXenditRedirect()
+
+    await checkPendingRequest()
   } catch (e) {
-    transactions.value = []
+    // Ignore
   }
 })
 </script>

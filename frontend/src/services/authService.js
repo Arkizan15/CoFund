@@ -16,4 +16,12 @@ export default {
     getProfile() {
         return api.get('/auth/me');
     },
+
+    forgotPassword(data) {
+        return api.post('/auth/password/forgot', data);
+    },
+
+    resetPassword(data) {
+        return api.post('/auth/password/reset', data);
+    },
 };

@@ -275,11 +275,6 @@ body {
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
 }
 
-/* ===== PrimeVue Override: ProgressBar ===== */
-.p-progressbar .p-progressbar-value {
-  background: linear-gradient(90deg, #10b981, #059669);
-}
-
 /* ===== PrimeVue Override: Badge ===== */
 .p-badge.p-badge-success {
   background-color: #d1fae5;

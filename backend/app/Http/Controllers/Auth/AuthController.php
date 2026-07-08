@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -97,6 +98,7 @@ class AuthController extends Controller
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at,
                 'total_backings' => $user->total_backings,
+                'avatar_url' => $user->avatar_url,
             ],
         ]);
     }
@@ -155,6 +157,46 @@ class AuthController extends Controller
         }
 
         return redirect($successUrl);
+    }
+
+    public function uploadAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'avatar' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+        ]);
+
+        // Delete old avatar if exists
+        if ($user->avatar_url) {
+            $oldPath = str_replace('/storage/', 'public/', $user->avatar_url);
+            if (Storage::exists($oldPath)) {
+                Storage::delete($oldPath);
+            }
+        }
+
+        $file = $request->file('avatar');
+        $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->extension();
+        $path = $file->storeAs('public/avatars', $filename);
+
+        if (!$path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengunggah avatar.',
+            ], 500);
+        }
+
+        $avatarUrl = url(Storage::url($path));
+        $user->avatar_url = $avatarUrl;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Avatar berhasil diperbarui.',
+            'data' => [
+                'avatar_url' => $avatarUrl,
+            ],
+        ], 200);
     }
 
     public function resend(Request $request): JsonResponse

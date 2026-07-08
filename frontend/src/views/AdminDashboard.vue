@@ -377,7 +377,13 @@
                 </div>
               </div>
 
-              <ProgressBar :value="campaign.progress" class="!h-3 !rounded-full" />
+              <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-500"
+                    :class="progressBarColor(campaign.progress || 0)"
+                    :style="{ width: (campaign.progress || 0) + '%' }"
+                  ></div>
+                </div>
               <div class="flex items-center justify-between text-xs mt-1.5">
                 <span class="text-gray-500">{{ campaign.progress }}% terkumpul</span>
                 <span class="flex items-center gap-1 text-orange-600 font-medium">
@@ -463,7 +469,13 @@
             <Column header="Progress" :style="{ width: '100px' }">
               <template #body="{ data }">
                 <div class="flex items-center gap-2">
-                  <ProgressBar :value="data.progress" class="!h-2 !rounded-full flex-1" />
+                  <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden flex-1">
+                    <div
+                      class="h-full rounded-full transition-all duration-500"
+                      :class="progressBarColor(data.progress || 0)"
+                      :style="{ width: (data.progress || 0) + '%' }"
+                    ></div>
+                  </div>
                   <span class="text-xs text-gray-500 w-8 text-right">{{ data.progress }}%</span>
                 </div>
               </template>
@@ -505,16 +517,15 @@
             optionLabel="label"
             optionValue="value"
             placeholder="Semua Role"
-            class="!w-40 !rounded-xl !text-sm"
+            class="!w-40 !rounded-xl !text-sm !bg-white"
             @change="fetchUsers"
           />
           <InputText
             v-model="userFilterSearch"
             placeholder="Cari nama atau email..."
             class="!w-60 !rounded-xl !text-sm"
-            @keyup.enter="fetchUsers"
+            @input="onAdminSearchInput"
           />
-          <Button icon="pi pi-search" class="!rounded-xl !bg-emerald-600 !border-emerald-600" @click="fetchUsers" />
         </div>
 
         <div v-if="usersLoading" class="flex items-center justify-center py-20">
@@ -717,7 +728,7 @@ import Button from 'primevue/button'
 import Badge from 'primevue/badge'
 import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
-import ProgressBar from 'primevue/progressbar'
+
 import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import Divider from 'primevue/divider'
@@ -730,12 +741,13 @@ const { onDialogShow } = useGenieEffect()
 const activeSection = ref('overview')
 
 const sidebarItems = [
-  { id: 'overview', label: 'Overview', desc: 'Statistik platform', icon: 'pi pi-chart-bar' },
+  { id: 'overview', label: 'Overview', desc: 'Statistik + Grafik', icon: 'pi pi-chart-bar' },
   { id: 'approval', label: 'Approval Campaign', desc: 'Persetujuan kampanye', icon: 'pi pi-check-circle' },
   { id: 'creatorRequests', label: 'Creator Requests', desc: 'Persetujuan creator', icon: 'pi pi-shield' },
   { id: 'active', label: 'Kampanye Aktif', desc: 'Kampanye berjalan', icon: 'pi pi-play-circle' },
   { id: 'ended', label: 'Kampanye Berakhir', desc: 'Riwayat kampanye', icon: 'pi pi-flag' },
   { id: 'users', label: 'Manajemen User', desc: 'Kelola akun pengguna', icon: 'pi pi-users' },
+  { id: 'activity-logs', label: 'Activity Logs', desc: 'Log aktivitas admin', icon: 'pi pi-book' },
 ]
 
 // ==================== Section 1: Overview ====================
@@ -768,6 +780,14 @@ const userRoleOptions = [
 ]
 const userDetailVisible = ref(false)
 const userDetailData = ref(null)
+let adminSearchTimeout = null
+
+function onAdminSearchInput() {
+  if (adminSearchTimeout) clearTimeout(adminSearchTimeout)
+  adminSearchTimeout = setTimeout(() => {
+    fetchUsers()
+  }, 400)
+}
 
 async function fetchUsers() {
   usersLoading.value = true
@@ -945,8 +965,6 @@ async function executeBan() {
     banLoading.value = false
   }
 }
-
-// ==================== Utility Functions ====================
 function statusLabel(status) {
   const labels = { draft: 'Draft', review: 'Review', active: 'Aktif', success: 'Sukses', failed: 'Gagal' }
   return labels[status] || status || '-'
@@ -955,6 +973,14 @@ function statusLabel(status) {
 function statusSeverity(status) {
   const severities = { draft: 'info', review: 'warn', active: 'success', success: 'success', failed: 'danger' }
   return severities[status] || 'info'
+}
+
+function progressBarColor(pct) {
+  if (pct >= 100) return 'bg-emerald-700'
+  if (pct >= 75) return 'bg-emerald-600'
+  if (pct >= 50) return 'bg-emerald-500'
+  if (pct >= 25) return 'bg-emerald-400'
+  return 'bg-emerald-300'
 }
 
 function formatCurrency(val) {
@@ -996,4 +1022,5 @@ onMounted(async () => {
 
   fetchUsers()
 })
+
 </script>

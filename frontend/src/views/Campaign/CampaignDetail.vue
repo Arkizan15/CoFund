@@ -245,7 +245,13 @@
                 <div class="text-lg font-semibold text-gray-800">{{ formatCurrency(campaign.target_amount || 0) }}</div>
               </div>
 
-              <ProgressBar :value="progressPercent(campaign)" class="!h-6 !rounded-full" />
+              <div class="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  :class="progressBarColor(campaign)"
+                  :style="{ width: progressPercent(campaign) + '%' }"
+                ></div>
+              </div>
 
               <div class="flex items-center justify-between text-sm">
                 <span class="text-gray-500">{{ progressPercent(campaign) }}% terkumpul</span>
@@ -369,40 +375,27 @@
                 </div>
 
                 <!-- Success Message with Animation -->
-                <div v-if="backingSuccess" class="relative overflow-hidden">
-                  <!-- Confetti decorations -->
-                  <div class="confetti-piece"></div>
-                  <div class="confetti-piece"></div>
-                  <div class="confetti-piece"></div>
-
-                  <div class="animate-success-slide p-5 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-lg text-white">
-                    <div class="flex items-start gap-4">
-                      <div class="animate-success-pop w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
-                        <i class="pi pi-check-circle text-2xl text-white"></i>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-base font-bold text-white">Dukungan Berhasil! 🎉</p>
-                        <p class="text-sm text-emerald-100 mt-1">
-                          Dana sebesar <strong>{{ formatCurrency(lastBackingAmount) }}</strong> telah berhasil masuk ke escrow.
-                        </p>
-                        <div class="mt-3 flex items-center gap-3 text-xs text-emerald-100/80">
-                          <span class="flex items-center gap-1">
-                            <i class="pi pi-shield text-[10px]"></i> Escrow aman
-                          </span>
-                          <span class="flex items-center gap-1">
-                            <i class="pi pi-clock text-[10px]"></i> Selesai dicairkan
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                <!-- Xendit Checkout Opened Message -->
+              <div v-if="backingInvoiceOpened" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center flex-shrink-0">
+                    <i class="pi pi-external-link text-emerald-700 text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-emerald-800">Halaman Pembayaran Dibuka</p>
+                    <p class="text-xs text-emerald-600 mt-0.5">
+                      Pembayaran sebesar <strong>{{ formatCurrency(lastBackingAmount) }}</strong> telah dibuka di tab baru.
+                      Setelah pembayaran selesai, halaman ini akan diperbarui secara otomatis.
+                    </p>
                   </div>
                 </div>
+              </div>
 
                 <!-- Submit Button -->
                 <Button
-                  v-if="!backingSuccess"
-                  label="Dukung Kampanye Ini"
-                  icon="pi pi-heart"
+                  v-if="!backingInvoiceOpened"
+                  label="Bayar via Xendit"
+                  icon="pi pi-credit-card"
                   class="w-full !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3.5 !rounded-xl shadow-sm"
                   :loading="backingLoading"
                   :disabled="backingLoading || !backingAmount"
@@ -454,7 +447,7 @@ import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import Badge from 'primevue/badge'
-import ProgressBar from 'primevue/progressbar'
+
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -524,7 +517,7 @@ const backingAmount = ref(null)
 const selectedTier = ref(null)
 const backingLoading = ref(false)
 const backingError = ref('')
-const backingSuccess = ref(false)
+const backingInvoiceOpened = ref(false)
 const lastBackingAmount = ref(0)
 
 const presetAmounts = [50000, 100000, 250000, 500000]
@@ -596,6 +589,15 @@ function remainingDays(deadline) {
   return diff > 0 ? diff : 0
 }
 
+function progressBarColor(c) {
+  const pct = progressPercent(c)
+  if (pct >= 100) return 'bg-emerald-700'
+  if (pct >= 75) return 'bg-emerald-600'
+  if (pct >= 50) return 'bg-emerald-500'
+  if (pct >= 25) return 'bg-emerald-400'
+  return 'bg-emerald-300'
+}
+
 function progressPercent(c) {
   const col = Number(c.collected_amount || 0)
   const tar = Number(c.target_amount || 1)
@@ -615,8 +617,12 @@ function validateBacking() {
     return false
   }
 
-  if (Number(backingAmount.value) > userBalance.value) {
-    backingError.value = 'Saldo tidak mencukupi. Silakan top up terlebih dahulu.'
+  // Check if backing amount exceeds remaining campaign target
+  const collected = Number(campaign.value.collected_amount || 0)
+  const target = Number(campaign.value.target_amount || 0)
+  const remaining = Math.max(0, target - collected)
+  if (Number(backingAmount.value) > remaining) {
+    backingError.value = 'Nominal donasi melebihi sisa dana yang dibutuhkan kampanye. Sisa dana yang diperlukan: ' + formatCurrency(remaining)
     return false
   }
 
@@ -630,7 +636,9 @@ async function handleBacking() {
   const backedTier = selectedTier.value
 
   backingLoading.value = true
-  backingSuccess.value = false
+
+  // Open blank window BEFORE the async call to avoid pop-up blockers
+  let xenditWindow = window.open('', '_blank')
 
   try {
     const payload = {
@@ -641,29 +649,36 @@ async function handleBacking() {
       payload.tier_id = backedTier.id
     }
 
-    const res = await campaignService.backCampaign(payload)
+    // Pass current page as redirect URLs
+    const baseUrl = window.location.origin + route.fullPath
+    payload.success_redirect_url = baseUrl
+    payload.failure_redirect_url = baseUrl
 
-    // Update local state
-    campaign.value.collected_amount = res.data.collected_amount
-    authStore.user.balance = res.data.balance
+    const res = await campaignService.createBackingInvoice(payload)
 
-    lastBackingAmount.value = backedAmount
-    backingSuccess.value = true
+    const invoiceUrl = res.data?.invoice_url
 
-    // If tier selected, decrement remaining_quota locally
-    if (backedTier) {
-      const tier = campaign.value.tiers?.find(t => t.id === backedTier.id)
-      if (tier) tier.remaining_quota = Math.max(0, (tier.remaining_quota || 0) - 1)
+    if (invoiceUrl && xenditWindow) {
+      xenditWindow.location = invoiceUrl
+      lastBackingAmount.value = backedAmount
+      backingInvoiceOpened.value = true
+      backingAmount.value = null
+      selectedTier.value = null
+
+      toast.add({
+        severity: 'success',
+        summary: 'Pembayaran Dibuka',
+        detail: 'Halaman pembayaran Xendit telah dibuka di tab baru.',
+        life: 5000,
+      })
+    } else {
+      backingError.value = 'Gagal mendapatkan URL pembayaran'
+      if (xenditWindow) xenditWindow.close()
     }
-
-    // Reset form
-    backingAmount.value = null
-    selectedTier.value = null
-
-    toast.add({ severity: 'success', summary: 'Dukungan Berhasil!', detail: res.message || 'Dana telah masuk ke escrow.', life: 5000 })
   } catch (error) {
-    backingError.value = error.response?.data?.message || 'Gagal melakukan backing. Silakan coba lagi.'
+    backingError.value = error.response?.data?.message || 'Gagal membuat invoice pembayaran'
     toast.add({ severity: 'error', summary: 'Gagal', detail: backingError.value, life: 4000 })
+    if (xenditWindow) xenditWindow.close()
   } finally {
     backingLoading.value = false
   }
@@ -718,23 +733,64 @@ async function handlePostUpdate() {
   }
 }
 
-onMounted(async () => {
+/**
+ * Detect redirect from Xendit checkout after backing payment.
+ * Xendit redirects back with query params like ?status=PAID&external_id=COFUND-BACKING-...
+ */
+function checkXenditRedirect() {
+  const params = new URLSearchParams(window.location.search)
+  const status = params.get('status')
+  const externalId = params.get('external_id')
+
+  if (status && externalId && externalId.startsWith('COFUND-BACKING-')) {
+    // Clean up URL immediately
+    window.history.replaceState({}, '', window.location.pathname)
+
+    const isPaid = ['PAID', 'SETTLED'].includes(status.toUpperCase())
+
+    if (isPaid) {
+      // Reload campaign data to get updated collected_amount
+      loadCampaignData()
+      toast.add({
+        severity: 'success',
+        summary: 'Pembayaran Berhasil!',
+        detail: 'Dana telah masuk ke escrow. Terima kasih atas dukungan Anda!',
+        life: 6000,
+      })
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Pembayaran Gagal',
+        detail: 'Status: ' + status + '. Silakan coba lagi.',
+        life: 8000,
+      })
+    }
+  }
+}
+
+async function loadCampaignData() {
   try {
     const response = await campaignService.getCampaignDetail(route.params.slug)
     const campaignData = response?.data || response || {}
     campaign.value = campaignData
 
-    // Use real backings data from eager-loaded relationship
     if (campaignData.backings?.length) {
-      backers.value = campaignData.backings
+      backers.value = campaignData.backings.filter(b => b.status === 'completed')
     } else {
       backers.value = []
     }
   } catch (e) {
     campaign.value = { title: 'Kampanye Tidak Ditemukan' }
     backers.value = []
-  } finally {
-    loading.value = false
   }
+}
+
+onMounted(async () => {
+  // Check if user was redirected back from Xendit checkout
+  checkXenditRedirect()
+
+  await loadCampaignData()
+
+  loading.value = false
 })
 </script>

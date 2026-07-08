@@ -28,6 +28,7 @@ class CampaignController extends Controller
 
         $query = Campaign::with(['category', 'user', 'images']);
 
+        // Status filter
         $status = $request->query('status');
         if ($status && in_array($status, CampaignStatus::values())) {
             $query->where('status', $status);
@@ -35,6 +36,23 @@ class CampaignController extends Controller
             $query->where('status', CampaignStatus::ACTIVE);
         }
 
+        // Category filter
+        $categoryId = $request->query('category_id');
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        // Search filter (title & description)
+        $search = $request->query('search');
+        if ($search) {
+            $searchTerm = '%' . $search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', $searchTerm)
+                  ->orWhere('description', 'like', $searchTerm);
+            });
+        }
+
+        // Sorting
         $sort = $request->query('sort', 'newest');
         if ($sort === 'popular') {
             $query->orderBy('collected_amount', 'desc');
@@ -44,7 +62,10 @@ class CampaignController extends Controller
             $query->latest();
         }
 
-        $campaigns = $query->get();
+        $perPage = (int) $request->query('per_page', 12);
+        $perPage = max(1, min(50, $perPage));
+
+        $campaigns = $query->paginate($perPage);
 
         return response()->json([
             'success' => true,
