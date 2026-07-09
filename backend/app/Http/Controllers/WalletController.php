@@ -274,6 +274,11 @@ class WalletController extends Controller
             $backing->status = BackingStatus::REFUNDED;
             $backing->save();
 
+            // Restore tier quota since the slot was reserved at invoice creation
+            if ($backing->tier_id) {
+                CampaignTier::where('id', $backing->tier_id)->increment('remaining_quota');
+            }
+
             Log::info('Xendit backing payment not successful', [
                 'backing_id' => $backingId,
                 'status' => $status,

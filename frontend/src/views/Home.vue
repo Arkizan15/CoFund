@@ -224,6 +224,7 @@ yang realistis.
             v-for="campaign in liveCampaigns.slice(0, 3)"
             :key="campaign.id"
             :campaign="campaign"
+            @backing="goToCampaignDetail"
           />
         </div>
 
@@ -240,12 +241,14 @@ yang realistis.
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import CampaignCard from '@/components/CampaignCard.vue'
 import CampaignCardSkeleton from '@/components/CampaignCardSkeleton.vue'
 import api from '@/services/api'
 import * as campaignService from '@/services/campaignService'
 
+const router = useRouter()
 const authStore = useAuthStore()
 
 let headingObserver = null
@@ -293,6 +296,10 @@ const liveCampaignsLoading = ref(true)
 
 function formatCurrency(val) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0)
+}
+
+function goToCampaignDetail(campaign) {
+  router.push(`/campaigns/${campaign.slug}?dukung=1`)
 }
 
 function scrollToHowItWorks() {
@@ -343,7 +350,9 @@ if (!_fetching) {
 
       // Latest campaigns
       if (latestRes) {
-        const all = latestRes?.data || latestRes || []
+        // latestRes = { success: true, data: paginator }
+        // paginator = { data: [...campaigns], current_page, last_page, total, ... }
+        const all = latestRes?.data?.data || latestRes?.data || []
         _latestCache = all
         latestCampaigns.value = Array.isArray(all) ? all : []
       }
@@ -353,7 +362,7 @@ if (!_fetching) {
       if (authStore.isAuthenticated) {
         const liveRes = await campaignService.getCampaigns().catch(() => null)
         if (liveRes) {
-          const liveData = liveRes?.data || liveRes || []
+          const liveData = liveRes?.data?.data || liveRes?.data || []
           _liveCache = Array.isArray(liveData) ? liveData : []
           liveCampaigns.value = _liveCache
         }

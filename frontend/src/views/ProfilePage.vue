@@ -188,7 +188,7 @@
             label="Riwayat Transaksi"
             icon="pi pi-history"
             class="p-button-text w-full !text-emerald-600 !justify-start !rounded-xl"
-            @click="showHistory = !showHistory"
+            @click="showHistory = !showHistory; if (showHistory && transactions.value.length === 0) loadTransactions()"
           />
 
           <div v-if="showHistory" class="mt-4 space-y-3 max-h-80 overflow-y-auto">
@@ -201,9 +201,9 @@
               :key="tx.id"
               class="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0"
             >
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-3 min-w-0 flex-1">
                 <div
-                  class="w-8 h-8 rounded-lg flex items-center justify-center"
+                  class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   :class="tx.type === 'top_up' ? 'bg-emerald-100' : tx.type === 'disbursement' ? 'bg-purple-100' : 'bg-blue-100'"
                 >
                   <i
@@ -211,12 +211,16 @@
                     :class="tx.type === 'top_up' ? 'pi-arrow-up text-emerald-600' : tx.type === 'disbursement' ? 'pi-wallet text-purple-600' : 'pi-arrow-right text-blue-600'"
                   ></i>
                 </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-700 capitalize">{{ formatTypeLabel(tx.type) }}</p>
-                  <p class="text-xs text-gray-400">{{ formatDate(tx.created_at) }}</p>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-700">{{ formatTypeLabel(tx.type) }}</p>
+                  <p v-if="txCampaignName(tx)" class="text-xs text-emerald-600 font-medium truncate max-w-[180px]">
+                    Donasi ke: {{ txCampaignName(tx) }}
+                  </p>
+                  <p v-else-if="tx.description" class="text-xs text-gray-500 truncate max-w-[180px]">{{ tx.description.replace(/\s*[-–—]\s*Rp\s*[\d.,]+/, '') }}</p>
+                  <p class="text-xs text-gray-400 mt-0.5">{{ formatDate(tx.created_at) }}</p>
                 </div>
               </div>
-              <div class="text-right">
+              <div class="text-right flex-shrink-0 ml-2">
                 <span
                   class="text-sm font-semibold"
                   :class="tx.type === 'top_up' || tx.type === 'refund' ? 'text-emerald-600' : 'text-gray-800'"
@@ -597,9 +601,16 @@ async function handleAvatarUpload(event) {
   }
 }
 
+function txCampaignName(tx) {
+  if (tx.type !== 'payment' && tx.type !== 'backing') return null
+  const match = tx.description?.match(/"([^"]+)"/)
+  return match ? match[1] : null
+}
+
 function formatTypeLabel(type) {
   const map = {
     top_up: 'Top Up',
+    payment: 'Donasi',
     backing: 'Backing',
     disbursement: 'Pencairan',
     refund: 'Refund',
@@ -654,13 +665,20 @@ function checkXenditRedirect() {
       })
     }
   }
+}async function loadTransactions() {
+  if (transactions.value.length > 0) return
+  await refreshBalanceOnly()
 }
 
 onMounted(async () => {
   try {
     // Check if user was redirected back from Xendit checkout
-    // (this also calls refreshBalanceOnly internally)
     checkXenditRedirect()
+
+    // Always load balance & transactions on mount
+    if (!transactions.value.length) {
+      await refreshBalanceOnly()
+    }
 
     await checkPendingRequest()
   } catch (e) {

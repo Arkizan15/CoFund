@@ -17,6 +17,8 @@ class Backing extends Model
         'tier_id',
         'amount',
         'status',
+        'external_id',
+        'invoice_url',
     ];
 
     protected $casts = [
@@ -40,8 +42,16 @@ class Backing extends Model
 
     protected static function resolveStatus(mixed $value): ?BackingStatus
     {
+        if ($value === null) {
+            return null;
+        }
+
         if ($value instanceof BackingStatus) {
             return $value;
+        }
+
+        if ($value instanceof \BackedEnum) {
+            return BackingStatus::tryFrom($value->value);
         }
 
         return BackingStatus::tryFrom((string) $value);
