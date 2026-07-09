@@ -125,7 +125,7 @@
                     : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-300 hover:text-emerald-700'"
                   @click="topUpAmount = amt; showCustomTopUp = false"
                 >
-                  Rp {{ (amt / 1000).toLocaleString('id-ID') }}rb
+                  {{ formatCollected(amt) }}
                 </button>
                 <button
                   class="py-2.5 px-3 rounded-xl text-sm font-semibold border transition-all duration-150"
@@ -196,7 +196,7 @@
                 @click="withdrawAmount = amt; showCustomWithdraw = false"
                 :disabled="amt > currentBalance"
               >
-                Rp {{ (amt / 1000).toLocaleString('id-ID') }}rb
+                {{ formatCollected(amt) }}
               </button>
               <button
                 class="py-2.5 px-3 rounded-xl text-sm font-semibold border-dashed border transition-all duration-150"

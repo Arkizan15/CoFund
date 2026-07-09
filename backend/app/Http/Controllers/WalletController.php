@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\BackingStatus;
+use App\Helpers\RupiahHelper;
 use App\Http\Requests\TopUpRequest;
 use App\Http\Requests\VerifyPaymentRequest;
 use App\Http\Requests\WithdrawRequest;
@@ -57,7 +58,7 @@ class WalletController extends Controller
             'amount' => $amount,
             'status' => 'pending',
             'reference' => $externalId,
-            'description' => 'Top up saldo via Xendit — Rp ' . number_format($amount, 0, ',', '.'),
+            'description' => 'Top up saldo via Xendit — ' . RupiahHelper::format($amount),
         ]);
 
         try {
@@ -66,7 +67,7 @@ class WalletController extends Controller
                 'external_id' => $externalId,
                 'amount' => $amount,
                 'payer_email' => $user->email,
-                'description' => 'Top Up Saldo CoFund — Rp ' . number_format($amount, 0, ',', '.'),
+                'description' => 'Top Up Saldo CoFund — ' . RupiahHelper::format($amount),
                 'success_redirect_url' => $validated['success_redirect_url'] ?? null,
                 'failure_redirect_url' => $validated['failure_redirect_url'] ?? null,
                 'metadata' => [
@@ -350,7 +351,7 @@ class WalletController extends Controller
             'amount' => $amount,
             'status' => 'success',
             'reference' => $reference,
-            'description' => 'Top up saldo sebesar Rp ' . number_format($amount, 0, ',', '.'),
+            'description' => 'Top up saldo sebesar ' . RupiahHelper::format($amount),
         ]);
 
         Transaction::create([
@@ -427,7 +428,7 @@ class WalletController extends Controller
             'amount' => $amount,
             'status' => 'pending',
             'reference' => $externalId,
-            'description' => 'Penarikan dana via Xendit — Rp ' . number_format($amount, 0, ',', '.'),
+            'description' => 'Penarikan dana via Xendit — ' . RupiahHelper::format($amount),
         ]);
 
         try {
@@ -436,7 +437,7 @@ class WalletController extends Controller
                 'external_id' => $externalId,
                 'amount' => $amount,
                 'payer_email' => $user->email,
-                'description' => 'Penarikan Saldo CoFund — Rp ' . number_format($amount, 0, ',', '.'),
+                'description' => 'Penarikan Saldo CoFund — ' . RupiahHelper::format($amount),
                 'success_redirect_url' => $validated['success_redirect_url'] ?? null,
                 'failure_redirect_url' => $validated['failure_redirect_url'] ?? null,
                 'metadata' => [

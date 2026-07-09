@@ -34,11 +34,7 @@ class BackingController extends Controller
         $this->backingService = $backingService;
     }
 
-    /**
-     * Create a Xendit Invoice for backing a campaign.
-     * Returns the invoice URL for the frontend to redirect the user to Xendit checkout.
-     * Use this when Xendit payment gateway is configured.
-     */
+    
     public function createBackingInvoice(CreateBackingInvoiceRequest $request): JsonResponse
     {
         $user = Auth::user();

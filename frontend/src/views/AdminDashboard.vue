@@ -245,9 +245,9 @@
             <Column header="Aksi" :style="{ width: '140px' }">
               <template #body="{ data }">
                 <div class="flex items-center gap-1.5">
-                  <Button icon="pi pi-check" class="!w-8 !h-8 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !shadow-sm !text-white !text-xs" v-tooltip.left="'Setujui'" @click="approveCampaign(data)" />
-                  <Button icon="pi pi-times" class="!w-8 !h-8 !rounded-full !bg-slate-400 !border-slate-400 hover:!bg-slate-500 !shadow-sm !text-white !text-xs" v-tooltip.left="'Tolak'" @click="openCampaignRejectDialog(data)" />
-                  <Button icon="pi pi-ban" class="!w-8 !h-8 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !shadow-sm !text-white !text-xs" v-tooltip.left="'Ban'" @click="confirmBanCampaign(data)" />
+                  <Button icon="pi pi-check" class="!w-8 !h-8 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !shadow-sm !text-white !text-xs"  @click="approveCampaign(data)" />
+                  <Button icon="pi pi-times" class="!w-8 !h-8 !rounded-full !bg-slate-400 !border-slate-400 hover:!bg-slate-500 !shadow-sm !text-white !text-xs" @click="openCampaignRejectDialog(data)" />
+                  <Button icon="pi pi-ban" class="!w-8 !h-8 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !shadow-sm !text-white !text-xs" @click="confirmBanCampaign(data)" />
                 </div>
               </template>
             </Column>
@@ -311,8 +311,8 @@
             <Column header="Aksi" :style="{ width: '140px' }">
               <template #body="{ data }">
                 <div class="flex items-center gap-1.5">
-                  <Button icon="pi pi-check" class="!w-8 !h-8 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !shadow-sm !text-white !text-xs" v-tooltip.left="'Setujui'" @click="approveCreatorRequest(data)" />
-                  <Button icon="pi pi-times" class="!w-8 !h-8 !rounded-full !bg-red-400 !border-red-400 hover:!bg-red-500 !shadow-sm !text-white !text-xs" v-tooltip.left="'Tolak'" @click="openRejectCreatorDialog(data)" />
+                  <Button icon="pi pi-check" class="!w-8 !h-8 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !shadow-sm !text-white !text-xs"  @click="approveCreatorRequest(data)" />
+                  <Button icon="pi pi-times" class="!w-8 !h-8 !rounded-full !bg-red-400 !border-red-400 hover:!bg-red-500 !shadow-sm !text-white !text-xs" @click="openRejectCreatorDialog(data)" />
                 </div>
               </template>
             </Column>
@@ -396,7 +396,7 @@
                 <div class="flex items-center gap-4 text-xs text-gray-500">
                   <span class="flex items-center gap-1"><i class="pi pi-users"></i> {{ campaign.backer_count }} Backer</span>
                   <span class="flex items-center gap-1"><i class="pi pi-calendar"></i> Tenggat {{ formatDate(campaign.deadline) }}</span>
-                </div>                  <Button icon="pi pi-ban" class="!w-7 !h-7 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !shadow-sm !text-white !text-[10px]" v-tooltip.left="'Ban'" @click="confirmBanCampaign(campaign)" />
+                </div>                  <Button icon="pi pi-ban" class="!w-7 !h-7 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !shadow-sm !text-white !text-[10px]"  @click="confirmBanCampaign(campaign)" />
               </div>
             </div>
           </div>

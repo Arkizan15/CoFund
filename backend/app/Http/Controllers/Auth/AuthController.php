@@ -331,7 +331,11 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $request): JsonResponse
     {
-        $status = Password::sendResetLink($request->only('email'));
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $status = Password::sendResetLink($validated);
 
         if ($status === Password::RESET_LINK_SENT) {
             return response()->json([
@@ -342,7 +346,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => __($status),
+            'message' => 'Email tidak ditemukan dalam sistem kami.',
         ], 422);
     }
 

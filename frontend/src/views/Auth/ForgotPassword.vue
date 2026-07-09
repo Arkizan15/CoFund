@@ -118,7 +118,11 @@ const handleForgotPassword = async () => {
     emailSent.value = true
   } catch (error) {
     if (error.response?.status === 422) {
-      Object.assign(errors, error.response.data.errors)
+      if (error.response.data?.errors) {
+        Object.assign(errors, error.response.data.errors)
+      } else if (error.response.data?.message) {
+        errorMessage.value = error.response.data.message
+      }
     } else {
       errorMessage.value = error.response?.data?.message || 'Gagal mengirim email reset password. Silakan coba lagi.'
     }

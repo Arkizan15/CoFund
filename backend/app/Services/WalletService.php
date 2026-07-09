@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\RupiahHelper;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\WalletTransaction;
@@ -16,7 +17,7 @@ class WalletService
             $walletTransaction->update([
                 'status' => 'success',
                 'amount' => $amount,
-                'description' => 'Top up saldo berhasil — Rp ' . number_format($amount, 0, ',', '.'),
+                'description' => 'Top up saldo berhasil — ' . RupiahHelper::format($amount),
             ]);
 
             $user->balance += $amount;
@@ -51,7 +52,7 @@ class WalletService
                 $walletTransaction->update([
                     'status' => 'success',
                     'amount' => $amount,
-                    'description' => 'Penarikan dana berhasil — Rp ' . number_format($amount, 0, ',', '.'),
+                    'description' => 'Penarikan dana berhasil — ' . RupiahHelper::format($amount),
                 ]);
 
                 $user->balance -= $amount;
