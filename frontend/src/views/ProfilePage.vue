@@ -381,7 +381,7 @@
 
             <div class="flex flex-col gap-1.5">
               <label for="reason" class="text-sm font-semibold text-gray-700">
-                Alasan permohonan <span class="text-gray-400 font-normal">(Opsional)</span>
+                Alasan permohonan <span class="text-red-400 font-normal">(Wajib)</span>
               </label>
               <Textarea
                 id="reason"

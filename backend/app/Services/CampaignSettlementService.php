@@ -64,72 +64,79 @@ class CampaignSettlementService
 
     public static function processDisbursement(Campaign $campaign): void
     {
-        $collected = (float) $campaign->collected_amount;
-        $platformFee = round($collected * self::PLATFORM_FEE_PERCENT / 100, 2);
-        $creatorAmount = $collected - $platformFee;
+        DB::transaction(function () use ($campaign) {
+            $collected = (float) $campaign->collected_amount;
+            $platformFee = round($collected * self::PLATFORM_FEE_PERCENT / 100, 2);
+            $creatorAmount = $collected - $platformFee;
 
-        $campaign->status = CampaignStatus::SUCCESS;
-        $campaign->save();
+            $campaign->status = CampaignStatus::SUCCESS;
+            $campaign->save();
 
-        $creator = $campaign->user;
-        $creator->balance += $creatorAmount;
-        $creator->save();
+            $creator = $campaign->user;
+            $creator->balance += $creatorAmount;
+            $creator->save();
 
-        $disbursementRef = 'DBS-' . strtoupper(uniqid());
-        WalletTransaction::create([
-            'user_id' => $creator->id,
-            'type' => 'disbursement',
-            'amount' => $creatorAmount,
-            'status' => 'success',
-            'reference' => $disbursementRef,
-            'description' => 'Pencairan dana kampanye "' . $campaign->title . '" — Rp ' .
-                number_format($creatorAmount, 0, ',', '.'),
-        ]);
-
-        $feeRef = 'FEE-' . strtoupper(uniqid());
-        WalletTransaction::create([
-            'user_id' => $creator->id,
-            'type' => 'platform_fee',
-            'amount' => $platformFee,
-            'status' => 'success',
-            'reference' => $feeRef,
-            'description' => 'Biaya platform 5% untuk kampanye "' . $campaign->title . '" — Rp ' .
-                number_format($platformFee, 0, ',', '.'),
-        ]);
-
-        Transaction::create([
-            'user_id' => $creator->id,
-            'type' => 'disbursement',
-            'amount' => $creatorAmount,
-            'status' => 'success',
-            'reference' => $disbursementRef,
-        ]);
-
-        Transaction::create([
-            'user_id' => $creator->id,
-            'type' => 'platform_fee',
-            'amount' => $platformFee,
-            'status' => 'success',
-            'reference' => $feeRef,
-        ]);
-
-        Notification::create([
-            'user_id' => $creator->id,
-            'type' => 'disbursement_success',
-            'title' => 'Pencairan Dana Berhasil!',
-            'body' => 'Kampanye "' . $campaign->title . '" telah mencapai target! Dana Rp ' .
-                number_format($creatorAmount, 0, ',', '.') .
-                ' telah masuk ke saldo Anda (setelah potongan biaya platform 5%).',
-            'data' => [
-                'campaign_id' => $campaign->id,
-                'campaign_slug' => $campaign->slug,
+            $disbursementRef = 'DBS-' . strtoupper(uniqid());
+            WalletTransaction::create([
+                'user_id' => $creator->id,
+                'type' => 'disbursement',
                 'amount' => $creatorAmount,
-                'platform_fee' => $platformFee,
-            ],
-            'created_at' => now(),
-        ]);
+                'status' => 'success',
+                'reference' => $disbursementRef,
+                'description' => 'Pencairan dana kampanye "' . $campaign->title . '" — Rp ' .
+                    number_format($creatorAmount, 0, ',', '.'),
+            ]);
+
+            $feeRef = 'FEE-' . strtoupper(uniqid());
+            WalletTransaction::create([
+                'user_id' => $creator->id,
+                'type' => 'platform_fee',
+                'amount' => $platformFee,
+                'status' => 'success',
+                'reference' => $feeRef,
+                'description' => 'Biaya platform 5% untuk kampanye "' . $campaign->title . '" — Rp ' .
+                    number_format($platformFee, 0, ',', '.'),
+            ]);
+
+            Transaction::create([
+                'user_id' => $creator->id,
+                'type' => 'disbursement',
+                'amount' => $creatorAmount,
+                'status' => 'success',
+                'reference' => $disbursementRef,
+            ]);
+
+            Transaction::create([
+                'user_id' => $creator->id,
+                'type' => 'platform_fee',
+                'amount' => $platformFee,
+                'status' => 'success',
+                'reference' => $feeRef,
+            ]);
+
+            Notification::create([
+                'user_id' => $creator->id,
+                'type' => 'disbursement_success',
+                'title' => 'Pencairan Dana Berhasil!',
+                'body' => 'Kampanye "' . $campaign->title . '" telah mencapai target! Dana Rp ' .
+                    number_format($creatorAmount, 0, ',', '.') .
+                    ' telah masuk ke saldo Anda (setelah potongan biaya platform 5%).',
+                'data' => [
+                    'campaign_id' => $campaign->id,
+                    'campaign_slug' => $campaign->slug,
+                    'amount' => $creatorAmount,
+                    'platform_fee' => $platformFee,
+                ],
+                'created_at' => now(),
+            ]);
+        });
 
         try {
+            $creator = $campaign->user;
+            $collected = (float) $campaign->collected_amount;
+            $platformFee = round($collected * self::PLATFORM_FEE_PERCENT / 100, 2);
+            $creatorAmount = $collected - $platformFee;
+
             Mail::to($creator->email)->send(new NotifikasiEmail(
                 'Pencairan Dana: ' . $campaign->title,
                 'Halo ' . $creator->name . '!',
@@ -148,8 +155,62 @@ class CampaignSettlementService
 
     public static function processRefund(Campaign $campaign): void
     {
-        $campaign->status = CampaignStatus::FAILED;
-        $campaign->save();
+        DB::transaction(function () use ($campaign) {
+            $campaign->status = CampaignStatus::FAILED;
+            $campaign->save();
+
+            $completedBackings = Backing::where('campaign_id', $campaign->id)
+                ->where('status', BackingStatus::COMPLETED)
+                ->with('user')
+                ->get();
+
+            foreach ($completedBackings as $backing) {
+                $backer = $backing->user;
+                $amount = (float) $backing->amount;
+
+                $backer->balance += $amount;
+                $backer->save();
+
+                $backing->status = BackingStatus::REFUNDED;
+                $backing->save();
+
+                $refundRef = 'RFD-' . strtoupper(uniqid());
+
+                Transaction::create([
+                    'user_id' => $backer->id,
+                    'backing_id' => $backing->id,
+                    'type' => 'refund',
+                    'amount' => $amount,
+                    'status' => 'success',
+                    'reference' => $refundRef,
+                ]);
+
+                WalletTransaction::create([
+                    'user_id' => $backer->id,
+                    'type' => 'refund',
+                    'amount' => $amount,
+                    'status' => 'success',
+                    'reference' => $refundRef,
+                    'description' => 'Refund dana kampanye "' . $campaign->title . '" — Rp ' .
+                        number_format($amount, 0, ',', '.'),
+                ]);
+
+                Notification::create([
+                    'user_id' => $backer->id,
+                    'type' => 'refund_success',
+                    'title' => 'Pengembalian Dana (Refund)',
+                    'body' => 'Kampanye "' . $campaign->title . '" gagal mencapai target. Dana Rp ' .
+                        number_format($amount, 0, ',', '.') . ' telah dikembalikan ke saldo Anda.',
+                    'data' => [
+                        'campaign_id' => $campaign->id,
+                        'campaign_slug' => $campaign->slug,
+                        'amount' => $amount,
+                        'backing_id' => $backing->id,
+                    ],
+                    'created_at' => now(),
+                ]);
+            }
+        });
 
         $completedBackings = Backing::where('campaign_id', $campaign->id)
             ->where('status', BackingStatus::COMPLETED)
@@ -159,48 +220,6 @@ class CampaignSettlementService
         foreach ($completedBackings as $backing) {
             $backer = $backing->user;
             $amount = (float) $backing->amount;
-
-            $backer->balance += $amount;
-            $backer->save();
-
-            $backing->status = BackingStatus::REFUNDED;
-            $backing->save();
-
-            $refundRef = 'RFD-' . strtoupper(uniqid());
-
-            Transaction::create([
-                'user_id' => $backer->id,
-                'backing_id' => $backing->id,
-                'type' => 'refund',
-                'amount' => $amount,
-                'status' => 'success',
-                'reference' => $refundRef,
-            ]);
-
-            WalletTransaction::create([
-                'user_id' => $backer->id,
-                'type' => 'refund',
-                'amount' => $amount,
-                'status' => 'success',
-                'reference' => $refundRef,
-                'description' => 'Refund dana kampanye "' . $campaign->title . '" — Rp ' .
-                    number_format($amount, 0, ',', '.'),
-            ]);
-
-            Notification::create([
-                'user_id' => $backer->id,
-                'type' => 'refund_success',
-                'title' => 'Pengembalian Dana (Refund)',
-                'body' => 'Kampanye "' . $campaign->title . '" gagal mencapai target. Dana Rp ' .
-                    number_format($amount, 0, ',', '.') . ' telah dikembalikan ke saldo Anda.',
-                'data' => [
-                    'campaign_id' => $campaign->id,
-                    'campaign_slug' => $campaign->slug,
-                    'amount' => $amount,
-                    'backing_id' => $backing->id,
-                ],
-                'created_at' => now(),
-            ]);
 
             try {
                 Mail::to($backer->email)->send(new NotifikasiEmail(

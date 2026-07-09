@@ -12,6 +12,7 @@ class CreatorRequest extends Model
 
     protected $fillable = [
         'user_id',
+        'reason',
         'status',
         'rejection_reason',
     ];

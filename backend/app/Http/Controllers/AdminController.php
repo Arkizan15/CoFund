@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Enums\BackingStatus;
 use App\Enums\CampaignStatus;
 use App\Enums\RoleEnum;
+use App\Http\Requests\RejectCampaignRequest;
+use App\Http\Requests\SendAnnouncementRequest;
 use App\Mail\NotifikasiEmail;
 use App\Models\Backing;
 use App\Models\Campaign;
@@ -17,6 +19,7 @@ use App\Services\CampaignSettlementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -137,11 +140,9 @@ class AdminController extends Controller
         ], 200);
     }
 
-    public function rejectCampaign(Request $request, int $id): JsonResponse
+    public function rejectCampaign(RejectCampaignRequest $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'reason' => ['required', 'string', 'max:500'],
-        ]);
+        $validated = $request->validated();
 
         $campaign = Campaign::findOrFail($id);
 
@@ -386,16 +387,35 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if ($user->suspended_at) {
-            $user->suspended_at = null;
-            $message = 'Akun user berhasil diaktifkan kembali.';
-        } else {
-            $user->suspended_at = now();
-            $user->tokens()->delete();
-            $message = 'Akun user berhasil dinonaktifkan.';
-        }
+        DB::transaction(function () use ($user) {
+            if ($user->suspended_at) {
+                $user->suspended_at = null;
+            } else {
+                $user->suspended_at = now();
+                $user->tokens()->delete();
+            }
 
-        $user->save();
+            $user->save();
+
+            $notifType = $user->suspended_at ? 'user_banned' : 'user_unbanned';
+            $notifTitle = $user->suspended_at ? 'Akun Dinonaktifkan' : 'Akun Diaktifkan Kembali';
+            $notifBody = $user->suspended_at
+                ? "Akun Anda telah dinonaktifkan oleh admin. Anda tidak dapat masuk atau melakukan aktivitas di platform."
+                : "Akun Anda telah diaktifkan kembali oleh admin. Anda dapat masuk dan menggunakan platform seperti biasa.";
+
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => $notifType,
+                'title' => $notifTitle,
+                'body' => $notifBody,
+                'data' => ['suspended_at' => $user->suspended_at],
+                'created_at' => now(),
+            ]);
+        });
+
+        $message = $user->suspended_at
+            ? 'Akun user berhasil dinonaktifkan.'
+            : 'Akun user berhasil diaktifkan kembali.';
 
         ActivityLoggerService::log(
             Auth::id(),
@@ -404,21 +424,6 @@ class AdminController extends Controller
             $user->id,
             $user->suspended_at ? "Menonaktifkan user: {$user->name} ({$user->email})" : "Mengaktifkan user: {$user->name} ({$user->email})"
         );
-
-        $notifType = $user->suspended_at ? 'user_banned' : 'user_unbanned';
-        $notifTitle = $user->suspended_at ? 'Akun Dinonaktifkan' : 'Akun Diaktifkan Kembali';
-        $notifBody = $user->suspended_at
-            ? "Akun Anda telah dinonaktifkan oleh admin. Anda tidak dapat masuk atau melakukan aktivitas di platform."
-            : "Akun Anda telah diaktifkan kembali oleh admin. Anda dapat masuk dan menggunakan platform seperti biasa.";
-
-        Notification::create([
-            'user_id' => $user->id,
-            'type' => $notifType,
-            'title' => $notifTitle,
-            'body' => $notifBody,
-            'data' => ['suspended_at' => $user->suspended_at],
-            'created_at' => now(),
-        ]);
 
         return response()->json([
             'success' => true,
@@ -433,12 +438,9 @@ class AdminController extends Controller
     /**
      * Send an announcement notification to all users (admin only).
      */
-    public function sendAnnouncement(Request $request): JsonResponse
+    public function sendAnnouncement(SendAnnouncementRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:200'],
-            'body' => ['required', 'string', 'max:2000'],
-        ]);
+        $validated = $request->validated();
 
         $users = User::all();
         $count = 0;

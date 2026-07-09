@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Enums\BackingStatus;
 use App\Enums\CampaignStatus;
 use App\Enums\RoleEnum;
+use App\Http\Requests\StoreCampaignRequest;
+use App\Http\Requests\UpdateCampaignRequest;
 use App\Mail\NotifikasiEmail;
 use App\Models\Backing;
 use App\Models\Campaign;
@@ -94,7 +96,7 @@ class CampaignController extends Controller
         ], 200);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreCampaignRequest $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -112,20 +114,7 @@ class CampaignController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'category_id' => ['required', 'exists:categories,id'],
-            'title' => ['required', 'string', 'max:100'],
-            'slug' => ['nullable', 'string', 'max:120', 'unique:campaigns,slug', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
-            'description' => ['required', 'string'],
-            'target_amount' => ['required', 'numeric', 'min:100000'],
-            'deadline' => ['required', 'date', 'after_or_equal:' . now()->addDays(7)->format('Y-m-d')],
-            'video_url' => ['nullable', 'url'],
-            'tiers' => ['required', 'array', 'min:1'],
-            'tiers.*.name' => ['required', 'string', 'max:100'],
-            'tiers.*.min_amount' => ['required', 'numeric', 'min:10000'],
-            'tiers.*.quota' => ['nullable', 'integer', 'min:0'],
-            'tiers.*.reward_description' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $validated = $request->validated();
 
         // Handle slug: if not provided, auto-generate from title
         if (!empty($validated['slug'])) {
@@ -175,7 +164,7 @@ class CampaignController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateCampaignRequest $request, int $id): JsonResponse
     {
         $campaign = Campaign::findOrFail($id);
 
@@ -193,24 +182,7 @@ class CampaignController extends Controller
             ], 422);
         }
 
-        $validated = $request->validate([
-            'category_id' => ['sometimes', 'required', 'exists:categories,id'],
-            'title' => ['sometimes', 'required', 'string', 'max:100'],
-            'slug' => [
-                'nullable', 'string', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
-                'unique:campaigns,slug,' . $campaign->id,
-            ],
-            'description' => ['sometimes', 'required', 'string'],
-            'target_amount' => ['sometimes', 'required', 'numeric', 'min:100000'],
-            'deadline' => ['sometimes', 'required', 'date', 'after_or_equal:' . now()->addDays(7)->format('Y-m-d')],
-            'video_url' => ['nullable', 'url'],
-            'tiers' => ['nullable', 'array', 'min:1'],
-            'tiers.*.id' => ['nullable', 'exists:campaign_tiers,id'],
-            'tiers.*.name' => ['required', 'string', 'max:100'],
-            'tiers.*.min_amount' => ['required', 'numeric', 'min:10000'],
-            'tiers.*.quota' => ['nullable', 'integer', 'min:0'],
-            'tiers.*.reward_description' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $validated = $request->validated();
 
         // Handle slug: if provided, manual slug; else auto-generate from title
         if (array_key_exists('slug', $validated)) {

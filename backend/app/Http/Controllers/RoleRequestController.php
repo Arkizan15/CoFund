@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoleEnum;
+use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\UpdateRoleRequest;
 use App\Models\CreatorRequest;
 use App\Models\Notification;
 use App\Services\ActivityLoggerService;
@@ -24,7 +26,7 @@ class RoleRequestController extends Controller
         ], 200);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreRoleRequest $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -39,12 +41,11 @@ class RoleRequestController extends Controller
             ], 422);
         }
 
-        $validated = $request->validate([
-            'reason' => ['nullable', 'string', 'max:500'],
-        ]);
+        $validated = $request->validated();
 
         $creatorRequest = CreatorRequest::create([
             'user_id' => $user->id,
+            'reason' => $validated['reason'],
             'status' => 'pending',
         ]);
 
@@ -77,7 +78,7 @@ class RoleRequestController extends Controller
         ], 200);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateRoleRequest $request, int $id): JsonResponse
     {
         $user = Auth::user();
 
@@ -88,10 +89,7 @@ class RoleRequestController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'status' => ['required', 'in:approved,rejected'],
-            'rejection_reason' => ['nullable', 'string', 'max:500'],
-        ]);
+        $validated = $request->validated();
 
         $creatorRequest = CreatorRequest::findOrFail($id);
 

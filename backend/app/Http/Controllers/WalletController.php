@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enums\BackingStatus;
+use App\Http\Requests\TopUpRequest;
+use App\Http\Requests\VerifyPaymentRequest;
+use App\Http\Requests\WithdrawRequest;
 use App\Mail\NotifikasiEmail;
 use App\Models\Backing;
 use App\Models\Campaign;
@@ -11,6 +14,7 @@ use App\Models\Notification;
 use App\Models\Transaction;
 use App\Models\WalletTransaction;
 use App\Services\CampaignSettlementService;
+use App\Services\WalletService;
 use App\Services\XenditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,23 +28,21 @@ use Xendit\Invoice\InvoiceStatus;
 class WalletController extends Controller
 {
     protected XenditService $xendit;
+    protected WalletService $walletService;
 
-    public function __construct(XenditService $xendit)
+    public function __construct(XenditService $xendit, WalletService $walletService)
     {
         $this->xendit = $xendit;
+        $this->walletService = $walletService;
     }
 
     /**
      * Create a Xendit Invoice for wallet top-up.
      * Returns the invoice URL for the frontend to redirect the user.
      */
-    public function createTopUp(Request $request): JsonResponse
+    public function createTopUp(TopUpRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'amount' => ['required', 'numeric', 'min:10000'],
-            'success_redirect_url' => ['nullable', 'url'],
-            'failure_redirect_url' => ['nullable', 'url'],
-        ]);
+        $validated = $request->validated();
 
         $user = Auth::user();
         $amount = (float) $validated['amount'];
@@ -154,91 +156,21 @@ class WalletController extends Controller
         $isPaid = in_array(strtoupper($status), ['PAID', 'SETTLED']);
 
         if ($isPaid) {
-            DB::beginTransaction();
-            try {
-                $amount = (float) ($paidAmount ?? $walletTransaction->amount);
-                $user = $walletTransaction->user;
+            $amount = (float) ($paidAmount ?? $walletTransaction->amount);
+            $user = $walletTransaction->user;
 
-                if ($isTopUp) {
-                    // TOP-UP: Increment balance
-                    $walletTransaction->update([
-                        'status' => 'success',
-                        'amount' => $amount,
-                        'description' => 'Top up saldo berhasil — Rp ' . number_format($amount, 0, ',', '.'),
-                    ]);
-
-                    $user->balance += $amount;
-                    $user->save();
-
-                    Transaction::create([
-                        'user_id' => $user->id,
-                        'type' => 'topup',
-                        'amount' => $amount,
-                        'status' => 'success',
-                        'reference' => $externalId,
-                    ]);
-
-                    DB::commit();
-
-                    Log::info('Xendit top-up completed', [
-                        'user_id' => $user->id,
-                        'amount' => $amount,
-                        'external_id' => $externalId,
-                    ]);
-                } elseif ($isWithdraw) {
-                    // WITHDRAW: Deduct balance (already put on hold or deduct now)
-                    // For staging invoice-based withdraw, the balance was NOT pre-deducted.
-                    // Deduct now since the invoice was "paid".
-                    if ($user->balance < $amount) {
-                        DB::rollBack();
-                        $walletTransaction->update(['status' => 'failed']);
-                        Log::warning('Xendit withdraw callback: insufficient balance', [
-                            'user_id' => $user->id,
-                            'amount' => $amount,
-                            'external_id' => $externalId,
-                        ]);
-                        return response()->json(['error' => 'Insufficient balance'], 422);
-                    }
-
-                    $walletTransaction->update([
-                        'status' => 'success',
-                        'amount' => $amount,
-                        'description' => 'Penarikan dana berhasil — Rp ' . number_format($amount, 0, ',', '.'),
-                    ]);
-
-                    $user->balance -= $amount;
-                    $user->save();
-
-                    Transaction::create([
-                        'user_id' => $user->id,
-                        'type' => 'disbursement',
-                        'amount' => $amount,
-                        'status' => 'success',
-                        'reference' => $externalId,
-                    ]);
-
-                    DB::commit();
-
-                    Log::info('Xendit withdraw completed via invoice callback', [
-                        'user_id' => $user->id,
-                        'amount' => $amount,
-                        'external_id' => $externalId,
-                    ]);
-                } else {
-                    DB::rollBack();
-                    Log::warning('Xendit callback: unknown transaction type', [
-                        'external_id' => $externalId,
-                    ]);
-                    return response()->json(['error' => 'Unknown transaction type'], 400);
+            if ($isTopUp) {
+                $this->walletService->processTopUp($walletTransaction, $user, $amount, $externalId);
+            } elseif ($isWithdraw) {
+                $success = $this->walletService->processWithdraw($walletTransaction, $user, $amount, $externalId);
+                if (!$success) {
+                    return response()->json(['error' => 'Insufficient balance'], 422);
                 }
-            } catch (\Exception $e) {
-                DB::rollBack();
-                Log::error('Xendit callback: failed to process transaction', [
+            } else {
+                Log::warning('Xendit callback: unknown transaction type', [
                     'external_id' => $externalId,
-                    'type' => $isTopUp ? 'topup' : 'withdraw',
-                    'error' => $e->getMessage(),
                 ]);
-                return response()->json(['error' => 'Processing failed'], 500);
+                return response()->json(['error' => 'Unknown transaction type'], 400);
             }
         } else {
             // Payment failed or expired
@@ -470,13 +402,9 @@ class WalletController extends Controller
      * No bank details needed — uses Xendit Checkout page like top-up.
      * The callback will deduct the balance upon successful payment.
      */
-    public function createWithdraw(Request $request): JsonResponse
+    public function createWithdraw(WithdrawRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'amount' => ['required', 'numeric', 'min:10000'],
-            'success_redirect_url' => ['nullable', 'url'],
-            'failure_redirect_url' => ['nullable', 'url'],
-        ]);
+        $validated = $request->validated();
 
         $user = Auth::user();
         $amount = (float) $validated['amount'];
@@ -549,11 +477,9 @@ class WalletController extends Controller
      * Verify payment status after Xendit redirect.
      * Used as fallback when webhook callback is missed (e.g., local development).
      */
-    public function verifyPayment(Request $request): JsonResponse
+    public function verifyPayment(VerifyPaymentRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'external_id' => ['required', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $user = Auth::user();
         $externalId = $validated['external_id'];
@@ -595,68 +521,22 @@ class WalletController extends Controller
             $isTopUp = str_starts_with($externalId, 'COFUND-TOPUP-');
             $isWithdraw = str_starts_with($externalId, 'COFUND-WITHDRAW-');
 
-            DB::beginTransaction();
-            try {
-                if ($isTopUp) {
-                    $walletTransaction->update([
-                        'status' => 'success',
-                        'amount' => $amount,
-                        'description' => 'Top up saldo berhasil — Rp ' . number_format($amount, 0, ',', '.'),
-                    ]);
-
-                    $user->balance += $amount;
-                    $user->save();
-
-                    Transaction::create([
-                        'user_id' => $user->id,
-                        'type' => 'topup',
-                        'amount' => $amount,
-                        'status' => 'success',
-                        'reference' => $externalId,
-                    ]);
-                } elseif ($isWithdraw) {
-                    if ($user->balance < $amount) {
-                        DB::rollBack();
-                        $walletTransaction->update(['status' => 'failed']);
-                        return response()->json(['error' => 'Insufficient balance'], 422);
-                    }
-
-                    $walletTransaction->update([
-                        'status' => 'success',
-                        'amount' => $amount,
-                        'description' => 'Penarikan dana berhasil — Rp ' . number_format($amount, 0, ',', '.'),
-                    ]);
-
-                    $user->balance -= $amount;
-                    $user->save();
-
-                    Transaction::create([
-                        'user_id' => $user->id,
-                        'type' => 'disbursement',
-                        'amount' => $amount,
-                        'status' => 'success',
-                        'reference' => $externalId,
-                    ]);
-                } else {
-                    DB::rollBack();
-                    return response()->json(['error' => 'Unknown transaction type'], 400);
+            if ($isTopUp) {
+                $this->walletService->processTopUp($walletTransaction, $user, $amount, $externalId);
+            } elseif ($isWithdraw) {
+                $success = $this->walletService->processWithdraw($walletTransaction, $user, $amount, $externalId);
+                if (!$success) {
+                    return response()->json(['error' => 'Insufficient balance'], 422);
                 }
-
-                DB::commit();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Payment verified successfully',
-                    'data' => ['balance' => $user->balance],
-                ]);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                Log::error('Payment verification failed', [
-                    'external_id' => $externalId,
-                    'error' => $e->getMessage(),
-                ]);
-                return response()->json(['error' => 'Processing failed'], 500);
+            } else {
+                return response()->json(['error' => 'Unknown transaction type'], 400);
             }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment verified successfully',
+                'data' => ['balance' => $user->balance],
+            ]);
         } catch (\Exception $e) {
             Log::error('Xendit API verification failed', [
                 'external_id' => $externalId,

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\BackingStatus;
 use App\Enums\CampaignStatus;
+use App\Http\Requests\CreateBackingInvoiceRequest;
+use App\Http\Requests\StoreBackingRequest;
 use App\Mail\NotifikasiEmail;
 use App\Models\Backing;
 use App\Models\Campaign;
@@ -11,6 +13,7 @@ use App\Models\CampaignTier;
 use App\Models\Notification;
 use App\Models\Transaction;
 use App\Models\WalletTransaction;
+use App\Services\BackingService;
 use App\Services\CampaignSettlementService;
 use App\Services\XenditService;
 use Illuminate\Http\JsonResponse;
@@ -23,10 +26,12 @@ use Illuminate\Support\Facades\Mail;
 class BackingController extends Controller
 {
     protected XenditService $xendit;
+    protected BackingService $backingService;
 
-    public function __construct(XenditService $xendit)
+    public function __construct(XenditService $xendit, BackingService $backingService)
     {
         $this->xendit = $xendit;
+        $this->backingService = $backingService;
     }
 
     /**
@@ -34,7 +39,7 @@ class BackingController extends Controller
      * Returns the invoice URL for the frontend to redirect the user to Xendit checkout.
      * Use this when Xendit payment gateway is configured.
      */
-    public function createBackingInvoice(Request $request): JsonResponse
+    public function createBackingInvoice(CreateBackingInvoiceRequest $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -45,13 +50,7 @@ class BackingController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'campaign_id' => ['required', 'exists:campaigns,id'],
-            'tier_id' => ['nullable', 'exists:campaign_tiers,id'],
-            'amount' => ['required', 'numeric', 'min:10000'],
-            'success_redirect_url' => ['nullable', 'url'],
-            'failure_redirect_url' => ['nullable', 'url'],
-        ]);
+        $validated = $request->validated();
 
         $campaign = Campaign::findOrFail($validated['campaign_id']);
 
@@ -173,11 +172,10 @@ class BackingController extends Controller
      *
      * POST /api/backings
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreBackingRequest $request): JsonResponse
     {
         $user = Auth::user();
 
-        // 1. Email verification check
         if ($user->hasVerifiedEmail() === false) {
             return response()->json([
                 'success' => false,
@@ -185,16 +183,11 @@ class BackingController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'campaign_id' => ['required', 'exists:campaigns,id'],
-            'tier_id' => ['nullable', 'exists:campaign_tiers,id'],
-            'amount' => ['required', 'numeric', 'min:10000'],
-        ]);
+        $validated = $request->validated();
 
         $campaign = Campaign::findOrFail($validated['campaign_id']);
         $amount = (float) $validated['amount'];
 
-        // 2. Creator restriction: cannot back own campaign
         if ($campaign->user_id === $user->id) {
             return response()->json([
                 'success' => false,
@@ -202,7 +195,6 @@ class BackingController extends Controller
             ], 403);
         }
 
-        // 3. Campaign must be active
         if ($campaign->status !== CampaignStatus::ACTIVE) {
             return response()->json([
                 'success' => false,
@@ -210,7 +202,6 @@ class BackingController extends Controller
             ], 422);
         }
 
-        // 4. Tier validation (if selected)
         if (isset($validated['tier_id'])) {
             $tier = CampaignTier::findOrFail($validated['tier_id']);
 
@@ -236,7 +227,6 @@ class BackingController extends Controller
             }
         }
 
-        // 5. Balance check
         if ($user->balance < $amount) {
             return response()->json([
                 'success' => false,
@@ -244,7 +234,6 @@ class BackingController extends Controller
             ], 422);
         }
 
-        // 6. Check if backing amount exceeds remaining target
         $collected = (float) $campaign->collected_amount;
         $target = (float) $campaign->target_amount;
         $remaining = max(0, $target - $collected);
@@ -255,52 +244,14 @@ class BackingController extends Controller
             ], 422);
         }
 
-        DB::beginTransaction();
         try {
-            // 7. Deduct balance first
-            $user->balance -= $amount;
-            $user->save();
-
-            // 8. Create backing with COMPLETED status (instant mock payment)
-            $backing = Backing::create([
-                'user_id' => $user->id,
-                'campaign_id' => $campaign->id,
-                'tier_id' => $validated['tier_id'] ?? null,
-                'amount' => $amount,
-                'status' => BackingStatus::COMPLETED,
-            ]);
-
-            // 9. Create transaction record
-            $paymentRef = 'PAY-' . strtoupper(uniqid());
-            Transaction::create([
-                'user_id' => $user->id,
-                'backing_id' => $backing->id,
-                'type' => 'payment',
-                'amount' => $amount,
-                'status' => 'success',
-                'reference' => $paymentRef,
-            ]);
-
-            WalletTransaction::create([
-                'user_id' => $user->id,
-                'type' => 'payment',
-                'amount' => $amount,
-                'status' => 'success',
-                'reference' => $paymentRef,
-                'description' => 'Pendanaan untuk kampanye "' . $campaign->title . '" — Rp ' .
-                    number_format($amount, 0, ',', '.'),
-            ]);
-
-            // 10. Update tier quota and campaign collected amount
-            if (isset($validated['tier_id'])) {
-                CampaignTier::where('id', $validated['tier_id'])->decrement('remaining_quota');
-            }
-
-            $campaign->increment('collected_amount', $amount);
-
-            DB::commit();
+            $result = $this->backingService->processWalletBacking(
+                $user,
+                $campaign,
+                $amount,
+                $validated['tier_id'] ?? null
+            );
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error('Backing failed', [
                 'user_id' => $user->id,
                 'campaign_id' => $campaign->id,
@@ -313,91 +264,10 @@ class BackingController extends Controller
             ], 500);
         }
 
-        // Non-critical post-commit operations: notifications, disbursement, email.
-        // Also wrap the final response so any serialization error still returns success JSON
-        // (the DB transaction has already committed at this point).
-        try {
-            // Auto-disburse if target is reached
-            if ((float) $campaign->fresh()->collected_amount >= (float) $campaign->target_amount) {
-                CampaignSettlementService::processDisbursement($campaign);
-            }
-
-            // Send notification to backer
-            Notification::create([
-                'user_id' => $user->id,
-                'type' => 'backing_success',
-                'title' => 'Pendanaan Berhasil!',
-                'body' => 'Dana sebesar Rp ' . number_format($amount, 0, ',', '.') . ' untuk "' . $campaign->title . '" telah masuk ke escrow.',
-                'data' => [
-                    'campaign_id' => $campaign->id,
-                    'campaign_slug' => $campaign->slug,
-                    'amount' => $amount,
-                    'backing_id' => $backing->id,
-                ],
-                'created_at' => now(),
-            ]);
-
-            // Notify campaign creator about new backing
-            if ($campaign->user_id !== $user->id) {
-                Notification::create([
-                    'user_id' => $campaign->user_id,
-                    'type' => 'backing_received',
-                    'title' => 'Pendanaan Baru Masuk!',
-                    'body' => 'Kampanye "' . $campaign->title . '" menerima pendanaan sebesar Rp ' .
-                        number_format($amount, 0, ',', '.') .
-                        ' dari ' . $user->name . '.',
-                    'data' => [
-                        'campaign_id' => $campaign->id,
-                        'campaign_slug' => $campaign->slug,
-                        'amount' => $amount,
-                        'backer_name' => $user->name,
-                        'backing_id' => $backing->id,
-                    ],
-                    'created_at' => now(),
-                ]);
-            }
-
-            // Send email notification to backer
-            try {
-                Mail::to($user->email)->send(new NotifikasiEmail(
-                    'Konfirmasi Pendanaan',
-                    'Halo ' . $user->name . '!',
-                    'Terima kasih! Pendanaan Anda sebesar Rp ' . number_format($amount, 0, ',', '.') .
-                    ' untuk kampanye "' . $campaign->title . '" telah berhasil diproses.',
-                    'Lihat Detail Kampanye',
-                    url('/campaigns/' . $campaign->slug)
-                ));
-            } catch (\Exception $e) {
-                Log::warning('Gagal kirim email notifikasi backing: ' . $e->getMessage());
-            }
-
-            // Fresh response data — catch any serialization error
-            $responseData = [
-                'backing' => $backing->fresh(),
-                'balance' => $user->fresh()->balance,
-            ];
-        } catch (\Exception $e) {
-            // Backing already committed successfully — just log the failure
-            Log::error('Backing notification/disbursement/response failed', [
-                'backing_id' => $backing->id ?? null,
-                'error' => $e->getMessage(),
-            ]);
-            // Fallback without fresh() to avoid re-throwing if the DB is flaky
-            try {
-                $fallbackBalance = $user->fresh()->balance;
-            } catch (\Exception $_) {
-                $fallbackBalance = 0;
-            }
-            $responseData = [
-                'backing_id' => $backing->id ?? null,
-                'balance' => $fallbackBalance,
-            ];
-        }
-
         return response()->json([
             'success' => true,
             'message' => 'Pendanaan berhasil!',
-            'data' => $responseData,
+            'data' => $result,
         ], 201);
     }
 
@@ -460,58 +330,61 @@ class BackingController extends Controller
             ], 422);
         }
 
-        // Complete the backing
-        $user->balance -= $amount;
-        $user->save();
+        DB::transaction(function () use ($backing, $user, $amount) {
+            // Complete the backing
+            $user->balance -= $amount;
+            $user->save();
 
-        $backing->status = BackingStatus::COMPLETED;
-        $backing->save();
+            $backing->status = BackingStatus::COMPLETED;
+            $backing->save();
 
-        if ($backing->tier_id) {
-            CampaignTier::where('id', $backing->tier_id)->decrement('remaining_quota');
-        }
+            if ($backing->tier_id) {
+                CampaignTier::where('id', $backing->tier_id)->decrement('remaining_quota');
+            }
 
-        $backing->campaign->increment('collected_amount', $amount);
+            $backing->campaign->increment('collected_amount', $amount);
 
+            // Create transaction record
+            $paymentRef = 'PAY-' . strtoupper(uniqid());
+            Transaction::create([
+                'user_id' => $user->id,
+                'backing_id' => $backing->id,
+                'type' => 'payment',
+                'amount' => $amount,
+                'status' => 'success',
+                'reference' => $paymentRef,
+            ]);
+
+            WalletTransaction::create([
+                'user_id' => $user->id,
+                'type' => 'payment',
+                'amount' => $amount,
+                'status' => 'success',
+                'reference' => $paymentRef,
+                'description' => 'Pendanaan untuk kampanye "' . $backing->campaign->title . '" — Rp ' .
+                    number_format($amount, 0, ',', '.'),
+            ]);
+
+            // Notification
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'backing_success',
+                'title' => 'Pembayaran Berhasil!',
+                'body' => 'Pembayaran untuk "' . $backing->campaign->title . '" telah berhasil diproses.',
+                'data' => [
+                    'campaign_id' => $backing->campaign->id,
+                    'campaign_slug' => $backing->campaign->slug,
+                    'amount' => $amount,
+                    'backing_id' => $backing->id,
+                ],
+                'created_at' => now(),
+            ]);
+        });
+
+        // Auto-disburse if target is reached (outside transaction, runs independently)
         if ((float) $backing->campaign->fresh()->collected_amount >= (float) $backing->campaign->target_amount) {
             CampaignSettlementService::processDisbursement($backing->campaign);
         }
-
-        // Create transaction record
-        $paymentRef = 'PAY-' . strtoupper(uniqid());
-        Transaction::create([
-            'user_id' => $user->id,
-            'backing_id' => $backing->id,
-            'type' => 'payment',
-            'amount' => $amount,
-            'status' => 'success',
-            'reference' => $paymentRef,
-        ]);
-
-        WalletTransaction::create([
-            'user_id' => $user->id,
-            'type' => 'payment',
-            'amount' => $amount,
-            'status' => 'success',
-            'reference' => $paymentRef,
-            'description' => 'Pendanaan untuk kampanye "' . $backing->campaign->title . '" — Rp ' .
-                number_format($amount, 0, ',', '.'),
-        ]);
-
-        // Notification
-        Notification::create([
-            'user_id' => $user->id,
-            'type' => 'backing_success',
-            'title' => 'Pembayaran Berhasil!',
-            'body' => 'Pembayaran untuk "' . $backing->campaign->title . '" telah berhasil diproses.',
-            'data' => [
-                'campaign_id' => $backing->campaign->id,
-                'campaign_slug' => $backing->campaign->slug,
-                'amount' => $amount,
-                'backing_id' => $backing->id,
-            ],
-            'created_at' => now(),
-        ]);
 
         return response()->json([
             'success' => true,

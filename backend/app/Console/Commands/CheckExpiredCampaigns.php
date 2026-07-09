@@ -36,14 +36,12 @@ class CheckExpiredCampaigns extends Command
 
                 if ($collected >= $target) {
                     $campaign->status = CampaignStatus::SUCCESS;
-                    $campaign->settled_at = now();
                     $campaign->save();
 
                     DisburseCampaignJob::dispatch($campaign);
                     $disbursed++;
                 } else {
                     $campaign->status = CampaignStatus::FAILED;
-                    $campaign->settled_at = now();
                     $campaign->save();
 
                     RefundBackersJob::dispatch($campaign);
