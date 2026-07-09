@@ -18,20 +18,20 @@
               class="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors duration-200 no-underline"
               active-class="text-emerald-600 font-semibold"
             >
-              <i class="pi pi-home mr-1.5 text-xs"></i>Home
+              <i class="pi pi-home mr-1.5 text-xs"></i>Beranda
             </router-link>
             <router-link
               :to="{ name: 'CampaignList' }"
               class="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors duration-200 no-underline"
               active-class="text-emerald-600 font-semibold"
             >
-              <i class="pi pi-th-large mr-1.5 text-xs"></i>Campaign
+              <i class="pi pi-th-large mr-1.5 text-xs"></i>Kampanye
             </router-link>
           </div>
         </div>
 
         <!-- Right: Auth Actions -->
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-1 sm:gap-3">
           <!-- Guest Mode -->
           <template v-if="!authStore.isAuthenticated">
             <router-link :to="{ name: 'Login' }">
@@ -39,14 +39,14 @@
                 label="Masuk"
                 icon="pi pi-sign-in"
                 severity="success"
-                class="p-button-text p-button-sm !text-emerald-600 !font-medium !p-2 !px-3"
+                class="p-button-text p-button-sm !text-emerald-600 !font-medium !p-1.5 !px-2 sm:!p-2 sm:!px-3"
               />
             </router-link>
             <router-link :to="{ name: 'Register' }">
               <Button
                 label="Daftar"
                 icon="pi pi-user-plus"
-                class="p-button-sm !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !p-2 !px-3 shadow-sm"
+                class="p-button-sm !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-medium !p-1.5 !px-2 sm:!p-2 sm:!px-3 shadow-sm"
               />
             </router-link>
           </template>
@@ -69,6 +69,17 @@
               </router-link>
             </div>
 
+            <LanguageSwitcher />
+
+            <!-- Dark Mode Toggle -->
+            <button
+              @click="$emit('toggleDarkMode')"
+              class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+              :title="isDarkMode ? 'Mode Terang' : 'Mode Gelap'"
+            >
+              <i :class="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'" class="text-lg text-gray-600 hover:text-emerald-600 transition-colors"></i>
+            </button>
+
             <!-- Dashboard Quick Link (desktop only) -->
             <router-link
               :to="{ name: 'Dashboard' }"
@@ -87,7 +98,7 @@
                 <div class="w-9 h-9 rounded-full bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center overflow-hidden">
                   <i class="pi pi-user text-emerald-600 text-sm"></i>
                 </div>
-                <span class="hidden sm:inline text-sm font-medium text-gray-700 max-w-[100px] truncate">{{ authStore.user?.name || 'User' }}</span>
+                <span class="hidden sm:inline text-sm font-medium text-gray-700 max-w-[100px] truncate">{{ authStore.user?.name || 'Pengguna' }}</span>
                 <i class="pi pi-chevron-down text-xs text-gray-400 transition-transform" :class="{ 'rotate-180': dropdownOpen }"></i>
               </button>
 
@@ -97,7 +108,7 @@
                   class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
                 >
                   <div class="px-4 py-2 border-b border-gray-100">
-                    <p class="text-sm font-medium text-gray-800 truncate">{{ authStore.user?.name || 'User' }}</p>
+                    <p class="text-sm font-medium text-gray-800 truncate">{{ authStore.user?.name || 'Pengguna' }}</p>
                     <p class="text-xs text-gray-400 truncate">{{ authStore.user?.email || '' }}</p>
                   </div>
 
@@ -113,7 +124,7 @@
                     @click="dropdownOpen = false"
                     class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors no-underline"
                   >
-                    <i class="pi pi-user text-xs"></i> Profil Saya
+                    <i class="pi pi-user text-xs"></i> Profil
                   </router-link>
                   <router-link
                     :to="{ name: 'Notifications' }"
@@ -133,23 +144,24 @@
                   </router-link>
                   <hr class="my-1 border-gray-100" />
                   <button
-                    @click="handleLogout"
+                    @click="confirmLogout"
                     class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >
-                    <i class="pi pi-sign-out text-xs"></i> Logout
+                    <i class="pi pi-sign-out text-xs"></i> Keluar
                   </button>
                 </div>
               </Transition>
             </div>
 
-            <!-- Mobile Hamburger -->
-            <button
-              @click="mobileOpen = !mobileOpen"
-              class="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              <i class="pi" :class="mobileOpen ? 'pi-times' : 'pi-bars'"></i>
-            </button>
           </template>
+
+          <!-- Mobile Hamburger (visible for all) -->
+          <button
+            @click="mobileOpen = !mobileOpen"
+            class="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <i class="pi" :class="mobileOpen ? 'pi-times' : 'pi-bars'"></i>
+          </button>
         </div>
       </div>
 
@@ -162,7 +174,7 @@
             class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
             active-class="text-emerald-600 bg-emerald-50 font-semibold"
           >
-            <i class="pi pi-home text-xs"></i> Home
+            <i class="pi pi-home text-xs"></i> Beranda
           </router-link>
           <router-link
             :to="{ name: 'CampaignList' }"
@@ -170,8 +182,29 @@
             class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
             active-class="text-emerald-600 bg-emerald-50 font-semibold"
           >
-            <i class="pi pi-th-large text-xs"></i> Campaign
+            <i class="pi pi-th-large text-xs"></i> Kampanye
           </router-link>
+
+          <!-- Guest mobile links -->
+          <template v-if="!authStore.isAuthenticated">
+            <hr class="border-gray-100" />
+            <router-link
+              :to="{ name: 'Login' }"
+              @click="mobileOpen = false"
+              class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
+            >
+              <i class="pi pi-sign-in text-xs"></i> Masuk
+            </router-link>
+            <router-link
+              :to="{ name: 'Register' }"
+              @click="mobileOpen = false"
+              class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
+            >
+              <i class="pi pi-user-plus text-xs"></i> Daftar
+            </router-link>
+          </template>
+
+          <!-- Authenticated mobile links -->
           <template v-if="authStore.isAuthenticated">
             <hr class="border-gray-100" />
             <router-link
@@ -188,8 +221,11 @@
               class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
               active-class="text-emerald-600 bg-emerald-50 font-semibold"
             >
-              <i class="pi pi-user text-xs"></i> Profil Saya
+              <i class="pi pi-user text-xs"></i> Profil
             </router-link>
+            <div class="px-3 py-2">
+              <LanguageSwitcher />
+            </div>
             <router-link
               :to="{ name: 'Notifications' }"
               @click="mobileOpen = false"
@@ -210,16 +246,50 @@
             </router-link>
             <hr class="border-gray-100" />
             <button
-              @click="handleLogout"
+              @click="confirmLogout"
               class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             >
-              <i class="pi pi-sign-out text-xs"></i> Logout
+              <i class="pi pi-sign-out text-xs"></i> Keluar
             </button>
           </template>
         </div>
       </Transition>
     </div>
   </nav>
+
+  <!-- Logout Confirmation Dialog -->
+  <Dialog
+    v-model:visible="logoutDialogVisible"
+    header="Konfirmasi Keluar"
+    :modal="true"
+    :closable="true"
+    class="!rounded-[15px] !bg-white !max-w-full !w-[95vw] sm:!w-auto"
+    :style="{ maxWidth: '380px' }"
+  >
+    <div class="text-center py-2">
+      <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
+        <i class="pi pi-sign-out text-2xl text-red-500"></i>
+      </div>
+      <p class="text-gray-700 font-medium">Apakah Anda yakin ingin keluar?</p>
+      <p class="text-gray-400 text-sm mt-1">Anda perlu masuk kembali untuk mengakses akun Anda.</p>
+    </div>
+    <template #footer>
+      <div class="flex gap-2 justify-end">
+        <Button
+          label="Batal"
+          icon="pi pi-times"
+          class="p-button-text !text-gray-500 !rounded-xl"
+          @click="logoutDialogVisible = false"
+        />
+        <Button
+          label="Keluar"
+          icon="pi pi-sign-out"
+          class="!bg-red-600 !border-none hover:!bg-red-700 !text-white !rounded-xl"
+          @click="handleLogout"
+        />
+      </div>
+    </template>
+  </Dialog>
 </template>
 
 <script setup>
@@ -227,8 +297,16 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import { useToast } from 'primevue/usetoast'
 import { notificationService } from '@/services/notificationService'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
+
+const props = defineProps({
+  isDarkMode: { type: Boolean, default: false },
+})
+
+defineEmits(['toggleDarkMode'])
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -259,17 +337,35 @@ onUnmounted(() => {
 async function fetchUnreadCount() {
   if (!authStore.isAuthenticated) return
   try {
-    const res = await notificationService.getUnreadNotifications()
-    const notifications = res.data?.data || res.data || []
-    unreadCount.value = notifications.filter(n => !n.read_at).length
+    try {
+      const res = await notificationService.getUnreadCount()
+      unreadCount.value = res.data?.data?.count || res.data?.count || 0
+    } catch (e) {
+      // fallback: fetch all and count client-side
+      try {
+        const res = await notificationService.getUnreadNotifications()
+        const notifications = res.data?.data || res.data || []
+        unreadCount.value = notifications.filter(n => !n.read_at).length
+      } catch (e2) {
+        unreadCount.value = 0
+      }
+    }
   } catch (e) {
     // Silently fail
   }
 }
 
-const handleLogout = async () => {
+// Logout confirmation dialog
+const logoutDialogVisible = ref(false)
+
+function confirmLogout() {
   dropdownOpen.value = false
   mobileOpen.value = false
+  logoutDialogVisible.value = true
+}
+
+const handleLogout = async () => {
+  logoutDialogVisible.value = false
   try {
     await authStore.logout()
     toast.add({ severity: 'success', summary: 'Logout Berhasil', detail: 'Anda telah keluar.', life: 3000 })

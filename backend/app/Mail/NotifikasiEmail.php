@@ -9,16 +9,30 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NotifikasiEmail extends Mailable
+class NotifikasiEmail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+
+    public string $greeting;
+    public string $messageContent;
+    public ?string $actionText;
+    public ?string $actionUrl;
 
     /**
      * Create a new message instance.
      */
-    public function __construct()
-    {
-        //
+    public function __construct(
+        string $subject = 'Notifikasi Email',
+        string $greeting = 'Halo!',
+        string $messageContent = 'Ini adalah email otomatis yang dikirim dari aplikasi.',
+        ?string $actionText = null,
+        ?string $actionUrl = null,
+    ) {
+        $this->subject = $subject;
+        $this->greeting = $greeting;
+        $this->messageContent = $messageContent;
+        $this->actionText = $actionText;
+        $this->actionUrl = $actionUrl;
     }
 
     /**
@@ -27,7 +41,7 @@ class NotifikasiEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notifikasi Email',
+            subject: $this->subject,
         );
     }
 
@@ -37,7 +51,13 @@ class NotifikasiEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.notifikasi',
+            with: [
+                'greeting' => $this->greeting,
+                'messageContent' => $this->messageContent,
+                'actionText' => $this->actionText,
+                'actionUrl' => $this->actionUrl,
+            ],
         );
     }
 

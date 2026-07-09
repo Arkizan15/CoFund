@@ -15,6 +15,18 @@ const routes = [
     component: () => import('@/views/Campaign/CampaignList.vue'),
   },
   {
+    path: '/campaigns/create',
+    name: 'CampaignCreate',
+    meta: { title: 'Buat Kampanye — CoFund', requiresAuth: true },
+    component: () => import('@/views/Campaign/CampaignForm.vue'),
+  },
+  {
+    path: '/campaigns/edit/:slug',
+    name: 'CampaignEdit',
+    meta: { title: 'Edit Kampanye — CoFund', requiresAuth: true },
+    component: () => import('@/views/Campaign/CampaignForm.vue'),
+  },
+  {
     path: '/campaigns/:slug',
     name: 'CampaignDetail',
     meta: { title: 'Detail Kampanye — CoFund' },
@@ -31,6 +43,24 @@ const routes = [
     name: 'Register',
     meta: { title: 'Daftar — CoFund', guestOnly: true },
     component: () => import('@/views/Auth/Register.vue'),
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    meta: { title: 'Lupa Password — CoFund', guestOnly: true },
+    component: () => import('@/views/Auth/ForgotPassword.vue'),
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    meta: { title: 'Reset Password — CoFund' },
+    component: () => import('@/views/Auth/ResetPassword.vue'),
+  },
+  {
+    path: '/verify-email',
+    name: 'EmailVerification',
+    meta: { title: 'Verifikasi Email — CoFund' },
+    component: () => import('@/views/Auth/EmailVerification.vue'),
   },
   {
     path: '/dashboard',
@@ -59,7 +89,8 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    redirect: '/',
+    meta: { title: 'Halaman Tidak Ditemukan — CoFund' },
+    component: () => import('@/views/NotFound.vue'),
   },
 ]
 
@@ -72,7 +103,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'CoFund'
+  const titleFn = to.meta.title
+  document.title = typeof titleFn === 'function' ? titleFn() : 'CoFund'
 
   const authStore = useAuthStore()
 

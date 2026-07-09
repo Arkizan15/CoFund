@@ -9,15 +9,15 @@
           </div>
           <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p class="text-gray-500 text-sm">Selamat datang kembali, <strong class="text-emerald-700">{{ authStore.user?.name || 'User' }}</strong></p>
+            <p class="text-gray-500 text-sm">Selamat datang kembali, {{ authStore.user?.name || 'User' }}</p>
           </div>
         </div>
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-          <div class="flex items-center gap-3">
+      <div class="perspective-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="card-3d card-visible card-3d-inner bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
+          <div class="card-3d-inner flex items-center gap-3">
             <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center">
               <i class="pi pi-wallet text-lg text-emerald-700"></i>
             </div>
@@ -28,8 +28,8 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-          <div class="flex items-center gap-3">
+        <div class="card-3d card-visible card-3d-inner bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
+          <div class="card-3d-inner flex items-center gap-3">
             <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center">
               <i class="pi pi-heart text-lg text-blue-700"></i>
             </div>
@@ -40,8 +40,8 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-          <div class="flex items-center gap-3">
+        <div class="card-3d card-visible card-3d-inner bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
+          <div class="card-3d-inner flex items-center gap-3">
             <div class="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center">
               <i class="pi pi-flag text-lg text-purple-700"></i>
             </div>
@@ -52,8 +52,8 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-          <div class="flex items-center gap-3">
+        <div class="card-3d card-visible card-3d-inner bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
+          <div class="card-3d-inner flex items-center gap-3">
             <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center">
               <i class="pi pi-shield text-lg text-emerald-700"></i>
             </div>
@@ -69,186 +69,141 @@
         </div>
       </div>
 
-      <!-- Creator: Campaign Creation Form -->
-      <div v-if="isCreator" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
-        <div class="flex items-center gap-3 mb-6">
+      <!-- Creator: Stats Cards -->
+      <div v-if="isCreator" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center">
+              <i class="pi pi-users text-lg text-emerald-700"></i>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Total Backer</p>
+              <p class="text-xl font-bold text-gray-900">{{ creatorStats.total_backers }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center">
+              <i class="pi pi-dollar text-lg text-blue-700"></i>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Total Terkumpul</p>
+              <p class="text-xl font-bold text-gray-900">{{ formatCurrency(creatorStats.total_collected) }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center">
+              <i class="pi pi-chart-line text-lg text-purple-700"></i>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Kampanye Aktif</p>
+              <p class="text-xl font-bold text-gray-900">{{ creatorStats.active_campaigns }} / {{ creatorStats.total_campaigns }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Creator: Funding Chart -->
+      <div v-if="isCreator && chartData.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+        <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-            <i class="pi pi-plus-circle text-lg text-emerald-700"></i>
+            <i class="pi pi-chart-bar text-lg text-emerald-700"></i>
           </div>
           <div>
-            <h2 class="text-xl font-bold text-gray-800">Buat Kampanye Baru</h2>
-            <p class="text-xs text-gray-400">Lengkapi detail kampanye crowdfunding Anda</p>
+            <h2 class="text-lg font-bold text-gray-800">Funding Harian</h2>
+            <p class="text-xs text-gray-400">Grafik kumulatif pendanaan per hari</p>
           </div>
         </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5">
-          <!-- Title -->
-          <div class="flex flex-col gap-1.5 lg:col-span-2">
-            <label for="form-title" class="text-sm font-semibold text-gray-700">Judul Kampanye <span class="text-red-400">*</span></label>
-            <InputText
-              id="form-title"
-              v-model="form.title"
-              placeholder="Masukkan judul kampanye yang menarik"
-              class="w-full !rounded-xl !text-sm"
-              :class="{ 'p-invalid': formErrors.title }"
-              :maxlength="100"
+        <div class="w-full h-64 relative">
+          <svg viewBox="0 0 800 200" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#059669" stop-opacity="0.2" />
+                <stop offset="100%" stop-color="#059669" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <path
+              :d="chartPath"
+              fill="none"
+              stroke="#059669"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             />
-            <small class="text-gray-400 text-xs text-right">{{ form.title.length }}/100</small>
-            <small v-if="formErrors.title" class="text-red-500 text-xs flex items-center gap-1">
-              <i class="pi pi-exclamation-circle"></i>{{ formErrors.title }}
-            </small>
-          </div>
-
-          <!-- Category -->
-          <div class="flex flex-col gap-1.5">
-            <label for="form-category" class="text-sm font-semibold text-gray-700">Kategori <span class="text-red-400">*</span></label>
-            <Dropdown
-              id="form-category"
-              v-model="form.category_id"
-              :options="categories"
-              optionLabel="name"
-              optionValue="id"
-              placeholder="Pilih kategori"
-              class="w-full"
-              :class="{ 'p-invalid': formErrors.category_id }"
+            <path
+              :d="chartAreaPath"
+              fill="url(#chartGrad)"
             />
-            <small v-if="formErrors.category_id" class="text-red-500 text-xs flex items-center gap-1">
-              <i class="pi pi-exclamation-circle"></i>{{ formErrors.category_id }}
-            </small>
-          </div>
-
-          <!-- Deadline -->
-          <div class="flex flex-col gap-1.5">
-            <label for="form-deadline" class="text-sm font-semibold text-gray-700">Tenggat Waktu <span class="text-red-400">*</span></label>
-            <Calendar
-              id="form-deadline"
-              v-model="form.deadline"
-              :minDate="minDeadline"
-              dateFormat="dd/mm/yy"
-              placeholder="Pilih tanggal"
-              class="w-full"
-              :class="{ 'p-invalid': formErrors.deadline }"
-              showIcon
-            />
-            <small v-if="formErrors.deadline" class="text-red-500 text-xs flex items-center gap-1">
-              <i class="pi pi-exclamation-circle"></i>{{ formErrors.deadline }}
-            </small>
-            <small v-else class="text-gray-400 text-xs">Minimal 7 hari dari sekarang</small>
-          </div>
-
-          <!-- Target Amount -->
-          <div class="flex flex-col gap-1.5">
-            <label for="form-target" class="text-sm font-semibold text-gray-700">Target Dana <span class="text-red-400">*</span></label>
-            <InputNumber
-              id="form-target"
-              v-model="form.target_amount"
-              :min="100000"
-              :step="500000"
-              prefix="Rp "
-              placeholder="Masukkan target dana"
-              class="w-full"
-              :class="{ 'p-invalid': formErrors.target_amount }"
-              fluid
-            />
-            <small v-if="formErrors.target_amount" class="text-red-500 text-xs flex items-center gap-1">
-              <i class="pi pi-exclamation-circle"></i>{{ formErrors.target_amount }}
-            </small>
-            <small v-else class="text-gray-400 text-xs">Minimal Rp 100.000</small>
-          </div>
-
-          <!-- Video URL (optional) -->
-          <div class="flex flex-col gap-1.5">
-            <label for="form-video" class="text-sm font-semibold text-gray-700">Video URL <span class="text-gray-400 font-normal">(Opsional)</span></label>
-            <InputText
-              id="form-video"
-              v-model="form.video_url"
-              placeholder="https://youtube.com/watch?v=..."
-              class="w-full !rounded-xl !text-sm"
-              :class="{ 'p-invalid': formErrors.video_url }"
-            />
-            <small v-if="formErrors.video_url" class="text-red-500 text-xs flex items-center gap-1">
-              <i class="pi pi-exclamation-circle"></i>{{ formErrors.video_url }}
-            </small>
-          </div>
-
-          <!-- Description -->
-          <div class="flex flex-col gap-1.5 lg:col-span-2">
-            <label for="form-desc" class="text-sm font-semibold text-gray-700">Deskripsi Kampanye <span class="text-red-400">*</span></label>
-            <Textarea
-              id="form-desc"
-              v-model="form.description"
-              rows="6"
-              placeholder="Jelaskan secara detail kampanye Anda — latar belakang, tujuan, rencana penggunaan dana, dan dampak yang akan dicapai..."
-              class="w-full !rounded-xl !text-sm"
-              :class="{ 'p-invalid': formErrors.description }"
-            />
-            <small v-if="formErrors.description" class="text-red-500 text-xs flex items-center gap-1">
-              <i class="pi pi-exclamation-circle"></i>{{ formErrors.description }}
-            </small>
+          </svg>
+          <div class="flex justify-between mt-2 text-xs text-gray-400">
+            <span>{{ chartData[0]?.date || '' }}</span>
+            <span>{{ chartData[chartData.length - 1]?.date || '' }}</span>
           </div>
         </div>
+      </div>
 
-        <!-- Error Banner -->
-        <div
-          v-if="formError"
-          class="mt-5 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-3"
-        >
-          <i class="pi pi-exclamation-circle mt-0.5 flex-shrink-0"></i>
-          <span>{{ formError }}</span>
-        </div>
-
-        <!-- Success Banner -->
-        <div
-          v-if="createdCampaign"
-          class="mt-5 p-5 bg-emerald-50 border border-emerald-200 rounded-xl"
-        >
-          <div class="flex items-start gap-3">
-            <div class="w-9 h-9 rounded-full bg-emerald-200 flex items-center justify-center flex-shrink-0">
-              <i class="pi pi-check-circle text-emerald-700"></i>
+      <!-- Backer: Stats Cards -->
+      <div v-if="!isCreator && activeTab === 'backings'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center">
+              <i class="pi pi-heart text-lg text-blue-700"></i>
             </div>
-            <div class="flex-1">
-              <p class="text-sm font-semibold text-emerald-800">Kampanye berhasil dibuat sebagai draft!</p>
-              <p class="text-xs text-emerald-600 mt-0.5">{{ createdCampaign.title }}</p>
-              <div class="mt-3 flex gap-2">
-                <Button
-                  label="Kirim ke Review"
-                  icon="pi pi-send"
-                  class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !rounded-xl !text-sm !px-5"
-                  :loading="submitLoading"
-                  @click="handleSubmitForReview"
-                />
-                <Button
-                  label="Edit Lagi"
-                  icon="pi pi-pencil"
-                  class="p-button-text !text-emerald-700 !rounded-xl !text-sm"
-                  @click="createdCampaign = null"
-                />
-              </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Total Dibacking</p>
+              <p class="text-xl font-bold text-gray-900">{{ formatCurrency(backerStats.total_backed) }}</p>
             </div>
           </div>
         </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-orange-100 rounded-xl flex items-center justify-center">
+              <i class="pi pi-history text-lg text-orange-700"></i>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Total Refund</p>
+              <p class="text-xl font-bold text-gray-900">{{ formatCurrency(backerStats.total_refund) }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center">
+              <i class="pi pi-check-circle text-lg text-purple-700"></i>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Backing Sukses</p>
+              <p class="text-xl font-bold text-gray-900">{{ backerStats.backing_count }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Action Buttons -->
-        <div v-if="!createdCampaign" class="mt-6 flex flex-col sm:flex-row gap-3 justify-end border-t border-gray-100 pt-6">
-          <Button
-            label="Reset Form"
-            icon="pi pi-refresh"
-            class="p-button-text !text-gray-500 !rounded-xl"
-            @click="resetForm"
-          />
-          <Button
-            label="Buat Kampanye"
-            icon="pi pi-plus-circle"
-            class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3 !px-8 !rounded-xl shadow-sm"
-            :loading="createLoading"
-            :disabled="createLoading"
-            @click="handleCreateCampaign"
-          />
+      <!-- Creator: Campaign CTA -->
+      <div v-if="isCreator" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <i class="pi pi-plus-circle text-2xl text-emerald-700"></i>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-lg font-bold text-gray-800">Buat Kampanye Baru</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Mulai kampanye crowdfunding Anda dan kumpulkan dana dari para backer</p>
+          </div>
+          <router-link :to="{ name: 'CampaignCreate' }">
+            <Button
+              label="Buat Kampanye"
+              icon="pi pi-plus"
+              class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3 !px-6 !rounded-xl shadow-sm"
+            />
+          </router-link>
         </div>
       </div>
 
       <!-- Non-Creator: Upgrade prompt -->
-      <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
+      <div v-if="!isCreator && !isAdmin" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
         <div class="flex items-start gap-4">
           <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
             <i class="pi pi-shield text-xl text-purple-700"></i>
@@ -256,8 +211,7 @@
           <div>
             <h2 class="text-lg font-bold text-gray-800">Jadilah Creator untuk Membuat Kampanye</h2>
             <p class="text-sm text-gray-500 mt-1 max-w-2xl">
-              Anda saat ini terdaftar sebagai <strong>Backer</strong>. Untuk membuat kampanye crowdfunding,
-              ajukan upgrade akun menjadi Creator melalui halaman Profil Saya.
+              Anda saat ini terdaftar sebagai Backer. Untuk membuat kampanye crowdfunding, ajukan upgrade akun menjadi Creator melalui halaman Profil Saya.
             </p>
             <router-link :to="{ name: 'Profile' }">
               <Button
@@ -270,116 +224,444 @@
         </div>
       </div>
 
-      <!-- My Campaigns Table -->
+      <!-- Tabs: My Campaigns / My Backings -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h2 class="text-lg font-bold text-gray-800">Kampanye Saya</h2>
-            <p class="text-xs text-gray-400 mt-0.5">Riwayat kampanye yang telah Anda buat</p>
+        <div class="flex border-b border-gray-100">
+          <button
+            class="flex-1 sm:flex-none px-6 py-4 text-sm font-semibold transition-all duration-200 relative"
+            :class="activeTab === 'campaigns'
+              ? 'text-emerald-700'
+              : 'text-gray-500 hover:text-gray-700'"
+            @click="activeTab = 'campaigns'"
+          >
+            <i class="pi pi-flag mr-1.5 text-xs"></i>
+            Kampanye Saya
+            <span
+              v-if="activeTab === 'campaigns'"
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-full"
+            ></span>
+          </button>
+          <button
+            class="flex-1 sm:flex-none px-6 py-4 text-sm font-semibold transition-all duration-200 relative"
+            :class="activeTab === 'backings'
+              ? 'text-emerald-700'
+              : 'text-gray-500 hover:text-gray-700'"
+            @click="activeTab = 'backings'"
+          >
+            <i class="pi pi-heart mr-1.5 text-xs"></i>
+            Riwayat Backing
+            <span
+              v-if="activeTab === 'backings'"
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-full"
+            ></span>
+          </button>
+        </div>
+
+        <!-- ===== MY CAMPAIGNS TABLE ===== -->
+        <div v-if="activeTab === 'campaigns'">
+          <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+            <p class="text-xs text-gray-400">Riwayat kampanye yang telah Anda buat</p>
+            <Badge
+              :value="myCampaigns.length + ' kampanye'"
+              severity="info"
+              class="!bg-emerald-50 !text-emerald-700 !rounded-full !text-xs !font-medium !px-3"
+            />
           </div>
-          <Badge
-            :value="myCampaigns.length + ' kampanye'"
-            severity="info"
-            class="!bg-emerald-50 !text-emerald-700 !rounded-full !text-xs !font-medium !px-3"
-          />
-        </div>
 
-        <div v-if="myCampaignsLoading" class="flex items-center justify-center py-12">
-          <i class="pi pi-spin pi-spinner text-2xl text-emerald-600"></i>
-        </div>
-
-        <div v-else-if="myCampaigns.length === 0" class="text-center py-12">
-          <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
-            <i class="pi pi-flag text-2xl text-gray-300"></i>
+          <div v-if="myCampaignsLoading" class="flex items-center justify-center py-12">
+            <i class="pi pi-spin pi-spinner text-2xl text-emerald-600"></i>
           </div>
-          <p class="text-gray-500 text-sm font-medium">Belum ada kampanye</p>
-          <p class="text-gray-400 text-xs mt-1">Kampanye yang Anda buat akan muncul di sini</p>
-        </div>
 
-        <DataTable
-          v-else
-          :value="myCampaigns"
-          class="!text-sm"
-          stripedRows
-          responsiveLayout="scroll"
-          :paginator="true"
-          :rows="10"
-        >
-          <Column field="id" header="ID" :style="{ width: '60px' }" />
-          <Column field="title" header="Judul">
-            <template #body="{ data }">
-              <div class="max-w-[220px]">
-                <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
-                <p class="text-xs text-gray-400 truncate">{{ data.category?.name || 'Tanpa Kategori' }}</p>
-              </div>
-            </template>
-          </Column>
-          <Column header="Target" :style="{ width: '120px' }">
-            <template #body="{ data }">
-              <span class="font-medium text-gray-800">{{ formatCurrency(data.target_amount) }}</span>
-            </template>
-          </Column>
-          <Column header="Terkumpul" :style="{ width: '120px' }">
-            <template #body="{ data }">
-              <span class="font-semibold text-emerald-700">{{ formatCurrency(data.collected_amount || 0) }}</span>
-            </template>
-          </Column>
-          <Column header="Status" :style="{ width: '100px' }">
-            <template #body="{ data }">
-              <Badge
-                :value="statusLabel(data.status)"
-                :severity="statusSeverity(data.status)"
-                class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5"
-              />
-            </template>
-          </Column>
-          <Column header="Aksi" :style="{ width: '120px' }">
-            <template #body="{ data }">
-              <div class="flex items-center gap-1.5">
-                <router-link
-                  :to="`/campaigns/${data.slug}`"
-                  class="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium no-underline px-2 py-1 rounded-lg hover:bg-emerald-50 transition-colors"
-                >
-                  <i class="pi pi-eye text-[10px]"></i>Lihat
-                </router-link>
-                <Button
-                  v-if="data.status === 'draft'"
-                  icon="pi pi-send"
-                  class="!w-7 !h-7 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !text-white !text-[10px] !shadow-sm"
-                  v-tooltip.left="'Kirim ke Review'"
-                  @click="handleTableSubmit(data)"
+          <div v-else-if="myCampaigns.length === 0" class="text-center py-12">
+            <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
+              <i class="pi pi-flag text-2xl text-gray-300"></i>
+            </div>
+            <p class="text-gray-500 text-sm font-medium">Belum ada kampanye</p>
+            <p class="text-gray-400 text-xs mt-1">Kampanye yang Anda buat akan muncul di sini</p>
+          </div>
+
+          <DataTable
+            v-else
+            :value="myCampaigns"
+            class="!text-sm"
+            stripedRows
+            responsiveLayout="scroll"
+            :paginator="true"
+            :rows="10"
+          >
+            <Column field="id" header="ID" :style="{ width: '60px' }" />
+            <Column field="title" header="Judul">
+              <template #body="{ data }">
+                <div class="max-w-[220px]">
+                  <p class="font-medium text-gray-800 truncate">{{ data.title }}</p>
+                  <p class="text-xs text-gray-400 truncate">{{ data.category?.name || 'Umum' }}</p>
+                </div>
+              </template>
+            </Column>
+            <Column header="Target" :style="{ width: '120px' }">
+              <template #body="{ data }">
+                <span class="font-medium text-gray-800">{{ formatCurrency(data.target_amount) }}</span>
+              </template>
+            </Column>
+            <Column header="Terkumpul" :style="{ width: '120px' }">
+              <template #body="{ data }">
+                <span class="font-semibold text-emerald-700">{{ formatCurrency(data.collected_amount || 0) }}</span>
+              </template>
+            </Column>
+            <Column header="Tier" :style="{ width: '80px' }">
+              <template #body="{ data }">
+                <span class="text-xs text-gray-500">{{ data.tiers?.length || 0 }} tier</span>
+              </template>
+            </Column>
+            <Column header="Status" :style="{ width: '100px' }">
+              <template #body="{ data }">
+                <Badge
+                  :value="statusLabel(data.status)"
+                  :severity="statusSeverity(data.status)"
+                  class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5"
                 />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
+              </template>
+            </Column>
+            <Column header="Aksi" :style="{ width: '200px' }">
+              <template #body="{ data }">
+                <div class="flex items-center gap-1.5">
+                  <router-link
+                    :to="`/campaigns/${data.slug}`"
+                    class="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium no-underline px-2 py-1 rounded-lg hover:bg-emerald-50 transition-colors"
+                  >
+                    <i class="pi pi-eye text-[10px]"></i> Lihat
+                  </router-link>
+                  <Button
+                    v-if="data.status === 'draft'"
+                    icon="pi pi-pencil"
+                    class="!w-7 !h-7 !rounded-full !bg-sky-500 !border-sky-500 hover:!bg-sky-600 !text-white !text-[10px] !shadow-sm"
+                    v-tooltip.left="'Edit'"
+                    @click="handleEditCampaign(data)"
+                  />
+                  <Button
+                    v-if="data.status === 'draft'"
+                    icon="pi pi-send"
+                    class="!w-7 !h-7 !rounded-full !bg-emerald-500 !border-emerald-500 hover:!bg-emerald-600 !text-white !text-[10px] !shadow-sm"
+                    v-tooltip.left="'Kirim ke Review'"
+                    @click="handleTableSubmit(data)"
+                  />
+                  <Button
+                    v-if="data.status === 'draft'"
+                    icon="pi pi-trash"
+                    class="!w-7 !h-7 !rounded-full !bg-red-500 !border-red-500 hover:!bg-red-600 !text-white !text-[10px] !shadow-sm"
+                    v-tooltip.left="'Hapus'"
+                    @click="confirmDeleteCampaign(data)"
+                  />
+                  <Button
+                    v-if="data.status === 'active'"
+                    icon="pi pi-megaphone"
+                    class="!w-7 !h-7 !rounded-full !bg-violet-500 !border-violet-500 hover:!bg-violet-600 !text-white !text-[10px] !shadow-sm"
+                    v-tooltip.left="'Post Update'"
+                    @click="openUpdateDialog(data)"
+                  />
+                </div>
+              </template>
+            </Column>
+          </DataTable>
+        </div>
+
+        <!-- ===== MY BACKINGS TABLE ===== -->
+        <div v-if="activeTab === 'backings'">
+          <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+            <p class="text-xs text-gray-400">Riwayat pendanaan kampanye yang Anda dukung</p>
+            <Badge
+              :value="myBackings.length + ' backing'"
+              severity="info"
+              class="!bg-blue-50 !text-blue-700 !rounded-full !text-xs !font-medium !px-3"
+            />
+          </div>
+
+          <div v-if="myBackingsLoading" class="flex items-center justify-center py-12">
+            <i class="pi pi-spin pi-spinner text-2xl text-blue-600"></i>
+          </div>
+
+          <div v-else-if="myBackings.length === 0" class="text-center py-12">
+            <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
+              <i class="pi pi-heart text-2xl text-gray-300"></i>
+            </div>
+            <p class="text-gray-500 text-sm font-medium">Belum ada riwayat backing</p>
+            <p class="text-gray-400 text-xs mt-1">Kampanye yang Anda dukung akan muncul di sini</p>
+          </div>
+
+          <DataTable
+            v-else
+            :value="myBackings"
+            class="!text-sm"
+            stripedRows
+            responsiveLayout="scroll"
+            :paginator="true"
+            :rows="10"
+          >
+            <Column header="Kampanye">
+              <template #body="{ data }">
+                <div class="max-w-[200px]">
+                  <router-link
+                    :to="`/campaigns/${data.campaign?.slug}`"
+                    class="font-medium text-gray-800 hover:text-emerald-600 transition-colors no-underline truncate block"
+                  >
+                    {{ data.campaign?.title || 'N/A' }}
+                  </router-link>
+                  <p class="text-xs text-gray-400">{{ data.campaign?.category?.name || 'Umum' }}</p>
+                </div>
+              </template>
+            </Column>
+            <Column field="amount" header="Jumlah" :style="{ width: '130px' }">
+              <template #body="{ data }">
+                <span class="font-semibold text-emerald-700">{{ formatCurrency(data.amount) }}</span>
+              </template>
+            </Column>
+            <Column header="Tier" :style="{ width: '160px' }">
+              <template #body="{ data }">
+                <div>
+                  <span class="text-xs text-gray-500">{{ data.tier?.name || 'Tanpa Tier' }}</span>
+                  <p v-if="data.tier?.reward_description" class="text-[10px] text-gray-400 truncate max-w-[140px]">{{ data.tier.reward_description }}</p>
+                </div>
+              </template>
+            </Column>
+            <Column field="status" header="Status" :style="{ width: '100px' }">
+              <template #body="{ data }">
+                <Badge
+                  :value="data.status === 'completed' ? 'Selesai' : data.status === 'pending' ? 'Menunggu' : 'Refund'"
+                  :severity="data.status === 'completed' ? 'success' : data.status === 'pending' ? 'warn' : 'danger'"
+                  class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5"
+                />
+              </template>
+            </Column>
+            <Column field="created_at" header="Tanggal" :style="{ width: '110px' }">
+              <template #body="{ data }">
+                <span class="text-xs text-gray-400">{{ formatShortDate(data.created_at) }}</span>
+              </template>
+            </Column>
+          </DataTable>
+        </div>
       </div>
+      <!-- Post Update Dialog -->
+      <Dialog
+        v-model:visible="updateDialogVisible"
+        header="Post Update Kampanye"
+        :modal="true"
+        class="app-dialog !rounded-[15px] !bg-white !border-2 !border-emerald-300 !shadow-lg !max-w-full !w-[95vw] sm:!w-auto"
+        :style="{ maxWidth: '500px' }"
+        @show="onDialogShow"
+      >
+        <div class="flex flex-col gap-4 py-2">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-semibold text-gray-700">Judul Update</label>
+            <InputText
+              v-model="updateForm.title"
+              placeholder="Judul pembaruan"
+              class="w-full !rounded-xl !text-sm"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-semibold text-gray-700">Konten Update</label>
+            <Textarea
+              v-model="updateForm.content"
+              placeholder="Tulis pembaruan kampanye..."
+              class="w-full !rounded-xl !text-sm"
+              rows="5"
+            />
+          </div>
+        </div>
+        <template #footer>
+          <div class="flex gap-2 justify-end">
+            <Button
+              label="Batal"
+              icon="pi pi-times"
+              class="p-button-text !text-gray-500 !rounded-xl"
+              @click="updateDialogVisible = false"
+            />
+            <Button
+              label="Posting Update"
+              icon="pi pi-send"
+              class="!bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !rounded-xl"
+              :loading="updateLoading"
+              @click="handlePostUpdate"
+            />
+          </div>
+        </template>
+      </Dialog>
+
+      <!-- Confirm Delete Campaign Dialog -->
+      <Dialog
+        v-model:visible="deleteDialogVisible"
+        header="Hapus Kampanye"
+        :modal="true"
+        class="app-dialog !rounded-[15px] !bg-white !border-2 !border-red-300 !shadow-lg !max-w-full !w-[95vw] sm:!w-auto"
+        :style="{ maxWidth: '420px' }"
+        @show="onDialogShow"
+      >
+        <div class="text-center py-4">
+          <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
+            <i class="pi pi-exclamation-triangle text-2xl text-red-500"></i>
+          </div>
+          <p class="text-gray-700 font-medium">Apakah Anda yakin ingin menghapus kampanye ini?</p>
+          <p class="text-gray-400 text-xs mt-2">Kampanye yang dihapus tidak dapat dikembalikan. Semua data terkait kampanye ini akan dihapus.</p>
+          <p class="text-gray-500 text-xs font-semibold mt-3 bg-gray-50 rounded-lg p-2">{{ deleteTargetCampaign?.title }}</p>
+        </div>
+        <template #footer>
+          <div class="flex gap-2 justify-end">
+            <Button
+              label="Batal"
+              icon="pi pi-times"
+              class="p-button-text !text-gray-500 !rounded-xl"
+              @click="deleteDialogVisible = false"
+            />
+            <Button
+              label="Hapus"
+              icon="pi pi-trash"
+              class="!bg-red-600 !border-none hover:!bg-red-700 !text-white !rounded-xl"
+              :loading="deleteLoading"
+              @click="handleDeleteCampaign"
+            />
+          </div>
+        </template>
+      </Dialog>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useGenieEffect } from '@/composables/useGenieEffect'
 import { useAuthStore } from '@/stores/auth'
 import Badge from 'primevue/badge'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import InputNumber from 'primevue/inputnumber'
 import Textarea from 'primevue/textarea'
-import Dropdown from 'primevue/dropdown'
-import Calendar from 'primevue/calendar'
+import Dialog from 'primevue/dialog'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import { useToast } from 'primevue/usetoast'
 import campaignService from '@/services/campaignService'
+import dashboardService from '@/services/dashboardService'
+
+const { onDialogShow } = useGenieEffect()
 
 const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
 
+const activeTab = ref('campaigns')
+
 const isCreator = computed(() => authStore.getUserRole === 'creator')
 const isAdmin = computed(() => authStore.getUserRole === 'admin')
+
+// Creator Stats
+const creatorStats = reactive({
+  total_campaigns: 0,
+  active_campaigns: 0,
+  total_backers: 0,
+  total_collected: 0,
+})
+const chartData = ref([])
+
+// Backer Stats
+const backerStats = reactive({
+  total_backed: 0,
+  total_refund: 0,
+  backing_count: 0,
+  refund_count: 0,
+})
+
+// Funding Chart computed
+const maxCumulative = computed(() => {
+  if (chartData.value.length === 0) return 0
+  return Math.max(...chartData.value.map(d => d.cumulative), 1)
+})
+
+const chartPath = computed(() => {
+  const data = chartData.value
+  if (data.length < 2) return ''
+  const w = 800, h = 180
+  const pad = 10
+  const stepX = (w - pad * 2) / (data.length - 1)
+  const max = maxCumulative.value
+  return data.map((d, i) => {
+    const x = pad + i * stepX
+    const y = h - pad - ((d.cumulative / max) * (h - pad * 2))
+    return `${i === 0 ? 'M' : 'L'}${x},${y}`
+  }).join(' ')
+})
+
+const chartAreaPath = computed(() => {
+  const data = chartData.value
+  if (data.length < 2) return ''
+  const w = 800, h = 180
+  const pad = 10
+  const stepX = (w - pad * 2) / (data.length - 1)
+  const max = maxCumulative.value
+  const lastX = pad + (data.length - 1) * stepX
+  const bottom = h - pad
+  let path = chartPath.value
+  if (path) {
+    path += ` L${lastX},${bottom} L${pad},${bottom} Z`
+  }
+  return path
+})
+
+// Update Dialog
+const updateDialogVisible = ref(false)
+const updateLoading = ref(false)
+const updateCampaignTarget = ref(null)
+const updateForm = reactive({ title: '', content: '' })
+
+const deleteDialogVisible = ref(false)
+const deleteLoading = ref(false)
+const deleteTargetCampaign = ref(null)
+
+function confirmDeleteCampaign(campaign) {
+  deleteTargetCampaign.value = campaign
+  deleteDialogVisible.value = true
+}
+
+async function handleDeleteCampaign() {
+  if (!deleteTargetCampaign.value) return
+  deleteLoading.value = true
+  try {
+    await campaignService.deleteCampaign(deleteTargetCampaign.value.id)
+    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kampanye berhasil dihapus.', life: 3000 })
+    deleteDialogVisible.value = false
+    await fetchMyCampaigns()
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: error.response?.data?.message || 'Gagal menghapus kampanye.', life: 3000 })
+  } finally {
+    deleteLoading.value = false
+  }
+}
+
+function openUpdateDialog(campaign) {
+  updateCampaignTarget.value = campaign
+  updateForm.title = ''
+  updateForm.content = ''
+  updateDialogVisible.value = true
+}
+
+async function handlePostUpdate() {
+  if (!updateForm.title.trim() || !updateForm.content.trim()) {
+    toast.add({ severity: 'warn', summary: 'Lengkapi Form', detail: 'Judul dan konten update wajib diisi.', life: 2000 })
+    return
+  }
+  updateLoading.value = true
+  try {
+    await campaignService.postUpdate(updateCampaignTarget.value.id, {
+      title: updateForm.title.trim(),
+      content: updateForm.content.trim(),
+    })
+    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Update kampanye berhasil diposting.', life: 3000 })
+    updateDialogVisible.value = false
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: error.response?.data?.message || 'Gagal posting update.', life: 3000 })
+  } finally {
+    updateLoading.value = false
+  }
+}
 
 const roleLabel = computed(() => {
   const labels = { admin: 'Admin', creator: 'Creator', backer: 'Backer', guest: 'Tamu' }
@@ -396,40 +678,12 @@ const myCampaigns = ref([])
 const myCampaignsLoading = ref(true)
 const myBackingsCount = computed(() => authStore.user?.total_backings || 0)
 
-// Categories
-const categories = ref([])
+// My Backings
+const myBackings = ref([])
+const myBackingsLoading = ref(false)
 
-// Campaign Form
-const form = reactive({
-  title: '',
-  category_id: null,
-  description: '',
-  target_amount: null,
-  deadline: null,
-  video_url: '',
-})
-const formErrors = reactive({})
-const formError = ref('')
-const createLoading = ref(false)
-const submitLoading = ref(false)
-const createdCampaign = ref(null)
-
-const minDeadline = computed(() => {
-  const date = new Date()
-  date.setDate(date.getDate() + 7)
-  return date
-})
-
-function resetForm() {
-  form.title = ''
-  form.category_id = null
-  form.description = ''
-  form.target_amount = null
-  form.deadline = null
-  form.video_url = ''
-  Object.keys(formErrors).forEach(k => delete formErrors[k])
-  formError.value = ''
-  createdCampaign.value = null
+function handleEditCampaign(data) {
+  router.push({ name: 'CampaignEdit', params: { slug: data.slug } })
 }
 
 function statusLabel(status) {
@@ -446,94 +700,9 @@ function formatCurrency(val) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0)
 }
 
-function validateForm() {
-  Object.keys(formErrors).forEach(k => delete formErrors[k])
-  formError.value = ''
-  let valid = true
-
-  if (!form.title.trim()) {
-    formErrors.title = 'Judul kampanye wajib diisi'
-    valid = false
-  }
-  if (!form.category_id) {
-    formErrors.category_id = 'Kategori wajib dipilih'
-    valid = false
-  }
-  if (!form.description.trim()) {
-    formErrors.description = 'Deskripsi kampanye wajib diisi'
-    valid = false
-  }
-  if (!form.target_amount || form.target_amount < 100000) {
-    formErrors.target_amount = 'Target dana minimal Rp 100.000'
-    valid = false
-  }
-  if (!form.deadline) {
-    formErrors.deadline = 'Tenggat waktu wajib diisi'
-    valid = false
-  }
-  if (form.video_url && !/^https?:\/\/.+/.test(form.video_url)) {
-    formErrors.video_url = 'URL video tidak valid. Harus diawali http:// atau https://'
-    valid = false
-  }
-  return valid
-}
-
-async function handleCreateCampaign() {
-  if (!validateForm()) return
-
-  createLoading.value = true
-  formError.value = ''
-
-  try {
-    const payload = {
-      title: form.title.trim(),
-      category_id: form.category_id,
-      description: form.description.trim(),
-      target_amount: form.target_amount,
-      deadline: form.deadline.toISOString().split('T')[0],
-    }
-    if (form.video_url.trim()) {
-      payload.video_url = form.video_url.trim()
-    }
-
-    const res = await campaignService.createCampaign(payload)
-    createdCampaign.value = res.data
-    toast.add({ severity: 'success', summary: 'Berhasil', detail: res.message || 'Kampanye berhasil dibuat.', life: 4000 })
-    await fetchMyCampaigns()
-  } catch (error) {
-    formError.value = error.response?.data?.message || 'Gagal membuat kampanye. Silakan coba lagi.'
-    toast.add({ severity: 'error', summary: 'Gagal', detail: formError.value, life: 4000 })
-  } finally {
-    createLoading.value = false
-  }
-}
-
-async function handleSubmitForReview() {
-  if (!createdCampaign.value?.id) return
-
-  submitLoading.value = true
-  try {
-    await campaignService.submitForReview(createdCampaign.value.id)
-    toast.add({ severity: 'success', summary: 'Dikirim ke Review', detail: 'Kampanye dikirim ke admin untuk direview.', life: 4000 })
-    createdCampaign.value.status = 'review'
-    createdCampaign.value = null
-    resetForm()
-    await fetchMyCampaigns()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'Gagal', detail: error.response?.data?.message || 'Gagal mengirim ke review.', life: 4000 })
-  } finally {
-    submitLoading.value = false
-  }
-}
-
-async function handleTableSubmit(data) {
-  try {
-    await campaignService.submitForReview(data.id)
-    data.status = 'review'
-    toast.add({ severity: 'success', summary: 'Dikirim ke Review', detail: 'Kampanye dikirim ke admin.', life: 4000 })
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'Gagal', detail: error.response?.data?.message || 'Terjadi kesalahan.', life: 4000 })
-  }
+function formatShortDate(dateStr) {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 async function fetchMyCampaigns() {
@@ -547,19 +716,75 @@ async function fetchMyCampaigns() {
   }
 }
 
-async function fetchCategories() {
+async function handleTableSubmit(data) {
   try {
-    const res = await campaignService.getCategories()
-    categories.value = res?.data || []
-  } catch (e) {
-    categories.value = []
+    await campaignService.submitForReview(data.id)
+    data.status = 'review'
+    toast.add({ severity: 'success', summary: 'Dikirim ke Review', detail: 'Kampanye dikirim ke admin.', life: 4000 })
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Gagal', detail: error.response?.data?.message || 'Terjadi kesalahan.', life: 4000 })
   }
 }
 
-onMounted(async () => {
-  await Promise.all([
-    fetchMyCampaigns(),
-    fetchCategories(),
-  ])
+async function fetchMyBackings() {
+  myBackingsLoading.value = true
+  try {
+    const res = await campaignService.getMyBackings()
+    myBackings.value = res?.data?.data || []
+  } catch (e) {
+    myBackings.value = []
+  } finally {
+    myBackingsLoading.value = false
+  }
+}
+
+async function fetchCreatorStats() {
+  try {
+    const res = await dashboardService.getCreatorStats()
+    if (res.data?.success) {
+      Object.assign(creatorStats, res.data.data)
+    }
+  } catch (e) { /* ignore */ }
+}
+
+async function fetchFundingChart() {
+  try {
+    const res = await dashboardService.getFundingChart()
+    if (res.data?.success) {
+      chartData.value = res.data.data || []
+    }
+  } catch (e) { /* ignore */ }
+}
+
+async function fetchBackerStats() {
+  try {
+    const res = await dashboardService.getBackerStats()
+    if (res.data?.success) {
+      Object.assign(backerStats, res.data.data)
+    }
+  } catch (e) { /* ignore */ }
+}
+
+// Watch tab changes to fetch backings when needed
+watch(activeTab, (tab) => {
+  if (tab === 'backings' && myBackings.value.length === 0) {
+    fetchMyBackings()
+  }
 })
+
+onMounted(async () => {
+  const promises = [
+    fetchMyCampaigns(),
+  ]
+
+  if (isCreator.value) {
+    promises.push(fetchCreatorStats(), fetchFundingChart())
+  } else {
+    promises.push(fetchBackerStats())
+  }
+
+  await Promise.all(promises)
+})
+
+
 </script>

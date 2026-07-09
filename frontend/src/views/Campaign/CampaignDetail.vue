@@ -7,29 +7,58 @@
         <span class="mx-2">/</span>
         <router-link :to="{ name: 'CampaignList' }" class="hover:text-emerald-600 transition-colors">Kampanye</router-link>
         <span class="mx-2">/</span>
-        <span class="text-gray-600">{{ campaign.title || 'Detail' }}</span>
+        <span class="text-gray-600">{{ campaign.title || 'Detail Kampanye' }}</span>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-20">
         <i class="pi pi-spin pi-spinner text-4xl text-emerald-600"></i>
       </div>
 
-      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Hero Image -->
-          <div class="relative rounded-2xl overflow-hidden h-64 md:h-80 bg-gray-100 shadow-md">
-            <img
-              :src="campaign.image_url || 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80'"
-              :alt="campaign.title"
-              class="w-full h-full object-cover"
-            />
-            <div class="absolute top-4 left-4">
-              <Badge
-                :value="statusLabel(campaign.status)"
-                :severity="statusSeverity(campaign.status)"
-                class="!bg-white/90 !text-xs !px-3 !py-1 !rounded-full !font-semibold shadow-sm"
+          <!-- Hero Image Gallery -->
+          <div class="relative rounded-2xl overflow-hidden bg-gray-100 shadow-md">
+            <!-- Main Image -->
+            <div class="relative h-64 md:h-80">
+              <img
+                :src="activeImageUrl"
+                :alt="campaign.title"
+                class="w-full h-full object-cover transition-opacity duration-300"
+                :key="activeImageIndex"
               />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
+              <div class="absolute top-4 left-4">
+                <Badge
+                  :value="statusLabel(campaign.status)"
+                  :severity="statusSeverity(campaign.status)"
+                  class="!bg-white/90 !text-xs !px-3 !py-1 !rounded-full !font-semibold shadow-sm"
+                />
+              </div>
+
+              <!-- Image Counter -->
+              <div v-if="galleryImages.length > 1" class="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full">
+                {{ activeImageIndex + 1 }} / {{ galleryImages.length }}
+              </div>
+            </div>
+
+            <!-- Thumbnail Strip -->
+            <div v-if="galleryImages.length > 1" class="flex gap-2 p-3 bg-gray-50 overflow-x-auto">
+              <button
+                v-for="(img, idx) in galleryImages"
+                :key="img.id || idx"
+                class="flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200"
+                :class="idx === activeImageIndex
+                  ? 'border-emerald-500 ring-2 ring-emerald-200 opacity-100'
+                  : 'border-transparent opacity-60 hover:opacity-100'"
+                @click="activeImageIndex = idx"
+              >
+                <img
+                  :src="img.image_url"
+                  :alt="'Gambar ' + (idx + 1)"
+                  class="w-full h-full object-cover"
+                />
+              </button>
             </div>
           </div>
 
@@ -40,7 +69,7 @@
             <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-100">
               <div class="flex items-center gap-2">
                 <i class="pi pi-user text-emerald-600"></i>
-                <span>Oleh <strong class="text-gray-700">{{ campaign.user?.name || 'N/A' }}</strong></span>
+                <span>Oleh {{ campaign.user?.name || 'N/A' }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <i class="pi pi-tag text-emerald-600"></i>
@@ -54,44 +83,17 @@
 
             <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed" v-html="campaign.description || 'Belum ada deskripsi.'"></div>
 
-            <div v-if="campaign.video_url" class="mt-6 bg-gray-100 rounded-xl h-56 flex items-center justify-center text-gray-400">
-              <div class="text-center">
-                <i class="pi pi-video text-4xl mb-2 block"></i>
-                <span class="text-sm">Video tersedia</span>
+            <div v-if="campaign.video_url" class="mt-6 rounded-xl overflow-hidden shadow-sm">
+              <div class="relative w-full" style="padding-bottom: 56.25%">
+                <iframe
+                  :src="embedVideoUrl"
+                  class="absolute inset-0 w-full h-full"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                ></iframe>
               </div>
             </div>
-          </div>
-
-          <!-- Backers Table -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-            <h3 class="text-lg font-bold text-gray-800 mb-1">Riwayat Donasi</h3>
-            <p class="text-sm text-gray-400 mb-4">Para pendukung kampanye ini</p>
-            <div v-if="backers.length === 0" class="text-center py-6">
-              <i class="pi pi-inbox text-2xl text-gray-300 mb-2 block"></i>
-              <p class="text-gray-400 text-sm">Belum ada pendukung. Jadilah yang pertama!</p>
-            </div>
-            <DataTable v-else :value="backers" class="!text-sm" stripedRows responsiveLayout="scroll">
-              <Column field="user.name" header="Nama">
-                <template #body="{ data }">
-                  <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
-                      <i class="pi pi-user text-[8px] text-emerald-600"></i>
-                    </div>
-                    <span>{{ data.user?.name || 'Anonim' }}</span>
-                  </div>
-                </template>
-              </Column>
-              <Column field="amount" header="Jumlah">
-                <template #body="{ data }">
-                  <span class="font-medium text-gray-800">{{ formatCurrency(data.amount) }}</span>
-                </template>
-              </Column>
-              <Column field="created_at" header="Tanggal">
-                <template #body="{ data }">
-                  <span class="text-gray-400 text-xs">{{ formatShortDate(data.created_at) }}</span>
-                </template>
-              </Column>
-            </DataTable>
           </div>
 
           <!-- Campaign Updates Section -->
@@ -197,13 +199,13 @@
         <!-- Sidebar -->
         <aside class="space-y-6">
           <!-- Funding Summary -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-6">
             <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Ringkasan Pendanaan</h4>
 
             <div class="space-y-4">
               <div>
                 <div class="text-3xl font-bold text-gray-900">{{ formatCurrency(campaign.collected_amount || 0) }}</div>
-                <div class="text-sm text-gray-500 mt-1">terkumpul</div>
+                <div class="text-sm text-gray-500 mt-1">Terkumpul</div>
               </div>
 
               <div>
@@ -211,10 +213,16 @@
                 <div class="text-lg font-semibold text-gray-800">{{ formatCurrency(campaign.target_amount || 0) }}</div>
               </div>
 
-              <ProgressBar :value="progressPercent(campaign)" class="!h-3 !rounded-full" />
+              <div class="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  :class="progressBarColor(campaign)"
+                  :style="{ width: progressPercent(campaign) + '%' }"
+                ></div>
+              </div>
 
               <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-500">{{ progressPercent(campaign) }}% tercapai</span>
+                <span class="text-gray-500">{{ progressPercent(campaign) }}% terkumpul</span>
                 <span class="flex items-center gap-1.5 text-orange-600 font-medium">
                   <i class="pi pi-clock"></i>
                   {{ remainingDays(campaign.deadline) }} hari lagi
@@ -238,9 +246,9 @@
             </div>
 
             <!-- Backing Flow -->
-            <div class="mt-6 pt-6 border-t border-gray-100">
+            <div ref="backingSectionRef" class="mt-6 pt-6 border-t border-gray-100">
               <!-- User Balance Info -->
-              <div v-if="authStore.isAuthenticated && !isOwner" class="mb-4 p-3 bg-slate-50 rounded-xl flex items-center justify-between">
+              <div v-if="authStore.isAuthenticated && !isOwner" class="mb-4 p-3 bg-white rounded-[15px] border border-emerald-200 flex items-center justify-between">
                 <span class="text-xs text-gray-500 font-medium">Saldo Anda</span>
                 <span class="text-sm font-bold text-gray-800">{{ formatCurrency(userBalance) }}</span>
               </div>
@@ -313,10 +321,13 @@
                 </div>
 
                 <!-- Selected Tier Display -->
-                <div v-if="selectedTier" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <div v-if="selectedTier" class="p-3 bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 rounded-[15px]">
                   <div class="flex items-start justify-between">
                     <div>
-                      <p class="text-xs font-semibold text-emerald-800">{{ selectedTier.name }}</p>
+                      <div class="flex items-center gap-1.5">
+                        <i class="pi pi-gift text-emerald-600 text-xs"></i>
+                        <p class="text-xs font-semibold text-emerald-800">{{ selectedTier.name }}</p>
+                      </div>
                       <p class="text-[10px] text-emerald-600 mt-0.5">Min. {{ formatCurrency(selectedTier.min_amount) }}</p>
                     </div>
                     <button
@@ -334,24 +345,17 @@
                   <span>{{ backingError }}</span>
                 </div>
 
-                <!-- Success Message -->
-                <div v-if="backingSuccess" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                  <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center flex-shrink-0">
-                      <i class="pi pi-check-circle text-emerald-700"></i>
-                    </div>
-                    <div>
-                      <p class="text-sm font-semibold text-emerald-800">Dukungan Berhasil!</p>
-                      <p class="text-xs text-emerald-600 mt-0.5">Dana sebesar {{ formatCurrency(lastBackingAmount) }} telah masuk ke escrow.</p>
-                    </div>
-                  </div>
+                <!-- Backing Error -->
+                <div v-if="backingSuccess" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-center gap-2">
+                  <i class="pi pi-check-circle"></i>
+                  <span>Pendanaan berhasil! Halaman akan diperbarui...</span>
                 </div>
 
                 <!-- Submit Button -->
                 <Button
                   v-if="!backingSuccess"
-                  label="Dukung Kampanye Ini"
-                  icon="pi pi-heart"
+                  label="Kirim Donasi"
+                  icon="pi pi-send"
                   class="w-full !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3.5 !rounded-xl shadow-sm"
                   :loading="backingLoading"
                   :disabled="backingLoading || !backingAmount"
@@ -362,17 +366,18 @@
           </div>
 
           <!-- Tier Rewards -->
-          <div v-if="campaign.tiers?.length" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div v-if="campaign.tiers?.length" class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-6">
             <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Tier Reward</h4>
+            <p class="text-xs text-gray-400 mb-4 -mt-2">Pilih tier untuk menyesuaikan nominal donasi (hanya tampilan).</p>
             <div class="space-y-3">
               <div
-                v-for="tier in campaign.tiers"
+                v-for="tier in sortedTiers"
                 :key="tier.id"
-                class="border-2 rounded-xl p-4 transition-all duration-200 cursor-pointer"
-                :class="selectedTier?.id === tier.id
-                  ? 'border-emerald-500 bg-emerald-50 shadow-sm'
-                  : tier.remaining_quota === 0
-                    ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                class="border-2 rounded-[15px] p-4 transition-all duration-200 cursor-pointer"
+                :class="tier.remaining_quota === 0
+                  ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                  : selectedTier?.id === tier.id
+                    ? 'border-emerald-500 bg-emerald-50 shadow-sm'
                     : 'border-gray-200 bg-white hover:border-emerald-200 hover:bg-emerald-50/50'"
                 @click="selectTier(tier)"
               >
@@ -384,7 +389,7 @@
                       ? 'bg-red-100 text-red-600'
                       : 'bg-white text-gray-500 border border-gray-200'"
                   >
-                    {{ tier.remaining_quota === 0 ? 'Habis' : `Sisa ${tier.remaining_quota}` }}
+                    {{ tier.remaining_quota === 0 ? 'Habis' : 'Sisa ' + tier.remaining_quota }}
                   </span>
                 </div>
                 <div class="text-sm font-bold text-emerald-700 mb-1">Min. {{ formatCurrency(tier.min_amount) }}</div>
@@ -399,13 +404,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted, reactive, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import Badge from 'primevue/badge'
-import ProgressBar from 'primevue/progressbar'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
+
+
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
@@ -414,12 +418,49 @@ import { useToast } from 'primevue/usetoast'
 import * as campaignService from '@/services/campaignService'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
 
 const campaign = ref({})
-const backers = ref([])
 const loading = ref(true)
+const backingSectionRef = ref(null)
+
+// Gallery
+const activeImageIndex = ref(0)
+const galleryImages = computed(() => {
+  if (!campaign.value.images) return []
+  // Show uploaded images first, then video thumbnail
+  const uploaded = campaign.value.images.filter(img => img.title !== 'Video Thumbnail')
+  const videoThumb = campaign.value.images.filter(img => img.title === 'Video Thumbnail')
+  // Sort: primary first
+  const sorted = [...uploaded].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0))
+  return [...sorted, ...videoThumb]
+})
+const activeImageUrl = computed(() => {
+  if (galleryImages.value.length > 0) {
+    return galleryImages.value[activeImageIndex.value]?.image_url
+  }
+  return 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80'
+})
+
+const embedVideoUrl = computed(() => {
+  const url = campaign.value.video_url
+  if (!url) return null
+  const patterns = [
+    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ]
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match) {
+      return `https://www.youtube.com/embed/${match[1]}`
+    }
+  }
+  return null
+})
 
 const isOwner = computed(() => {
   return authStore.user?.id && campaign.value.user_id === authStore.user.id
@@ -438,7 +479,6 @@ const selectedTier = ref(null)
 const backingLoading = ref(false)
 const backingError = ref('')
 const backingSuccess = ref(false)
-const lastBackingAmount = ref(0)
 
 const presetAmounts = [50000, 100000, 250000, 500000]
 
@@ -446,6 +486,11 @@ function selectPreset(amount) {
   backingAmount.value = amount
   backingError.value = ''
 }
+
+const sortedTiers = computed(() => {
+  const tiers = campaign.value.tiers || []
+  return [...tiers].sort((a, b) => Number(a.min_amount) - Number(b.min_amount))
+})
 
 function selectTier(tier) {
   if (tier.remaining_quota === 0) return
@@ -467,6 +512,7 @@ const updateErrors = reactive({})
 const updateError = ref('')
 const updateLoading = ref(false)
 
+
 function statusLabel(status) {
   const labels = { draft: 'Draft', review: 'Review', active: 'Aktif', success: 'Sukses', failed: 'Gagal' }
   return labels[status] || status || '-'
@@ -479,33 +525,31 @@ function statusSeverity(status) {
 
 function formatCurrency(val) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0)
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-function formatShortDate(dateStr) {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
+}  function formatDate(dateStr) {
+    if (!dateStr) return '-'
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
 
 function remainingDays(deadline) {
   if (!deadline) return '-'
   const d = new Date(deadline)
   const diff = Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24))
   return diff > 0 ? diff : 0
+}
+
+function progressBarColor(c) {
+  const pct = progressPercent(c)
+  if (pct >= 100) return 'bg-emerald-700'
+  if (pct >= 75) return 'bg-emerald-600'
+  if (pct >= 50) return 'bg-emerald-500'
+  if (pct >= 25) return 'bg-emerald-400'
+  return 'bg-emerald-300'
 }
 
 function progressPercent(c) {
@@ -527,8 +571,12 @@ function validateBacking() {
     return false
   }
 
-  if (Number(backingAmount.value) > userBalance.value) {
-    backingError.value = 'Saldo tidak mencukupi. Silakan top up terlebih dahulu.'
+  // Check if backing amount exceeds remaining campaign target
+  const collected = Number(campaign.value.collected_amount || 0)
+  const target = Number(campaign.value.target_amount || 0)
+  const remaining = Math.max(0, target - collected)
+  if (Number(backingAmount.value) > remaining) {
+    backingError.value = 'Nominal donasi melebihi sisa dana yang dibutuhkan kampanye. Sisa dana yang diperlukan: ' + formatCurrency(remaining)
     return false
   }
 
@@ -538,42 +586,57 @@ function validateBacking() {
 async function handleBacking() {
   if (!validateBacking()) return
 
+  const backedAmount = Number(backingAmount.value)
+  const backedTier = selectedTier.value
+
   backingLoading.value = true
-  backingSuccess.value = false
+  backingError.value = ''
 
   try {
     const payload = {
       campaign_id: campaign.value.id,
-      amount: Number(backingAmount.value),
+      amount: backedAmount,
     }
-    if (selectedTier.value) {
-      payload.tier_id = selectedTier.value.id
+    if (backedTier) {
+      payload.tier_id = backedTier.id
     }
 
     const res = await campaignService.backCampaign(payload)
 
-    // Update local state
-    campaign.value.collected_amount = res.data.collected_amount
-    authStore.user.balance = res.data.balance
-    localStorage.setItem('user', JSON.stringify(authStore.user))
-
-    lastBackingAmount.value = Number(backingAmount.value)
+    // Success — reload campaign data to reflect updated balance + collected_amount
     backingSuccess.value = true
-
-    // If tier selected, decrement remaining_quota locally
-    if (selectedTier.value) {
-      const tier = campaign.value.tiers?.find(t => t.id === selectedTier.value.id)
-      if (tier) tier.remaining_quota = Math.max(0, (tier.remaining_quota || 0) - 1)
-    }
-
-    // Reset form
     backingAmount.value = null
     selectedTier.value = null
 
-    toast.add({ severity: 'success', summary: 'Dukungan Berhasil!', detail: res.message || 'Dana telah masuk ke escrow.', life: 5000 })
+    await loadCampaignData()
+
+    // Refresh auth store balance
+    const meRes = await authStore.fetchUser()
+
+    toast.add({
+      severity: 'success',
+      summary: 'Pendanaan Berhasil!',
+      detail: 'Dana sebesar ' + formatCurrency(backedAmount) + ' telah masuk ke escrow.',
+      life: 5000,
+    })
+
+    // Auto-hide success message after 5s
+    setTimeout(() => {
+      backingSuccess.value = false
+    }, 5000)
   } catch (error) {
-    backingError.value = error.response?.data?.message || 'Gagal melakukan backing. Silakan coba lagi.'
-    toast.add({ severity: 'error', summary: 'Gagal', detail: backingError.value, life: 4000 })
+    // Distinguish different error types for better user feedback
+    if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response) {
+      // Network error — request didn't reach server (blocked by extension, CORS, server down)
+      backingError.value = 'Koneksi terblokir atau server tidak merespons. Periksa ekstensi browser (ad blocker) atau coba refresh halaman.'
+    } else if (error.response?.status === 500) {
+      backingError.value = error.response?.data?.message || 'Terjadi kesalahan server. Silakan coba lagi.'
+    } else if (error.response?.status === 429) {
+      backingError.value = 'Terlalu banyak permintaan. Silakan tunggu beberapa saat.'
+    } else {
+      backingError.value = error.response?.data?.message || 'Gagal memproses pendanaan'
+    }
+    toast.add({ severity: 'error', summary: 'Gagal', detail: backingError.value, life: 5000 })
   } finally {
     backingLoading.value = false
   }
@@ -628,23 +691,31 @@ async function handlePostUpdate() {
   }
 }
 
-onMounted(async () => {
+async function loadCampaignData() {
   try {
     const response = await campaignService.getCampaignDetail(route.params.slug)
     const campaignData = response?.data || response || {}
     campaign.value = campaignData
 
-    // Use real backings data from eager-loaded relationship
-    if (campaignData.backings?.length) {
-      backers.value = campaignData.backings
-    } else {
-      backers.value = []
-    }
   } catch (e) {
     campaign.value = { title: 'Kampanye Tidak Ditemukan' }
-    backers.value = []
-  } finally {
-    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  await loadCampaignData()
+  loading.value = false
+
+  // Auto-scroll to backing form if navigated from "Dukung" button
+  if (route.query.dukung === '1') {
+    // Replace query param so refresh doesn't re-scroll
+    router.replace({ query: {} })
+
+    nextTick(() => {
+      setTimeout(() => {
+        backingSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 400)
+    })
   }
 })
 </script>

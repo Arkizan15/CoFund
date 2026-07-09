@@ -15,6 +15,7 @@ class CampaignImage extends Model
     protected $fillable = [
         'campaign_id',
         'title',
+        'image_url',
         'is_primary',
     ];
 

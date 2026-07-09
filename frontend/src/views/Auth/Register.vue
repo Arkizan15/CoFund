@@ -8,65 +8,71 @@
         </router-link>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+      <div class="bg-white rounded-[15px] shadow-lg border border-emerald-200 p-8">
         <div class="text-center mb-8">
           <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mb-4">
             <i class="pi pi-user-plus text-2xl"></i>
           </div>
           <h2 class="text-2xl font-bold text-gray-900">Daftar Akun Baru</h2>
-          <p class="text-sm text-gray-500 mt-1">Mulai perjalanan crowdfunding Anda</p>
+          <p class="text-sm text-gray-500 mt-1">Buat akun untuk mulai berdonasi dan membuat kampanye</p>
         </div>
 
         <form @submit.prevent="handleRegister" class="space-y-4">
           <div class="flex flex-col gap-1.5">
             <label for="name" class="text-sm font-semibold text-gray-700">Nama Lengkap</label>
-            <span class="p-input-icon-left w-full">
-              <i class="pi pi-user text-gray-400"></i>
+            <div class="relative">
+              <i class="pi pi-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10"></i>
               <InputText
                 id="name"
                 v-model="form.name"
-                placeholder="Nama Lengkap Anda"
-                class="w-full !rounded-xl !py-3 !text-sm"
+                placeholder="Masukkan nama lengkap"
+                class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.name }"
                 required
               />
-            </span>
-            <small v-if="errors.name" class="p-error text-xs">{{ errors.name[0] }}</small>
+            </div>
+            <small v-if="errors.name" class="p-error text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-[10px]"></i>{{ errors.name[0] }}
+            </small>
           </div>
 
           <div class="flex flex-col gap-1.5">
             <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
-            <span class="p-input-icon-left w-full">
-              <i class="pi pi-envelope text-gray-400"></i>
+            <div class="relative">
+              <i class="pi pi-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10"></i>
               <InputText
                 id="email"
                 v-model="form.email"
                 type="email"
-                placeholder="nama@email.com"
-                class="w-full !rounded-xl !py-3 !text-sm"
+                placeholder="Masukkan alamat email"
+                class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.email }"
                 required
               />
-            </span>
-            <small v-if="errors.email" class="p-error text-xs">{{ errors.email[0] }}</small>
+            </div>
+            <small v-if="errors.email" class="p-error text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-[10px]"></i>{{ errors.email[0] }}
+            </small>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label for="password" class="text-sm font-semibold text-gray-700">Password</label>
-            <span class="p-input-icon-left w-full">
-              <i class="pi pi-lock text-gray-400"></i>
+            <label for="password" class="text-sm font-semibold text-gray-700">Kata Sandi</label>
+            <div class="relative">
+              <i class="pi pi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10"></i>
               <InputText
                 id="password"
                 v-model="form.password"
                 type="password"
                 placeholder="Minimal 6 karakter"
-                class="w-full !rounded-xl !py-3 !text-sm"
+                class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.password }"
                 minlength="6"
                 required
               />
-            </span>
-            <small v-if="errors.password" class="p-error text-xs">{{ errors.password[0] }}</small>
+            </div>
+            <small v-if="errors.password" class="p-error text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-[10px]"></i>{{ errors.password[0] }}
+            </small>
 
             <div v-if="form.password" class="mt-1">
               <div class="flex gap-1 mb-1">
@@ -74,41 +80,43 @@
                 <div class="h-1.5 flex-1 rounded-full transition-colors duration-300" :class="passwordStrength.score >= 2 ? passwordStrength.color : 'bg-gray-200'"></div>
                 <div class="h-1.5 flex-1 rounded-full transition-colors duration-300" :class="passwordStrength.score >= 3 ? passwordStrength.color : 'bg-gray-200'"></div>
               </div>
-              <p class="text-xs font-medium" :class="passwordStrength.textColor">Kekuatan Password: {{ passwordStrength.label }}</p>
+              <p class="text-xs font-medium" :class="passwordStrength.textColor">Kekuatan Sandi: {{ passwordStrength.label }}</p>
             </div>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label for="password_confirmation" class="text-sm font-semibold text-gray-700">Konfirmasi Password</label>
-            <span class="p-input-icon-left w-full">
-              <i class="pi pi-lock text-gray-400"></i>
+            <label for="password_confirmation" class="text-sm font-semibold text-gray-700">Konfirmasi Kata Sandi</label>
+            <div class="relative">
+              <i class="pi pi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10"></i>
               <InputText
                 id="password_confirmation"
                 v-model="form.password_confirmation"
                 type="password"
-                placeholder="Ulangi password"
-                class="w-full !rounded-xl !py-3 !text-sm"
+                placeholder="Ulangi kata sandi"
+                class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.password_confirmation }"
                 minlength="6"
                 required
               />
-            </span>
-            <small v-if="errors.password_confirmation" class="p-error text-xs">{{ errors.password_confirmation[0] }}</small>
+            </div>
+            <small v-if="errors.password_confirmation" class="p-error text-xs flex items-center gap-1">
+              <i class="pi pi-exclamation-circle text-[10px]"></i>{{ errors.password_confirmation[0] }}
+            </small>
           </div>
 
-          <div v-if="globalError" class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-start gap-3">
+          <div v-if="globalError" class="p-4 bg-red-50 border border-red-200 rounded-[15px] text-sm text-red-600 flex items-start gap-3">
             <i class="pi pi-exclamation-circle mt-0.5"></i>
             <span>{{ globalError }}</span>
           </div>
 
-          <div v-if="successMessage" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-start gap-3">
+          <div v-if="successMessage" class="p-4 bg-emerald-50 border border-emerald-200 rounded-[15px] text-sm text-emerald-700 flex items-start gap-3">
             <i class="pi pi-check-circle mt-0.5"></i>
             <span>{{ successMessage }}</span>
           </div>
 
           <Button
             type="submit"
-            :label="loading ? 'Mendaftar...' : 'Daftar'"
+            :label="loading ? 'Memproses...' : 'Daftar Sekarang'"
             :icon="loading ? 'pi pi-spin pi-spinner' : 'pi pi-user-plus'"
             :disabled="loading"
             class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold !py-3 !rounded-xl border-none shadow-sm transition-all duration-200 mt-2"
@@ -116,9 +124,9 @@
         </form>
 
         <div class="text-center mt-6 text-sm text-gray-500">
-          Sudah memiliki akun?
+          Sudah punya akun?
           <router-link :to="{ name: 'Login' }" class="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors ml-1">
-            Masuk di Sini
+            Masuk
           </router-link>
         </div>
       </div>
@@ -172,7 +180,7 @@ const handleRegister = async () => {
 
   try {
     const response = await authStore.register(form)
-    successMessage.value = response.data.message || 'Registrasi berhasil! Silakan cek email Anda untuk verifikasi.'
+    successMessage.value = response.data.message || 'Pendaftaran berhasil! Silakan cek email Anda.'
     setTimeout(() => {
       router.push({ name: 'Login' })
     }, 2000)
@@ -180,7 +188,7 @@ const handleRegister = async () => {
     if (error.response?.status === 422) {
       Object.assign(errors, error.response.data.errors)
     } else {
-      globalError.value = error.response?.data?.message || 'Terjadi kesalahan saat registrasi. Silakan coba lagi.'
+      globalError.value = error.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi.'
     }
   } finally {
     loading.value = false

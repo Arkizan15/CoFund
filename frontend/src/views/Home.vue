@@ -1,98 +1,146 @@
 <template>
-  <div>
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-600 to-green-500 text-white">
-      <div class="absolute inset-0 opacity-10">
-        <div class="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-        <div class="absolute bottom-10 right-10 w-96 h-96 bg-emerald-300 rounded-full blur-3xl"></div>
+  <div class="min-h-screen bg-slate-950 text-slate-900">
+    <section class="relative isolate overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-green-500 text-white min-h-screen flex items-center">
+      <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.2),transparent_38%)]"></div>
+        <div class="parallax-blur absolute top-8 left-8 w-64 h-64 rounded-full bg-white/20 blur-3xl" data-speed="0.16"></div>
+        <div class="parallax-blur absolute bottom-8 right-8 w-80 h-80 rounded-full bg-emerald-200/20 blur-3xl" data-speed="0.28"></div>
+        <div class="parallax-blur absolute top-1/3 right-1/4 w-56 h-56 rounded-full bg-emerald-300/15 blur-3xl" data-speed="0.34"></div>
       </div>
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-          <div class="space-y-6">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-              Bangun Masa Depan<br />
-              <span class="text-emerald-200">Bersama Komunitas</span>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 md:py-10 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
+          <div class="space-y-7">
+            <div class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-medium text-emerald-50 backdrop-blur-sm">
+              <i class="pi pi-bolt text-xs"></i>
+              Platform Crowdfunding Lokal
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-white">
+              Mulai Perjalanan<br />
+              <span class="text-emerald-100">Bersama CoFund</span>
             </h1>
-            <p class="text-lg md:text-xl text-emerald-50 leading-relaxed max-w-lg">
-              CoFund menghubungkan para pengusaha UMKM dengan pendukung finansial. Wujudkan ide bisnis Anda melalui crowdfunding yang transparan, aman, dan terpercaya.
+            <p class="text-base sm:text-lg md:text-xl text-emerald-50/90 leading-relaxed max-w-lg sm:max-w-xl">
+              Sistem crowdfunding dengan virtual escrow, tier backer, campaign lifecycle otomatis, dan refund
+berbasis queue job. Dirancang sebagai proyek pelatihan magang dengan kompleksitas bisnis
+yang realistis.
             </p>
             <div class="flex flex-wrap gap-4 pt-2">
               <router-link
                 :to="{ name: 'CampaignList' }"
-                class="inline-flex items-center gap-2 bg-white text-emerald-700 font-semibold px-8 py-3.5 rounded-xl shadow-lg hover:bg-emerald-50 transition-all duration-200 hover:-translate-y-0.5"
+                class="inline-flex items-center gap-2 bg-white text-emerald-700 font-semibold w-full sm:w-auto px-5 py-3 sm:px-8 sm:py-3.5 rounded-2xl shadow-lg shadow-emerald-950/20 hover:bg-emerald-50 transition-all duration-300 hover:-translate-y-0.5"
               >
                 <i class="pi pi-search"></i>
-                Jelajahi Kampanye
+                Jelajahi Campaign
               </router-link>
               <router-link
                 :to="{ name: 'Register' }"
-                class="inline-flex items-center gap-2 border-2 border-white/40 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-white/10 transition-all duration-200"
+                class="inline-flex items-center gap-2 border border-white/40 text-white font-semibold w-full sm:w-auto px-5 py-3 sm:px-8 sm:py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/15 transition-all duration-300"
               >
                 <i class="pi pi-user-plus"></i>
-                Mulai Sekarang
+                Mulai Kampanye
               </router-link>
             </div>
           </div>
+
           <div class="hidden md:block relative">
+            <div class="absolute inset-0 rounded-[2rem] bg-gradient-to-tr from-emerald-200/30 to-transparent blur-2xl"></div>
             <img
               src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80"
               alt="Community crowdfunding"
-              class="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
+              class="relative rounded-[2rem] shadow-2xl shadow-emerald-950/30 w-full h-[420px] object-cover border border-white/20"
             />
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/80 hover:text-white transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-full px-3 py-2 animate-hero-bounce"
+        @click="scrollToHowItWorks"
+      >
+        <span class="text-[11px] tracking-[0.35em] uppercase font-semibold">Scroll</span>
+        <div class="w-6 h-10 border border-white/40 rounded-full flex items-start justify-center p-1.5">
+          <div class="w-1.5 h-1.5 bg-white rounded-full animate-scroll-dot"></div>
+        </div>
+      </button>
     </section>
 
-    <!-- About / Platform Values -->
-    <section class="py-20 bg-white">
+    <!-- Platform Stats Section -->
+    <section v-if="!statsLoading" class="py-12 md:py-16 bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Mengapa CoFund?</h2>
-          <p class="text-gray-500 max-w-2xl mx-auto">Platform crowdfunding terpercaya dengan sistem escrow otomatis dan transparansi penuh</p>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-8">
-          <div class="group p-8 bg-slate-50 rounded-2xl border border-gray-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300">
-            <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors">
-              <i class="pi pi-shield text-2xl text-emerald-700"></i>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="bg-emerald-50 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <i class="pi pi-flag text-xl text-emerald-700"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Perlindungan Escrow</h3>
-            <p class="text-gray-500 text-sm leading-relaxed">
-              Dana donasi diamankan dalam rekening escrow terverifikasi. Pencairan hanya dilakukan saat kampanye mencapai target yang ditentukan.
-            </p>
+            <p class="text-3xl font-bold text-gray-900">{{ platformStats.campaigns }}</p>
+            <p class="text-sm text-gray-500 mt-1">Total Kampanye</p>
           </div>
-
-          <div class="group p-8 bg-slate-50 rounded-2xl border border-gray-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300">
-            <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors">
-              <i class="pi pi-chart-line text-2xl text-emerald-700"></i>
+          <div class="bg-blue-50 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <i class="pi pi-users text-xl text-blue-700"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Transparansi Penuh</h3>
-            <p class="text-gray-500 text-sm leading-relaxed">
-              Pantau perkembangan kampanye secara real-time. Setiap transaksi tercatat dan dapat diaudit oleh seluruh pihak.
-            </p>
+            <p class="text-3xl font-bold text-gray-900">{{ platformStats.backers }}</p>
+            <p class="text-sm text-gray-500 mt-1">Backer Terdaftar</p>
           </div>
-
-          <div class="group p-8 bg-slate-50 rounded-2xl border border-gray-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300">
-            <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors">
-              <i class="pi pi-globe text-2xl text-emerald-700"></i>
+          <div class="bg-purple-50 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <i class="pi pi-wallet text-xl text-purple-700"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Dampak Nyata</h3>
-            <p class="text-gray-500 text-sm leading-relaxed">
-              Setiap kontribusi Anda berdampak langsung pada pertumbuhan UMKM dan perekonomian masyarakat lokal.
-            </p>
+            <p class="text-3xl font-bold text-gray-900">{{ formatCurrency(platformStats.collected) }}</p>
+            <p class="text-sm text-gray-500 mt-1">Dana Terkumpul</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Campaign Preview Section -->
-    <section class="py-20 bg-slate-50">
+    <section ref="howItWorksSection" class="relative py-16 md:py-24 lg:py-32 bg-white overflow-hidden">
+      <div class="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-emerald-50/80 to-transparent"></div>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div ref="headingRef" class="text-center mb-10 md:mb-16 lg:mb-20">
+          <div class="inline-block">
+            <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4 transition-all duration-700 ease-out" :class="headingRevealed ? 'reveal-text-visible' : 'reveal-text'">
+              Bagaimana Cara Kerjanya?
+            </h2>
+          </div>
+          <div class="inline-block max-w-2xl mx-auto">
+            <p class="text-slate-500 text-base md:text-lg leading-relaxed transition-all duration-700 ease-out" :class="headingRevealed ? 'reveal-text-visible' : 'reveal-text'" style="transition-delay: 150ms;">
+              Platform crowdfunding terpercaya dengan sistem escrow otomatis, transparansi penuh, dan pengalaman dukungan yang terasa lebih aman.
+            </p>
+          </div>
+        </div>
+
+        <div class="perspective-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+          <div
+            v-for="(card, index) in howItWorksCards"
+            :key="index"
+            class="card-3d group relative p-5 md:p-8 bg-slate-50/90 backdrop-blur rounded-[1.75rem] border border-slate-200/70 shadow-[0_25px_70px_-35px_rgba(15,23,42,0.35)] transition-all duration-700"
+            :data-index="index"
+            :style="{ transitionDelay: `${index * 140}ms` }"
+            :class="{ 'card-visible': visibleCards[index] }"
+          >
+            <div class="card-3d-inner">
+              <div class="w-12 h-12 md:w-14 md:h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-emerald-200 transition-colors duration-300">
+                <i :class="card.icon" class="text-xl md:text-2xl text-emerald-700"></i>
+              </div>
+              <h3 class="text-lg md:text-xl font-bold text-slate-800 mb-3">{{ card.title }}</h3>
+              <p class="text-slate-500 text-sm leading-relaxed">{{ card.description }}</p>
+              <div class="mt-6 flex items-center gap-2 text-emerald-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <span>Pelajari lebih lanjut</span>
+                <i class="pi pi-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-20 bg-slate-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-10">
           <div>
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Kampanye Populer</h2>
-            <p class="text-gray-500 mt-2">Temukan peluang investasi terbaik dari berbagai sektor</p>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900">Kampanye Terbaru</h2>
+            <p class="text-slate-500 mt-2">Jelajahi kampanye crowdfunding terbaru dari berbagai sektor</p>
           </div>
           <router-link :to="{ name: 'CampaignList' }" class="hidden sm:inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors group">
             Lihat Semua
@@ -100,134 +148,89 @@
           </router-link>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div v-for="campaign in featuredCampaigns" :key="campaign.id" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
-            <div class="relative overflow-hidden h-48">
-              <img :src="campaign.image" :alt="campaign.title" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
-              <div class="absolute top-3 left-3">
-                <span class="bg-white/90 backdrop-blur-sm text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
-                  {{ campaign.category }}
-                </span>
-              </div>
-            </div>
-            <div class="p-5 flex flex-col flex-1">
-              <router-link :to="`/campaigns/${campaign.slug}`" class="text-lg font-bold text-gray-800 hover:text-emerald-600 transition-colors line-clamp-2 mb-3">
-                {{ campaign.title }}
-              </router-link>
+        <!-- Loading State - Skeleton -->
+        <div v-if="latestCampaignsLoading" class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <CampaignCardSkeleton v-for="n in 3" :key="'skeleton-' + n" />
+        </div>
 
-              <div class="mt-auto space-y-3">
-                <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-500" :style="{ width: campaign.progress + '%' }"></div>
-                </div>
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-gray-500">
-                    Terkumpul <strong class="text-gray-800">{{ campaign.progress }}%</strong>
-                  </span>
-                  <span class="flex items-center gap-1.5 text-orange-600 font-medium">
-                    <i class="pi pi-clock text-xs"></i>
-                    {{ campaign.daysLeft }} hari lagi
-                  </span>
-                </div>
-              </div>
-            </div>
+        <!-- Empty State -->
+        <div v-else-if="latestCampaigns.length === 0" class="text-center py-16">
+          <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+            <i class="pi pi-inbox text-2xl text-gray-300"></i>
           </div>
+          <p class="text-gray-500 font-medium">Belum ada kampanye</p>
+          <p class="text-gray-400 text-sm mt-1">Kampanye terbaru akan muncul di sini</p>
+        </div>
+
+        <!-- Campaign Grid -->
+        <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <CampaignCard
+            v-for="campaign in latestCampaigns.slice(0, 3)"
+            :key="campaign.id"
+            :campaign="campaign"
+            :showBackingButton="false"
+          />
         </div>
 
         <div class="text-center mt-10 sm:hidden">
           <router-link :to="{ name: 'CampaignList' }" class="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors group">
-            Lihat Semua Kampanye
+            Lihat Semua
             <i class="pi pi-arrow-right text-sm transition-transform group-hover:translate-x-1"></i>
           </router-link>
         </div>
       </div>
     </section>
 
-    <!-- Guest CTA -->
-    <section v-if="!authStore.isAuthenticated" class="bg-gradient-to-r from-emerald-700 to-emerald-600 py-16">
+    <section v-if="!authStore.isAuthenticated" class="bg-gradient-to-r from-emerald-700 to-emerald-600 py-12 md:py-16">
       <div class="max-w-4xl mx-auto px-4 text-center">
         <div class="flex items-center justify-center gap-3 mb-6">
           <div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center">
             <i class="pi pi-wallet text-3xl text-white"></i>
           </div>
         </div>
-        <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">Siap Mengembangkan Portofolio Investasi Anda?</h3>
-        <p class="text-emerald-100 mb-8 max-w-2xl mx-auto">Bergabunglah bersama CoFund dan temukan berbagai peluang investasi sektor riil terbaik untuk masa depan Anda.</p>
-        <router-link :to="{ name: 'Register' }" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-10 py-4 rounded-xl shadow-lg hover:bg-emerald-50 transition-all duration-200 hover:-translate-y-0.5 no-underline">
+        <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-4">Mulai Kampanye</h3>
+        <p class="text-emerald-100 mb-8 max-w-2xl mx-auto">Jelajahi kampanye UMKM terbaik dan berikan dukungan dana sesuai kemampuan Anda.</p>
+        <router-link :to="{ name: 'Register' }" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-3 sm:px-10 sm:py-4 rounded-2xl shadow-lg hover:bg-emerald-50 transition-all duration-300 hover:-translate-y-0.5 no-underline">
           <i class="pi pi-user-plus"></i>
           Daftar Sekarang
         </router-link>
       </div>
     </section>
 
-    <!-- Logged-in Campaign Cards -->
-    <section v-else class="py-16 bg-gradient-to-r from-emerald-700 to-emerald-600">
+    <section v-else class="py-12 md:py-16 bg-gradient-to-r from-emerald-700 to-emerald-600">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center justify-between mb-6 md:mb-10">
           <div>
-            <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Kampanye Terbaru</h3>
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">Jelajahi Kampanye</h3>
             <p class="text-emerald-100 text-sm">Temukan dan dukung kampanye yang sesuai dengan minat Anda</p>
           </div>
-          <router-link :to="{ name: 'CampaignList' }" class="hidden sm:inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 no-underline">
+          <router-link :to="{ name: 'CampaignList' }" class="hidden sm:inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-2.5 rounded-2xl transition-all duration-300 no-underline">
             Lihat Semua
             <i class="pi pi-arrow-right text-sm"></i>
           </router-link>
         </div>
 
-        <div v-if="liveCampaignsLoading" class="flex items-center justify-center py-12">
-          <i class="pi pi-spin pi-spinner text-3xl text-white/70"></i>
+        <div v-if="liveCampaignsLoading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <CampaignCardSkeleton v-for="n in 3" :key="'live-skeleton-' + n" />
         </div>
 
         <div v-else-if="liveCampaigns.length === 0" class="text-center py-12 bg-white/10 rounded-2xl">
           <i class="pi pi-inbox text-4xl text-white/40 mb-3 block"></i>
-          <p class="text-white/70 text-sm">Belum ada kampanye aktif saat ini</p>
+          <p class="text-white/70 text-sm">Belum ada data</p>
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div
+          <CampaignCard
             v-for="campaign in liveCampaigns.slice(0, 3)"
             :key="campaign.id"
-            class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
-          >
-            <div class="relative overflow-hidden h-44 bg-gray-100">
-              <img
-                src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&q=80"
-                :alt="campaign.title"
-                class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-              />
-              <div class="absolute top-3 left-3">
-                <span class="bg-emerald-600/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
-                  {{ campaign.category?.name || 'Umum' }}
-                </span>
-              </div>
-            </div>
-            <div class="p-5 flex flex-col flex-1">
-              <h4 class="font-bold text-gray-800 text-sm line-clamp-2 mb-3">{{ campaign.title }}</h4>
-              <div class="mt-auto space-y-2.5">
-                <ProgressBar :value="progressPercent(campaign)" class="!h-2 !rounded-full" />
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-gray-500">
-                    {{ formatCurrency(campaign.collected_amount || 0) }}
-                  </span>
-                  <span class="flex items-center gap-1 text-orange-600 font-medium">
-                    <i class="pi pi-clock text-[10px]"></i>
-                    {{ remainingDays(campaign.deadline) }} hari
-                  </span>
-                </div>
-              </div>
-              <router-link
-                :to="`/campaigns/${campaign.slug}`"
-                class="mt-4 block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all duration-200 shadow-sm no-underline"
-              >
-                Lihat Detail
-                <i class="pi pi-arrow-right ml-1.5 text-xs"></i>
-              </router-link>
-            </div>
-          </div>
+            :campaign="campaign"
+            @backing="goToCampaignDetail"
+          />
         </div>
 
         <div class="text-center mt-8 sm:hidden">
           <router-link :to="{ name: 'CampaignList' }" class="inline-flex items-center gap-2 text-white font-semibold hover:text-emerald-100 transition-colors">
-            Lihat Semua Kampanye
+            Lihat Semua
             <i class="pi pi-arrow-right text-sm"></i>
           </router-link>
         </div>
@@ -237,42 +240,56 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import ProgressBar from 'primevue/progressbar'
+import CampaignCard from '@/components/CampaignCard.vue'
+import CampaignCardSkeleton from '@/components/CampaignCardSkeleton.vue'
+import api from '@/services/api'
 import * as campaignService from '@/services/campaignService'
 
+const router = useRouter()
 const authStore = useAuthStore()
 
-const featuredCampaigns = ref([
+let headingObserver = null
+let cardObserver = null
+
+const howItWorksSection = ref(null)
+const headingRef = ref(null)
+const headingRevealed = ref(false)
+const visibleCards = ref([false, false, false])
+
+const howItWorksCards = [
   {
-    id: 1,
-    title: 'Ekspansi Cabang Kopi Skena Sektor 4',
-    slug: 'ekspansi-cabang-kopi-skena',
-    category: 'F&B',
-    progress: 75,
-    daysLeft: 14,
-    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80'
+    icon: 'pi pi-shield',
+    title: 'Daftar & Verifikasi',
+    description: 'Buat akun dan lengkapi profil Anda untuk mulai berpartisipasi dalam crowdfunding.',
   },
   {
-    id: 2,
-    title: 'Pendanaan Bahan Baku Konveksi Taylor ID',
-    slug: 'pendanaan-bahan-baku-konveksi',
-    category: 'Fashion',
-    progress: 40,
-    daysLeft: 22,
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80'
+    icon: 'pi pi-chart-line',
+    title: 'Pilih & Dukung',
+    description: 'Jelajahi kampanye UMKM terbaik dan berikan dukungan dana sesuai kemampuan Anda.',
   },
   {
-    id: 3,
-    title: 'Digitalisasi Distribusi Sembako Murah Mandiri',
-    slug: 'digitalisasi-distribusi-sembako',
-    category: 'Ritel',
-    progress: 90,
-    daysLeft: 5,
-    image: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=600&q=80'
-  }
-])
+    icon: 'pi pi-globe',
+    title: 'Nikmati Hasilnya',
+    description: 'Pantau perkembangan kampanye dan dapatkan reward eksklusif dari kreator.',
+  },
+]
+
+// ── Cache module-level variables ─────────────────────────────
+// These persist across component mount/unmount cycles so
+// navigating away and back can reuse cached data immediately.
+let _statsCache = null
+let _latestCache = null
+let _liveCache = null
+let _fetching = false
+
+const platformStats = ref({ campaigns: 0, backers: 0, collected: 0 })
+const statsLoading = ref(true)
+
+const latestCampaigns = ref([])
+const latestCampaignsLoading = ref(true)
 
 const liveCampaigns = ref([])
 const liveCampaignsLoading = ref(true)
@@ -281,31 +298,205 @@ function formatCurrency(val) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0)
 }
 
-function remainingDays(deadline) {
-  if (!deadline) return '-'
-  const d = new Date(deadline)
-  const diff = Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24))
-  return diff > 0 ? diff : 0
+function goToCampaignDetail(campaign) {
+  router.push(`/campaigns/${campaign.slug}?dukung=1`)
 }
 
-function progressPercent(c) {
-  const col = Number(c.collected_amount || 0)
-  const tar = Number(c.target_amount || 1)
-  return Math.min(100, Math.round((col / tar) * 100))
+function scrollToHowItWorks() {
+  if (!howItWorksSection.value) return
+  howItWorksSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-onMounted(async () => {
-  if (authStore.isAuthenticated) {
+/**
+ * Eager fetch — runs immediately when the module is loaded (before mount).
+ * 1. Restore cached data instantly (if available) → skeleton disappears immediately.
+ * 2. Always fetch fresh data in the background → updates UI when done.
+ */
+// Restore cached data instantly
+if (_statsCache) {
+  platformStats.value = _statsCache
+  statsLoading.value = false
+}
+if (_latestCache) {
+  latestCampaigns.value = _latestCache
+  latestCampaignsLoading.value = false
+}
+if (_liveCache) {
+  liveCampaigns.value = _liveCache
+  liveCampaignsLoading.value = false
+}
+
+// Always fetch fresh data in background (skip if already fetching)
+if (!_fetching) {
+  _fetching = true
+  ;(async () => {
     try {
-      const data = await campaignService.getCampaigns()
-      liveCampaigns.value = data?.data || data || []
+      const [statsRes, latestRes] = await Promise.all([
+        api.get('/platform/stats').catch(() => null),
+        campaignService.getCampaigns({ sort: 'newest' }).catch(() => null),
+      ])
+
+      // Stats
+      if (statsRes) {
+        const d = statsRes.data?.data
+        _statsCache = {
+          campaigns: d?.total_campaigns || 0,
+          backers: d?.total_backers || 0,
+          collected: d?.total_collected || 0,
+        }
+        platformStats.value = _statsCache
+      }
+      statsLoading.value = false
+
+      // Latest campaigns
+      if (latestRes) {
+        // latestRes = { success: true, data: paginator }
+        // paginator = { data: [...campaigns], current_page, last_page, total, ... }
+        const all = latestRes?.data?.data || latestRes?.data || []
+        _latestCache = all
+        latestCampaigns.value = Array.isArray(all) ? all : []
+      }
+      latestCampaignsLoading.value = false
+
+      // Live campaigns (authenticated only)
+      if (authStore.isAuthenticated) {
+        const liveRes = await campaignService.getCampaigns().catch(() => null)
+        if (liveRes) {
+          const liveData = liveRes?.data?.data || liveRes?.data || []
+          _liveCache = Array.isArray(liveData) ? liveData : []
+          liveCampaigns.value = _liveCache
+        }
+        liveCampaignsLoading.value = false
+      } else {
+        liveCampaignsLoading.value = false
+      }
     } catch (e) {
-      liveCampaigns.value = []
-    } finally {
+      statsLoading.value = false
+      latestCampaignsLoading.value = false
       liveCampaignsLoading.value = false
+    } finally {
+      _fetching = false
     }
-  } else {
-    liveCampaignsLoading.value = false
+  })()
+}
+
+onMounted(() => {
+  headingObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        headingRevealed.value = true
+        headingObserver?.disconnect()
+      }
+    },
+    { threshold: 0.3 }
+  )
+
+  if (headingRef.value) {
+    headingObserver.observe(headingRef.value)
   }
+
+  const cardElements = Array.from(document.querySelectorAll('.card-3d'))
+  cardObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+
+        const index = Number(entry.target.dataset.index)
+        if (!Number.isNaN(index) && !visibleCards.value[index]) {
+          visibleCards.value[index] = true
+        }
+
+        cardObserver?.unobserve(entry.target)
+      })
+    },
+    { threshold: 0.2 }
+  )
+
+  cardElements.forEach((el) => cardObserver.observe(el))
+})
+
+onUnmounted(() => {
+  _fetching = false
+  headingObserver?.disconnect()
+  headingObserver = null
+
+  cardObserver?.disconnect()
+  cardObserver = null
 })
 </script>
+
+<style scoped>
+.perspective-container {
+  perspective: 1200px;
+  perspective-origin: center;
+}
+
+.card-3d {
+  transform-style: preserve-3d;
+  transform: translate3d(0, 28px, 0) rotateX(18deg) rotateY(-8deg) scale(0.96);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.card-3d.card-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) scale(1);
+}
+
+.card-3d:hover {
+  transform: rotateX(-6deg) rotateY(8deg) translateZ(24px) scale(1.02);
+  box-shadow: 0 30px 80px -30px rgba(16, 185, 129, 0.35);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.card-3d-inner {
+  transform: translateZ(18px);
+}
+
+.reveal-text {
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+}
+
+.reveal-text-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.animate-hero-bounce {
+  animation: hero-bounce 1.8s ease-in-out infinite;
+}
+
+.animate-scroll-dot {
+  animation: scroll-dot 1.6s ease-in-out infinite;
+}
+
+.parallax-blur {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes hero-bounce {
+  0%,
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  50% {
+    transform: translate3d(-50%, 8px, 0);
+  }
+}
+
+@keyframes scroll-dot {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(10px);
+    opacity: 1;
+  }
+}
+</style>
