@@ -130,6 +130,25 @@ class XenditService
     }
 
     /**
+     * Get invoices by external_id to verify payment status.
+     */
+    public function getInvoicesByExternalId(string $externalId, array $statuses = ['PAID', 'SETTLED'])
+    {
+        $apiInstance = new InvoiceApi();
+
+        try {
+            $result = $apiInstance->getInvoices(null, $externalId, $statuses, 1);
+            return $result;
+        } catch (XenditSdkException $e) {
+            Log::error('Xendit get invoices failed', [
+                'external_id' => $externalId,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Verify Xendit webhook callback token.
      *
      * @param string|null $token

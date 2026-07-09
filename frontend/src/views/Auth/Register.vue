@@ -63,10 +63,10 @@
                 id="password"
                 v-model="form.password"
                 type="password"
-                placeholder="Minimal 6 karakter"
+                placeholder="Minimal 8 karakter"
                 class="w-full !rounded-xl !py-3 !pl-10 !text-sm !bg-white"
                 :class="{ 'p-invalid': errors.password }"
-                minlength="6"
+                minlength="8"
                 required
               />
             </div>
@@ -136,12 +136,10 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const form = reactive({
@@ -181,9 +179,6 @@ const handleRegister = async () => {
   try {
     const response = await authStore.register(form)
     successMessage.value = response.data.message || 'Pendaftaran berhasil! Silakan cek email Anda.'
-    setTimeout(() => {
-      router.push({ name: 'Login' })
-    }, 2000)
   } catch (error) {
     if (error.response?.status === 422) {
       Object.assign(errors, error.response.data.errors)

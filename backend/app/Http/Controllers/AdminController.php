@@ -405,6 +405,21 @@ class AdminController extends Controller
             $user->suspended_at ? "Menonaktifkan user: {$user->name} ({$user->email})" : "Mengaktifkan user: {$user->name} ({$user->email})"
         );
 
+        $notifType = $user->suspended_at ? 'user_banned' : 'user_unbanned';
+        $notifTitle = $user->suspended_at ? 'Akun Dinonaktifkan' : 'Akun Diaktifkan Kembali';
+        $notifBody = $user->suspended_at
+            ? "Akun Anda telah dinonaktifkan oleh admin. Anda tidak dapat masuk atau melakukan aktivitas di platform."
+            : "Akun Anda telah diaktifkan kembali oleh admin. Anda dapat masuk dan menggunakan platform seperti biasa.";
+
+        Notification::create([
+            'user_id' => $user->id,
+            'type' => $notifType,
+            'title' => $notifTitle,
+            'body' => $notifBody,
+            'data' => ['suspended_at' => $user->suspended_at],
+            'created_at' => now(),
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => $message,
@@ -443,6 +458,14 @@ class AdminController extends Controller
         }
 
         Log::info("Admin mengirim pengumuman ke {$count} user: {$validated['title']}");
+
+        ActivityLoggerService::log(
+            Auth::id(),
+            'announcement.send',
+            'announcement',
+            null,
+            "Mengirim pengumuman: {$validated['title']} ke {$count} pengguna"
+        );
 
         return response()->json([
             'success' => true,

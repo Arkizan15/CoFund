@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Xendit\Invoice\InvoiceApi;
+use Xendit\Invoice\InvoiceStatus;
 
 class WalletController extends Controller
 {
@@ -540,6 +542,127 @@ class WalletController extends Controller
                 'success' => false,
                 'message' => 'Gagal membuat invoice penarikan. Silakan coba lagi.',
             ], 500);
+        }
+    }
+
+    /**
+     * Verify payment status after Xendit redirect.
+     * Used as fallback when webhook callback is missed (e.g., local development).
+     */
+    public function verifyPayment(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'external_id' => ['required', 'string'],
+        ]);
+
+        $user = Auth::user();
+        $externalId = $validated['external_id'];
+
+        $walletTransaction = WalletTransaction::where('reference', $externalId)
+            ->where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if (!$walletTransaction) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Already processed',
+                'data' => ['balance' => $user->balance],
+            ]);
+        }
+
+        try {
+            $invoices = $this->xendit->getInvoicesByExternalId($externalId, [InvoiceStatus::PAID, InvoiceStatus::SETTLED]);
+
+            if (empty($invoices)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment not confirmed yet',
+                ], 422);
+            }
+
+            $invoice = $invoices[0];
+            $status = $invoice->getStatus();
+            $amount = (float) ($invoice->getAmount() ?? $walletTransaction->amount);
+
+            if (!in_array(strtoupper($status), ['PAID', 'SETTLED'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment status: ' . $status,
+                ], 422);
+            }
+
+            $isTopUp = str_starts_with($externalId, 'COFUND-TOPUP-');
+            $isWithdraw = str_starts_with($externalId, 'COFUND-WITHDRAW-');
+
+            DB::beginTransaction();
+            try {
+                if ($isTopUp) {
+                    $walletTransaction->update([
+                        'status' => 'success',
+                        'amount' => $amount,
+                        'description' => 'Top up saldo berhasil — Rp ' . number_format($amount, 0, ',', '.'),
+                    ]);
+
+                    $user->balance += $amount;
+                    $user->save();
+
+                    Transaction::create([
+                        'user_id' => $user->id,
+                        'type' => 'topup',
+                        'amount' => $amount,
+                        'status' => 'success',
+                        'reference' => $externalId,
+                    ]);
+                } elseif ($isWithdraw) {
+                    if ($user->balance < $amount) {
+                        DB::rollBack();
+                        $walletTransaction->update(['status' => 'failed']);
+                        return response()->json(['error' => 'Insufficient balance'], 422);
+                    }
+
+                    $walletTransaction->update([
+                        'status' => 'success',
+                        'amount' => $amount,
+                        'description' => 'Penarikan dana berhasil — Rp ' . number_format($amount, 0, ',', '.'),
+                    ]);
+
+                    $user->balance -= $amount;
+                    $user->save();
+
+                    Transaction::create([
+                        'user_id' => $user->id,
+                        'type' => 'disbursement',
+                        'amount' => $amount,
+                        'status' => 'success',
+                        'reference' => $externalId,
+                    ]);
+                } else {
+                    DB::rollBack();
+                    return response()->json(['error' => 'Unknown transaction type'], 400);
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment verified successfully',
+                    'data' => ['balance' => $user->balance],
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Payment verification failed', [
+                    'external_id' => $externalId,
+                    'error' => $e->getMessage(),
+                ]);
+                return response()->json(['error' => 'Processing failed'], 500);
+            }
+        } catch (\Exception $e) {
+            Log::error('Xendit API verification failed', [
+                'external_id' => $externalId,
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json(['error' => 'Verification failed'], 500);
         }
     }
 }

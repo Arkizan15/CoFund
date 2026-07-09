@@ -3,7 +3,7 @@
     <button
       type="button"
       @click="toggleMenu"
-      class="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all hover:border-emerald-300 hover:text-emerald-700"
+      class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors no-underline rounded-full"
     >
       <i class="pi pi-globe text-sm"></i>
       <span class="hidden sm:inline">{{ currentLangLabel }}</span>

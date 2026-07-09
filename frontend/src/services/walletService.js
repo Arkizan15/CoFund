@@ -12,6 +12,7 @@ export const walletService = {
     ...(redirectUrls.success && { success_redirect_url: redirectUrls.success }),
     ...(redirectUrls.failure && { failure_redirect_url: redirectUrls.failure }),
   }),
+  verifyPayment: (externalId) => api.post('/wallet/verify-payment', { external_id: externalId }),
 }
 
 export default walletService

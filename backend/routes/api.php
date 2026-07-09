@@ -21,12 +21,14 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 
 // Public: Xendit webhook callbacks (no CSRF, no auth)
 Route::post('/xendit/callback', [WalletController::class, 'handleCallback']);
-// Public routes — with rate limiting for auth endpoints
-Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,60');
-Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,60');
-Route::post('/auth/password/forgot', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,60');
-Route::post('/auth/password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:5,60');
-Route::get('/auth/email/verify/{id}/{hash}', [AuthController::class, 'verify'])->middleware(['signed'])->name('verification.verify');
+// Public routes
+Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/email/resend', [AuthController::class, 'resend']);
+Route::post('/auth/password/forgot', [AuthController::class, 'forgotPassword']);
+Route::post('/auth/password/reset', [AuthController::class, 'resetPassword']);
+Route::get('/auth/email/verify/{token}', [AuthController::class, 'verify']);
+Route::get('/auth/email/verify/{id}/{hash}', [AuthController::class, 'verifyLegacy'])->middleware(['signed'])->name('verification.verify');
 
 Route::get('/campaigns', [CampaignController::class, 'index']);
 Route::get('/campaigns/{slug}', [CampaignController::class, 'show']);
@@ -40,7 +42,6 @@ Route::middleware(['auth:sanctum', 'check.user.suspended'])->group(function () {
     // Auth
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
-    Route::post('/auth/email/resend', [AuthController::class, 'resend']);
 
     // Campaign
     Route::post('/campaigns', [CampaignController::class, 'store']);
@@ -64,6 +65,7 @@ Route::middleware(['auth:sanctum', 'check.user.suspended'])->group(function () {
     Route::post('/wallet/top-up', [WalletController::class, 'createTopUp']);
     Route::get('/wallet/balance', [WalletController::class, 'balance']);
     Route::post('/wallet/withdraw', [WalletController::class, 'createWithdraw']);
+    Route::post('/wallet/verify-payment', [WalletController::class, 'verifyPayment']);
 
     // Dashboard
     Route::get('/creator/stats', [DashboardController::class, 'creatorStats']);

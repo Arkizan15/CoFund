@@ -68,27 +68,27 @@ yang realistis.
     <!-- Platform Stats Section -->
     <section v-if="!statsLoading" class="py-12 md:py-16 bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div class="bg-emerald-50 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <i class="pi pi-flag text-xl text-emerald-700"></i>
+        <div class="grid grid-cols-3 gap-2 sm:gap-6">
+          <div class="bg-emerald-50 rounded-xl sm:rounded-2xl p-2 sm:p-6 text-center hover:shadow-md transition-shadow">
+            <div class="w-8 h-8 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-1 sm:mb-3">
+              <i class="pi pi-flag text-sm sm:text-xl text-emerald-700"></i>
             </div>
-            <p class="text-3xl font-bold text-gray-900">{{ platformStats.campaigns }}</p>
-            <p class="text-sm text-gray-500 mt-1">Total Kampanye</p>
+            <p class="text-base sm:text-3xl font-bold text-gray-900">{{ platformStats.campaigns }}</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 mt-0 sm:mt-1">Total Kampanye</p>
           </div>
-          <div class="bg-blue-50 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <i class="pi pi-users text-xl text-blue-700"></i>
+          <div class="bg-blue-50 rounded-xl sm:rounded-2xl p-2 sm:p-6 text-center hover:shadow-md transition-shadow">
+            <div class="w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-1 sm:mb-3">
+              <i class="pi pi-users text-sm sm:text-xl text-blue-700"></i>
             </div>
-            <p class="text-3xl font-bold text-gray-900">{{ platformStats.backers }}</p>
-            <p class="text-sm text-gray-500 mt-1">Backer Terdaftar</p>
+            <p class="text-base sm:text-3xl font-bold text-gray-900">{{ platformStats.backers }}</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 mt-0 sm:mt-1">Backer Terdaftar</p>
           </div>
-          <div class="bg-purple-50 rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <i class="pi pi-wallet text-xl text-purple-700"></i>
+          <div class="bg-purple-50 rounded-xl sm:rounded-2xl p-2 sm:p-6 text-center hover:shadow-md transition-shadow">
+            <div class="w-8 h-8 sm:w-12 sm:h-12 bg-purple-100 rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-1 sm:mb-3">
+              <i class="pi pi-wallet text-sm sm:text-xl text-purple-700"></i>
             </div>
-            <p class="text-3xl font-bold text-gray-900">{{ formatCurrency(platformStats.collected) }}</p>
-            <p class="text-sm text-gray-500 mt-1">Dana Terkumpul</p>
+            <p class="text-base sm:text-3xl font-bold text-gray-900">{{ formatCollected(platformStats.collected) }}</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 mt-0 sm:mt-1">Dana Terkumpul</p>
           </div>
         </div>
       </div>
@@ -247,6 +247,7 @@ import CampaignCard from '@/components/CampaignCard.vue'
 import CampaignCardSkeleton from '@/components/CampaignCardSkeleton.vue'
 import api from '@/services/api'
 import * as campaignService from '@/services/campaignService'
+import { formatCollected } from '@/utils/formatter'
 
 const router = useRouter()
 const authStore = useAuthStore()

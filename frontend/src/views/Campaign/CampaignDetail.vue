@@ -229,6 +229,11 @@
                 </span>
               </div>
 
+              <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                <p class="text-xs text-emerald-600 font-medium">Sisa dana yang diperlukan</p>
+                <p class="text-lg font-bold text-emerald-800">{{ formatCurrency(remainingAmount(campaign)) }}</p>
+              </div>
+
               <hr class="border-gray-100" />
               <div class="flex items-center justify-between text-sm">
                 <span class="text-gray-500">Total Pendukung</span>
@@ -248,9 +253,13 @@
             <!-- Backing Flow -->
             <div ref="backingSectionRef" class="mt-6 pt-6 border-t border-gray-100">
               <!-- User Balance Info -->
-              <div v-if="authStore.isAuthenticated && !isOwner" class="mb-4 p-3 bg-white rounded-[15px] border border-emerald-200 flex items-center justify-between">
+              <div v-if="authStore.isAuthenticated && !isOwner" class="mb-3 p-3 bg-white rounded-[15px] border border-emerald-200 flex items-center justify-between">
                 <span class="text-xs text-gray-500 font-medium">Saldo Anda</span>
                 <span class="text-sm font-bold text-gray-800">{{ formatCurrency(userBalance) }}</span>
+              </div>
+              <div v-if="authStore.isAuthenticated && !isOwner" class="mb-4 p-3 bg-emerald-50 rounded-[15px] border border-emerald-100">
+                <p class="text-xs text-emerald-600 font-medium">Sisa dana yang diperlukan</p>
+                <p class="text-sm font-bold text-emerald-800">{{ formatCurrency(remainingAmount(campaign)) }}</p>
               </div>
 
               <!-- Not Authenticated -->
@@ -269,6 +278,14 @@
                 <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-xs text-yellow-700 flex items-start gap-2">
                   <i class="pi pi-info-circle mt-0.5 flex-shrink-0"></i>
                   <span>Anda tidak dapat mendanai kampanye milik sendiri.</span>
+                </div>
+              </div>
+
+              <!-- Admin (can't back) -->
+              <div v-else-if="isAdmin">
+                <div class="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-start gap-2">
+                  <i class="pi pi-shield mt-0.5 flex-shrink-0"></i>
+                  <span>Akun admin tidak dapat mendanai kampanye.</span>
                 </div>
               </div>
 
@@ -466,6 +483,8 @@ const isOwner = computed(() => {
   return authStore.user?.id && campaign.value.user_id === authStore.user.id
 })
 
+const isAdmin = computed(() => authStore.user?.role === 'admin')
+
 const userBalance = computed(() => authStore.user?.balance || 0)
 
 const sortedUpdates = computed(() => {
@@ -556,6 +575,10 @@ function progressPercent(c) {
   const col = Number(c.collected_amount || 0)
   const tar = Number(c.target_amount || 1)
   return Math.min(100, Math.round((col / tar) * 100))
+}
+
+function remainingAmount(c) {
+  return Math.max(0, Number(c.target_amount || 0) - Number(c.collected_amount || 0))
 }
 
 function validateBacking() {

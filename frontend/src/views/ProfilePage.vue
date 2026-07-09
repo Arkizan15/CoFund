@@ -48,7 +48,34 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Admin Profile Card -->
+      <div v-if="isAdmin" class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-6">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
+            <i class="pi pi-shield text-2xl text-emerald-700"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-gray-800">Akun Admin</h3>
+            <p class="text-xs text-gray-400">Anda login sebagai Administrator platform</p>
+          </div>
+        </div>
+        <div class="bg-emerald-50 rounded-xl p-5 border border-emerald-100">
+          <p class="text-sm text-emerald-800 leading-relaxed">
+            Akun admin tidak memiliki dompet digital dan tidak dapat membuat atau mendanai kampanye. 
+            Gunakan Panel Admin untuk mengelola pengguna, kampanye, dan pengaturan platform.
+          </p>
+        </div>
+        <router-link :to="{ name: 'AdminDashboard' }">
+          <Button
+            label="Buka Panel Admin"
+            icon="pi pi-external-link"
+            class="w-full mt-5 !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !font-semibold !py-3.5 !rounded-xl shadow-sm"
+          />
+        </router-link>
+      </div>
+
+      <!-- Non-Admin content -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Wallet Card -->
         <div class="bg-white rounded-[15px] shadow-sm border border-emerald-200 p-4 md:p-6">
           <div class="flex items-center gap-3 mb-6">
@@ -69,8 +96,24 @@
           </div>
 
           <div class="space-y-4">
-            <div class="flex flex-col gap-1.5">
-              <label class="text-sm font-semibold text-gray-700">Top Up Saldo</label>
+            <!-- Top Up Dropdown Header -->
+            <button
+              class="w-full flex items-center justify-between py-3 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all duration-150 cursor-pointer"
+              @click="showTopUp = !showTopUp"
+            >
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-emerald-200 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-arrow-up text-sm text-emerald-700"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-800">Top Up Saldo</span>
+              </div>
+              <i
+                class="pi text-sm text-gray-500 transition-transform duration-200"
+                :class="showTopUp ? 'pi-chevron-up' : 'pi-chevron-down'"
+              ></i>
+            </button>
+            <!-- Top Up Content -->
+            <div v-show="showTopUp" class="flex flex-col gap-1.5 px-1">
               <!-- Quick-select amount buttons -->
               <div class="grid grid-cols-3 gap-2">
                 <button
@@ -121,14 +164,26 @@
               </small>
               <small v-else class="text-gray-400 text-xs">Pilih nominal di atas, lalu bayar via Xendit</small>
             </div>
-
-
           </div>
 
-          <!-- Withdraw Section (via Xendit Invoice / Staging) -->
-          <div class="flex flex-col gap-1.5 mt-4">
-            <label class="text-sm font-semibold text-gray-700">Withdraw / Tarik Dana</label>
-
+          <!-- Withdraw Dropdown Header -->
+          <button
+            class="w-full flex items-center justify-between py-3 px-4 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200 transition-all duration-150 cursor-pointer mt-4"
+            @click="showWithdraw = !showWithdraw"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-orange-200 rounded-lg flex items-center justify-center">
+                <i class="pi pi-arrow-up-right text-sm text-orange-700"></i>
+              </div>
+              <span class="text-sm font-semibold text-gray-800">Withdraw / Tarik Dana</span>
+            </div>
+            <i
+              class="pi text-sm text-gray-500 transition-transform duration-200"
+              :class="showWithdraw ? 'pi-chevron-up' : 'pi-chevron-down'"
+            ></i>
+          </button>
+          <!-- Withdraw Content -->
+          <div v-show="showWithdraw" class="flex flex-col gap-1.5 px-1">
             <!-- Quick-select amount buttons -->
             <div class="grid grid-cols-3 gap-2">
               <button
@@ -361,8 +416,9 @@
                 <p class="text-2xl font-bold text-gray-800">{{ totalBackings }}</p>
                 <p class="text-xs text-gray-500 mt-1">Total Dukungan</p>
               </div>
-              <div class="bg-white rounded-[15px] border border-emerald-200 p-4 text-center hover:bg-emerald-50 transition-colors">
-                <p class="text-2xl font-bold text-emerald-700">{{ formatCurrency(totalDonated) }}</p>
+              <div class="bg-white rounded-[15px] border border-emerald-200 px-0 py-2 text-center hover:bg-emerald-50 transition-colors">
+                <p class="text-2xl font-bold text-emerald-700 hidden sm:block">{{ formatCurrency(totalDonated) }}</p>
+                <p class="text-2xl font-bold text-emerald-700 block sm:hidden">{{ formatCollected(totalDonated) }}</p>
                 <p class="text-xs text-gray-500 mt-1">Total Donasi</p>
               </div>
             </div>
@@ -385,6 +441,7 @@ import { useToast } from 'primevue/usetoast'
 import walletService from '@/services/walletService'
 import roleService from '@/services/roleService'
 import api from '@/services/api'
+import { formatCollected } from '@/utils/formatter'
 
 const authStore = useAuthStore()
 const toast = useToast()
@@ -393,7 +450,7 @@ const currentBalance = computed(() => authStore.user?.balance || 0)
 const isCreator = computed(() => authStore.user?.role === 'creator')
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 const totalBackings = computed(() => authStore.user?.total_backings || 0)
-const totalDonated = computed(() => authStore.user?.total_backings || 0)
+const totalDonated = computed(() => authStore.user?.total_donated || 0)
 
 const roleLabel = computed(() => {
   const labels = { admin: 'Admin', creator: 'Creator', backer: 'Backer', guest: 'Tamu' }
@@ -409,11 +466,13 @@ const roleSeverity = computed(() => {
 const topUpPresets = [50000, 100000, 200000, 500000, 1000000, 2000000]
 const withdrawPresets = [50000, 100000, 200000, 500000, 1000000, 2000000]
 
+const showTopUp = ref(false)
 const topUpAmount = ref(null)
 const topUpLoading = ref(false)
 const topUpError = ref('')
 const showCustomTopUp = ref(false)
 
+const showWithdraw = ref(false)
 const withdrawAmount = ref(null)
 const withdrawLoading = ref(false)
 const withdrawError = ref('')
@@ -632,7 +691,7 @@ function formatDate(dateStr) {
  * Detect redirect from Xendit checkout after payment/withdraw.
  * Xendit redirects back with query params like ?status=PAID&external_id=COFUND-...
  */
-function checkXenditRedirect() {
+async function checkXenditRedirect() {
   const params = new URLSearchParams(window.location.search)
   const status = params.get('status')
   const externalId = params.get('external_id')
@@ -646,15 +705,24 @@ function checkXenditRedirect() {
     const isWithdraw = externalId.startsWith('COFUND-WITHDRAW-')
 
     if (isPaid) {
-      refreshBalanceOnly().then(() => {
-        toast.add({
-          severity: 'success',
-          summary: isTopUp ? 'Top Up Berhasil' : 'Withdraw Berhasil',
-          detail: isTopUp
-            ? 'Saldo berhasil ditambahkan.'
-            : 'Penarikan dana berhasil. Saldo Anda telah diperbarui.',
-          life: 6000,
-        })
+      try {
+        // Verify payment with Xendit API and update balance server-side
+        const res = await walletService.verifyPayment(externalId)
+        if (res.data?.success && res.data?.data?.balance !== undefined) {
+          authStore.user.balance = res.data.data.balance
+        }
+        await refreshBalanceOnly()
+      } catch (e) {
+        // Fallback to just refreshing balance if verify fails
+        await refreshBalanceOnly()
+      }
+      toast.add({
+        severity: 'success',
+        summary: isTopUp ? 'Top Up Berhasil' : 'Withdraw Berhasil',
+        detail: isTopUp
+          ? 'Saldo berhasil ditambahkan.'
+          : 'Penarikan dana berhasil. Saldo Anda telah diperbarui.',
+        life: 6000,
       })
     } else {
       toast.add({

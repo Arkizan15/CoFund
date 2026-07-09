@@ -108,7 +108,7 @@
                 <i class="pi pi-wallet text-lg"></i>
               </div>
             </div>
-            <p class="text-3xl font-bold">{{ formatCurrency(overview.finance?.total_collected || 0) }}</p>                <p class="text-xs text-blue-100 mt-3">Fee Platform: {{ formatCurrency(overview.finance?.total_platform_fee || 0) }}</p>
+            <p class="text-3xl font-bold">{{ formatCollected(overview.finance?.total_collected || 0) }}</p>                <p class="text-xs text-blue-100 mt-3">Fee Platform: {{ formatCurrency(overview.finance?.total_platform_fee || 0) }}</p>
           </div>
 
           <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-4 md:p-6 text-white shadow-sm">
@@ -633,6 +633,78 @@
         </Dialog>
       </div>
 
+    <!-- ==================== SECTION: ACTIVITY LOGS ==================== -->
+    <div v-if="activeSection === 'activity-logs'">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Activity Logs</h1>
+          <p class="text-sm text-gray-400 mt-1">Riwayat aktivitas admin di platform</p>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div v-if="activityLogsLoading" class="flex items-center justify-center py-12">
+          <i class="pi pi-spin pi-spinner text-2xl text-emerald-600"></i>
+        </div>
+        <div v-else-if="activityLogs.length === 0" class="text-center py-12">
+          <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
+            <i class="pi pi-book text-2xl text-gray-300"></i>
+          </div>
+          <p class="text-gray-500 text-sm font-medium">Belum ada aktivitas</p>
+          <p class="text-gray-400 text-xs mt-1">Log aktivitas admin akan muncul di sini</p>
+        </div>
+        <DataTable
+          v-else
+          :value="activityLogs"
+          class="!text-sm"
+          stripedRows
+          responsiveLayout="scroll"
+          :paginator="true"
+          :rows="20"
+          :totalRecords="activityLogsTotal"
+          :lazy="true"
+          @page="onActivityPageChange"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+        >
+          <Column field="created_at" header="Waktu" :style="{ width: '160px' }">
+            <template #body="{ data }">
+              <span class="text-xs text-gray-500">{{ formatActivityDate(data.created_at) }}</span>
+            </template>
+          </Column>
+          <Column header="Admin" :style="{ width: '150px' }">
+            <template #body="{ data }">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <i class="pi pi-user text-[10px] text-emerald-700"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-800">{{ data.user?.name || 'N/A' }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column header="Aksi" :style="{ width: '140px' }">
+            <template #body="{ data }">
+              <Badge
+                :value="formatActionLabel(data.action)"
+                :severity="getActionSeverity(data.action)"
+                class="!rounded-full !text-[10px] !font-semibold !px-2.5 !py-0.5"
+              />
+            </template>
+          </Column>
+          <Column field="resource_type" header="Resource" :style="{ width: '110px' }">
+            <template #body="{ data }">
+              <span class="text-xs capitalize text-gray-600">{{ data.resource_type || '-' }}</span>
+            </template>
+          </Column>
+          <Column field="description" header="Deskripsi">
+            <template #body="{ data }">
+              <span class="text-sm text-gray-700">{{ data.description || '-' }}</span>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+    </div>
+
     <!-- ==================== DIALOGS ==================== -->
 
     <!-- Reject Campaign Dialog -->      <Dialog v-model:visible="campaignRejectDialogVisible" header="Tolak Kampanye" :modal="true" class="app-dialog !rounded-[15px] !bg-white !border-2 !border-emerald-300 !shadow-lg !max-w-full !w-[95vw] sm:!w-auto" :style="{ maxWidth: '450px' }" @show="onDialogShow">
@@ -720,7 +792,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useGenieEffect } from '@/composables/useGenieEffect'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -735,6 +807,7 @@ import Divider from 'primevue/divider'
 import { useToast } from 'primevue/usetoast'
 import api from '@/services/api'
 import roleService from '@/services/roleService'
+import { formatCollected } from '@/utils/formatter'
 
 const toast = useToast()
 const { onDialogShow } = useGenieEffect()
@@ -828,6 +901,67 @@ async function openUserDetail(user) {
 function formatRole(role) {
   const labels = { admin: 'Admin', creator: 'Creator', backer: 'Backer', guest: 'Guest' }
   return labels[role] || role || '-'
+}
+
+// ==================== Activity Logs ====================
+const activityLogs = ref([])
+const activityLogsLoading = ref(false)
+const activityLogsTotal = ref(0)
+const activityLogsPage = ref(1)
+
+async function fetchActivityLogs(page = 1) {
+  activityLogsLoading.value = true
+  activityLogsPage.value = page
+  try {
+    const res = await api.get('/admin/activity-logs', { params: { page } })
+    activityLogs.value = res.data?.data?.data || []
+    activityLogsTotal.value = res.data?.data?.total || 0
+  } catch (e) {
+    activityLogs.value = []
+    activityLogsTotal.value = 0
+  } finally {
+    activityLogsLoading.value = false
+  }
+}
+
+function onActivityPageChange(event) {
+  fetchActivityLogs(event.page + 1)
+}
+
+function formatActionLabel(action) {
+  const labels = {
+    'campaign.approve': 'Approve',
+    'campaign.reject': 'Reject',
+    'campaign.ban': 'Ban',
+    'creator_request.approve': 'Creator Approve',
+    'creator_request.reject': 'Creator Reject',
+    'user.suspend': 'Suspend',
+    'user.unsuspend': 'Unsuspend',
+    'announcement.send': 'Pengumuman',
+  }
+  return labels[action] || action || '-'
+}
+
+function getActionSeverity(action) {
+  const severities = {
+    'campaign.approve': 'success',
+    'campaign.reject': 'warn',
+    'campaign.ban': 'danger',
+    'creator_request.approve': 'success',
+    'creator_request.reject': 'warn',
+    'user.suspend': 'danger',
+    'user.unsuspend': 'success',
+    'announcement.send': 'info',
+  }
+  return severities[action] || 'info'
+}
+
+function formatActivityDate(dateStr) {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('id-ID', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
 }
 
 // Reject Creator Request Dialog
@@ -1021,6 +1155,13 @@ onMounted(async () => {
   }
 
   fetchUsers()
+  fetchActivityLogs(1)
+})
+
+watch(activeSection, (section) => {
+  if (section === 'activity-logs') {
+    fetchActivityLogs(1)
+  }
 })
 
 </script>

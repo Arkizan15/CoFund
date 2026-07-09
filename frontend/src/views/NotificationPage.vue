@@ -52,21 +52,8 @@
         </div>
       </div>
 
-      <!-- Type Filter Chips -->
-      <div class="flex items-center gap-2 flex-wrap mb-6">
-        <button
-          v-for="filter in typeFilters"
-          :key="filter.value"
-          class="px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all duration-200"
-          :class="selectedType === filter.value
-            ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-            : 'bg-white text-gray-600 border-gray-200 hover:border-emerald-300 hover:text-emerald-700'"
-          @click="toggleTypeFilter(filter.value)"
-        >
-          <i :class="filter.icon" class="mr-1 text-[10px]"></i>
-          {{ filter.label }}
-        </button>
-      </div>
+    
+      
 
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-24">
@@ -245,23 +232,43 @@ const isAdmin = computed(() => authStore.getUserRole === 'admin')
 
 // ── Tabs ──────────────────────────────────────────────────────
 const activeTab = ref('all')
-const tabs = [
-  { key: 'all', label: 'Semua', icon: 'pi pi-inbox', bgClass: 'bg-emerald-100', color: '#059669' },
-  { key: 'backing', label: 'Pendanaan', icon: 'pi pi-heart', bgClass: 'bg-pink-100', color: '#e11d48' },
-  { key: 'campaign', label: 'Kampanye', icon: 'pi pi-flag', bgClass: 'bg-blue-100', color: '#2563eb' },
-  { key: 'deadline', label: 'Deadline', icon: 'pi pi-clock', bgClass: 'bg-amber-100', color: '#d97706' },
-  { key: 'announcement', label: 'Pengumuman', icon: 'pi pi-megaphone', bgClass: 'bg-purple-100', color: '#7c3aed' },
-  { key: 'other', label: 'Lainnya', icon: 'pi pi-info-circle', bgClass: 'bg-gray-100', color: '#6b7280' },
-]
+const tabs = computed(() => {
+  if (isAdmin.value) {
+    return [
+      { key: 'all', label: 'Semua', icon: 'pi pi-inbox', bgClass: 'bg-emerald-100', color: '#059669' },
+      { key: 'campaign', label: 'Kampanye', icon: 'pi pi-flag', bgClass: 'bg-blue-100', color: '#2563eb' },
+      { key: 'deadline', label: 'Deadline', icon: 'pi pi-clock', bgClass: 'bg-amber-100', color: '#d97706' },
+      { key: 'account', label: 'Akun', icon: 'pi pi-users', bgClass: 'bg-red-100', color: '#dc2626' },
+    ]
+  }
+  return [
+    { key: 'all', label: 'Semua', icon: 'pi pi-inbox', bgClass: 'bg-emerald-100', color: '#059669' },
+    { key: 'backing', label: 'Pendanaan', icon: 'pi pi-heart', bgClass: 'bg-pink-100', color: '#e11d48' },
+    { key: 'campaign', label: 'Kampanye', icon: 'pi pi-flag', bgClass: 'bg-blue-100', color: '#2563eb' },
+    { key: 'deadline', label: 'Deadline', icon: 'pi pi-clock', bgClass: 'bg-amber-100', color: '#d97706' },
+    { key: 'announcement', label: 'Pengumuman', icon: 'pi pi-megaphone', bgClass: 'bg-purple-100', color: '#7c3aed' },
+    { key: 'other', label: 'Lainnya', icon: 'pi pi-info-circle', bgClass: 'bg-gray-100', color: '#6b7280' },
+  ]
+})
 
-const tabTypeMapping = {
-  all: null,
-  backing: ['backing', 'backing_success', 'backing_received', 'escrow_received'],
-  campaign: ['campaign', 'campaign_created', 'campaign_approved', 'campaign_rejected', 'campaign_update', 'campaign_disbursed', 'disbursement', 'settlement'],
-  deadline: ['deadline', 'deadline_approaching'],
-  announcement: ['announcement'],
-  other: ['refund', 'system', 'approval', 'rejection', 'withdraw', 'top_up'],
-}
+const tabTypeMapping = computed(() => {
+  if (isAdmin.value) {
+    return {
+      all: null,
+      campaign: ['campaign_approved', 'campaign_rejected'],
+      deadline: ['deadline', 'deadline_approaching'],
+      account: ['creator_approved', 'creator_rejected', 'user_banned', 'user_unbanned'],
+    }
+  }
+  return {
+    all: null,
+    backing: ['backing', 'backing_success', 'backing_received', 'escrow_received'],
+    campaign: ['campaign', 'campaign_created', 'campaign_approved', 'campaign_rejected', 'campaign_update', 'campaign_disbursed', 'disbursement', 'settlement'],
+    deadline: ['deadline', 'deadline_approaching'],
+    announcement: ['announcement'],
+    other: ['refund', 'system', 'approval', 'rejection', 'withdraw', 'top_up', 'creator_approved', 'creator_rejected', 'user_banned', 'user_unbanned'],
+  }
+})
 
 // ── Type Filter ───────────────────────────────────────────────
 const selectedType = ref(null)
@@ -288,10 +295,11 @@ const lastPage = ref(1)
 
 // Count per tab
 const tabCounts = computed(() => {
-  const counts = { all: 0, backing: 0, campaign: 0, deadline: 0, announcement: 0, other: 0 }
+  const counts = {}
+  tabs.value.forEach(t => { counts[t.key] = 0 })
   notifications.value.forEach(n => {
-    counts.all++
-    for (const [tab, types] of Object.entries(tabTypeMapping)) {
+    counts.all = (counts.all || 0) + 1
+    for (const [tab, types] of Object.entries(tabTypeMapping.value)) {
       if (types && types.includes(n.type)) {
         counts[tab] = (counts[tab] || 0) + 1
         break
@@ -305,7 +313,7 @@ const filteredNotifications = computed(() => {
   let result = notifications.value
 
   // Apply tab filter
-  const tabTypes = tabTypeMapping[activeTab.value]
+  const tabTypes = tabTypeMapping.value[activeTab.value]
   if (tabTypes) {
     result = result.filter(n => tabTypes.includes(n.type))
   }
@@ -467,6 +475,10 @@ function getIcon(type) {
     rejection: 'pi pi-times-circle',
     withdraw: 'pi pi-arrow-up',
     top_up: 'pi pi-plus',
+    creator_approved: 'pi pi-shield',
+    creator_rejected: 'pi pi-times-circle',
+    user_banned: 'pi pi-ban',
+    user_unbanned: 'pi pi-check-circle',
   }
   return icons[type] || 'pi pi-bell'
 }
@@ -494,6 +506,10 @@ function getIconBg(type) {
     rejection: 'bg-red-100 text-red-600',
     withdraw: 'bg-rose-100 text-rose-600',
     top_up: 'bg-emerald-100 text-emerald-600',
+    creator_approved: 'bg-emerald-100 text-emerald-600',
+    creator_rejected: 'bg-red-100 text-red-600',
+    user_banned: 'bg-red-100 text-red-600',
+    user_unbanned: 'bg-emerald-100 text-emerald-600',
   }
   return bg[type] || 'bg-emerald-100 text-emerald-600'
 }
@@ -521,6 +537,10 @@ function getTypeLabel(type) {
     rejection: 'Penolakan',
     withdraw: 'Penarikan',
     top_up: 'Top Up',
+    creator_approved: 'Kreator Disetujui',
+    creator_rejected: 'Kreator Ditolak',
+    user_banned: 'Akun Dinonaktifkan',
+    user_unbanned: 'Akun Diaktifkan',
   }
   return labels[type] || type || '-'
 }
@@ -542,6 +562,10 @@ function getTypeBadgeClass(type) {
     announcement: 'bg-purple-50 text-purple-700 border border-purple-200',
     refund: 'bg-orange-50 text-orange-700 border border-orange-200',
     system: 'bg-gray-50 text-gray-600 border border-gray-200',
+    creator_approved: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    creator_rejected: 'bg-red-50 text-red-700 border border-red-200',
+    user_banned: 'bg-red-50 text-red-700 border border-red-200',
+    user_unbanned: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
   }
   return classes[type] || 'bg-gray-50 text-gray-600 border border-gray-200'
 }

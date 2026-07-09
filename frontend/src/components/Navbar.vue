@@ -71,17 +71,10 @@
 
             <LanguageSwitcher />
 
-            <!-- Dark Mode Toggle -->
-            <button
-              @click="$emit('toggleDarkMode')"
-              class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
-              :title="isDarkMode ? 'Mode Terang' : 'Mode Gelap'"
-            >
-              <i :class="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'" class="text-lg text-gray-600 hover:text-emerald-600 transition-colors"></i>
-            </button>
 
             <!-- Dashboard Quick Link (desktop only) -->
             <router-link
+              v-if="!isAdmin"
               :to="{ name: 'Dashboard' }"
               class="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors no-underline px-2 py-1.5 rounded-lg hover:bg-emerald-50"
             >
@@ -113,6 +106,7 @@
                   </div>
 
                   <router-link
+                    v-if="!isAdmin"
                     :to="{ name: 'Dashboard' }"
                     @click="dropdownOpen = false"
                     class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors no-underline"
@@ -208,6 +202,7 @@
           <template v-if="authStore.isAuthenticated">
             <hr class="border-gray-100" />
             <router-link
+              v-if="!isAdmin"
               :to="{ name: 'Dashboard' }"
               @click="mobileOpen = false"
               class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
@@ -223,18 +218,8 @@
             >
               <i class="pi pi-user text-xs"></i> Profil
             </router-link>
-            <div class="px-3 py-2">
-              <LanguageSwitcher />
-            </div>
-            <router-link
-              :to="{ name: 'Notifications' }"
-              @click="mobileOpen = false"
-              class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors no-underline"
-              active-class="text-emerald-600 bg-emerald-50 font-semibold"
-            >
-              <i class="pi pi-bell text-xs"></i> Notifikasi
-              <span v-if="unreadCount > 0" class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ unreadCount }}</span>
-            </router-link>
+            
+            
             <router-link
               v-if="isAdmin"
               :to="{ name: 'AdminDashboard' }"
@@ -260,10 +245,9 @@
   <!-- Logout Confirmation Dialog -->
   <Dialog
     v-model:visible="logoutDialogVisible"
-    header="Konfirmasi Keluar"
     :modal="true"
     :closable="true"
-    class="!rounded-[15px] !bg-white !max-w-full !w-[95vw] sm:!w-auto"
+    class="!rounded-[15px] !bg-white !max-w-full !p-3 !w-[95vw] sm:!w-auto !border-2 !border-solid !border-red-500"
     :style="{ maxWidth: '380px' }"
   >
     <div class="text-center py-2">
@@ -274,17 +258,17 @@
       <p class="text-gray-400 text-sm mt-1">Anda perlu masuk kembali untuk mengakses akun Anda.</p>
     </div>
     <template #footer>
-      <div class="flex gap-2 justify-end">
+      <div class="flex py-3 gap-2 justify-end">
         <Button
           label="Batal"
           icon="pi pi-times"
-          class="p-button-text !text-gray-500 !rounded-xl"
+          class="p-button-text !text-gray-500 p-4 !rounded-xl !py-3"
           @click="logoutDialogVisible = false"
         />
         <Button
           label="Keluar"
           icon="pi pi-sign-out"
-          class="!bg-red-600 !border-none hover:!bg-red-700 !text-white !rounded-xl"
+          class="!bg-red-600 !border-none hover:!bg-red-700 !text-white !rounded-xl !py-2 !px-2"
           @click="handleLogout"
         />
       </div>

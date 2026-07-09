@@ -17,13 +17,13 @@ const routes = [
   {
     path: '/campaigns/create',
     name: 'CampaignCreate',
-    meta: { title: 'Buat Kampanye — CoFund', requiresAuth: true },
+    meta: { title: 'Buat Kampanye — CoFund', requiresAuth: true, requiresCreator: true },
     component: () => import('@/views/Campaign/CampaignForm.vue'),
   },
   {
     path: '/campaigns/edit/:slug',
     name: 'CampaignEdit',
-    meta: { title: 'Edit Kampanye — CoFund', requiresAuth: true },
+    meta: { title: 'Edit Kampanye — CoFund', requiresAuth: true, requiresCreator: true },
     component: () => import('@/views/Campaign/CampaignForm.vue'),
   },
   {
@@ -114,6 +114,14 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAdmin && authStore.getUserRole !== 'admin') {
     return next({ name: 'Dashboard' })
+  }
+
+  if (to.meta.requiresCreator && authStore.getUserRole !== 'creator') {
+    return next({ name: 'Dashboard' })
+  }
+
+  if (to.name === 'Dashboard' && authStore.getUserRole === 'admin') {
+    return next({ name: 'AdminDashboard' })
   }
 
   if (to.meta.guestOnly && authStore.isAuthenticated) {

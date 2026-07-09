@@ -7,14 +7,17 @@ use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Mail\NotifikasiEmail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -22,14 +25,34 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $user = User::create([
+
+        // Hapus pending registration sebelumnya jika ada (email sama)
+        $existingToken = Cache::get('pending_email_' . $data['email']);
+        if ($existingToken) {
+            Cache::forget('pending_registration_' . $existingToken);
+            Cache::forget('pending_email_' . $data['email']);
+        }
+
+        // Generate token unik dan simpan data registrasi ke cache (60 menit)
+        $token = Str::random(60);
+        Cache::put('pending_registration_' . $token, [
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role' => RoleEnum::BACKER->value,
-        ]);
+        ], now()->addMinutes(60));
 
-        $user->sendEmailVerificationNotification();
+        Cache::put('pending_email_' . $data['email'], $token, now()->addMinutes(60));
+
+        // Kirim email verifikasi
+        $verificationUrl = url('/api/auth/email/verify/' . $token);
+
+        Mail::to($data['email'])->send(new NotifikasiEmail(
+            subject: 'Verifikasi Email — CoFund',
+            greeting: 'Halo ' . $data['name'] . '!',
+            messageContent: "Terima kasih telah mendaftar di CoFund!\n\nSilakan klik tombol di bawah untuk memverifikasi alamat email Anda. Link ini akan kedaluwarsa dalam 60 menit.\n\nJika Anda tidak mendaftar di CoFund, abaikan email ini.",
+            actionText: 'Verifikasi Email',
+            actionUrl: $verificationUrl,
+        ));
 
         return response()->json([
             'success' => true,
@@ -87,6 +110,10 @@ class AuthController extends Controller
             },
         ]);
 
+        $totalDonated = (float) $user->backings()
+            ->where('status', BackingStatus::COMPLETED)
+            ->sum('amount');
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -98,18 +125,89 @@ class AuthController extends Controller
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at,
                 'total_backings' => $user->total_backings,
+                'total_donated' => $totalDonated,
                 'avatar_url' => $user->avatar_url,
             ],
         ]);
     }
 
-    public function verify(Request $request, int $id, string $hash): RedirectResponse|JsonResponse
+    public function verify(Request $request, string $token): RedirectResponse|JsonResponse
     {
-        $user = User::findOrFail($id);
         $frontendUrl = config('app.frontend_url');
+        $pendingData = Cache::get('pending_registration_' . $token);
 
-        // Invalid hash
-        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        if (!$pendingData) {
+            $errorUrl = $frontendUrl . '/verify-email?error=' . urlencode('Link verifikasi tidak valid atau telah kedaluwarsa.');
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Link verifikasi tidak valid atau telah kedaluwarsa.',
+                ], 403);
+            }
+
+            return redirect($errorUrl);
+        }
+
+        // Cek apakah user sudah ada (misalnya link diklik dua kali)
+        $existingUser = User::where('email', $pendingData['email'])->first();
+        if ($existingUser) {
+            Cache::forget('pending_registration_' . $token);
+            Cache::forget('pending_email_' . $pendingData['email']);
+
+            $sanctumToken = $existingUser->createToken('auth-token')->plainTextToken;
+            $successUrl = $frontendUrl . '/verify-email?token=' . $sanctumToken . '&verified=already';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Email sudah diverifikasi sebelumnya.',
+                    'token' => $sanctumToken,
+                    'user' => $existingUser,
+                ]);
+            }
+
+            return redirect($successUrl);
+        }
+
+        // Buat user di database
+        $user = User::create([
+            'name' => $pendingData['name'],
+            'email' => $pendingData['email'],
+            'password' => $pendingData['password'],
+            'role' => RoleEnum::BACKER->value,
+        ]);
+
+        // Hapus cache
+        Cache::forget('pending_registration_' . $token);
+        Cache::forget('pending_email_' . $pendingData['email']);
+
+        // Tandai email sebagai terverifikasi
+        $user->markEmailAsVerified();
+
+        // Generate Sanctum token untuk auto-login
+        $sanctumToken = $user->createToken('auth-token')->plainTextToken;
+
+        $successUrl = $frontendUrl . '/verify-email?token=' . $sanctumToken;
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Email berhasil diverifikasi.',
+                'token' => $sanctumToken,
+                'user' => $user,
+            ]);
+        }
+
+        return redirect($successUrl);
+    }
+
+    public function verifyLegacy(Request $request, int $id, string $hash): RedirectResponse|JsonResponse
+    {
+        $frontendUrl = config('app.frontend_url');
+        $user = User::find($id);
+
+        if (!$user || !hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
             $errorUrl = $frontendUrl . '/verify-email?error=' . urlencode('Link verifikasi tidak valid atau telah kedaluwarsa.');
 
             if ($request->expectsJson()) {
@@ -122,7 +220,6 @@ class AuthController extends Controller
             return redirect($errorUrl);
         }
 
-        // Already verified — still generate a token so they can log in
         if ($user->hasVerifiedEmail()) {
             $token = $user->createToken('auth-token')->plainTextToken;
             $successUrl = $frontendUrl . '/verify-email?token=' . $token . '&verified=already';
@@ -139,12 +236,8 @@ class AuthController extends Controller
             return redirect($successUrl);
         }
 
-        // Mark email as verified
         $user->markEmailAsVerified();
-
-        // Generate Sanctum token so user is automatically logged in on the frontend
         $token = $user->createToken('auth-token')->plainTextToken;
-
         $successUrl = $frontendUrl . '/verify-email?token=' . $token;
 
         if ($request->expectsJson()) {
@@ -201,16 +294,34 @@ class AuthController extends Controller
 
     public function resend(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $request->validate(['email' => ['required', 'string', 'email']]);
+        $email = $request->email;
 
-        if ($user->hasVerifiedEmail()) {
+        $token = Cache::get('pending_email_' . $email);
+        if (!$token) {
             return response()->json([
                 'success' => false,
-                'message' => 'Email sudah diverifikasi.',
-            ], 400);
+                'message' => 'Tidak ada registrasi tertunda untuk email ini.',
+            ], 404);
         }
 
-        $user->sendEmailVerificationNotification();
+        $pendingData = Cache::get('pending_registration_' . $token);
+        if (!$pendingData) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data registrasi tidak ditemukan atau telah kedaluwarsa.',
+            ], 404);
+        }
+
+        $verificationUrl = url('/api/auth/email/verify/' . $token);
+
+        Mail::to($email)->send(new NotifikasiEmail(
+            subject: 'Verifikasi Email — CoFund',
+            greeting: 'Halo ' . $pendingData['name'] . '!',
+            messageContent: "Terima kasih telah mendaftar di CoFund!\n\nSilakan klik tombol di bawah untuk memverifikasi alamat email Anda. Link ini akan kedaluwarsa dalam 60 menit.\n\nJika Anda tidak mendaftar di CoFund, abaikan email ini.",
+            actionText: 'Verifikasi Email',
+            actionUrl: $verificationUrl,
+        ));
 
         return response()->json([
             'success' => true,

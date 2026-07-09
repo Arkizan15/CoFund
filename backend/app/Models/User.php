@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Laravel\Sanctum\HasApiTokens;
@@ -43,16 +44,24 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendPasswordResetNotification($token): void
     {
-        $frontendUrl = config('app.frontend_url');
-        $resetUrl = $frontendUrl . '/reset-password?token=' . $token . '&email=' . urlencode($this->email);
+        try {
+            $frontendUrl = config('app.frontend_url');
+            $resetUrl = $frontendUrl . '/reset-password?token=' . $token . '&email=' . urlencode($this->email);
 
-        Mail::to($this->email)->send(new NotifikasiEmail(
-            subject: 'Reset Password — CoFund',
-            greeting: 'Halo ' . ($this->name ?? 'Pengguna') . '!',
-            messageContent: "Kami menerima permintaan reset password untuk akun CoFund Anda.\n\nKlik tombol di bawah untuk membuat password baru. Link ini akan kedaluwarsa dalam 60 menit.\n\nJika Anda tidak meminta reset password, abaikan email ini.",
-            actionText: 'Reset Password',
-            actionUrl: $resetUrl,
-        ));
+            Mail::to($this->email)->send(new NotifikasiEmail(
+                subject: 'Reset Password — CoFund',
+                greeting: 'Halo ' . ($this->name ?? 'Pengguna') . '!',
+                messageContent: "Kami menerima permintaan reset password untuk akun CoFund Anda.\n\nKlik tombol di bawah untuk membuat password baru. Link ini akan kedaluwarsa dalam 60 menit.\n\nJika Anda tidak meminta reset password, abaikan email ini.",
+                actionText: 'Reset Password',
+                actionUrl: $resetUrl,
+            ));
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim email reset password', [
+                'user_id' => $this->id,
+                'email' => $this->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -60,22 +69,30 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification(): void
     {
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(60),
-            [
-                'id' => $this->id,
-                'hash' => sha1($this->getEmailForVerification()),
-            ]
-        );
+        try {
+            $verificationUrl = URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addMinutes(60),
+                [
+                    'id' => $this->id,
+                    'hash' => sha1($this->getEmailForVerification()),
+                ]
+            );
 
-        Mail::to($this->email)->send(new NotifikasiEmail(
-            subject: 'Verifikasi Email — CoFund',
-            greeting: 'Halo ' . ($this->name ?? 'Pengguna') . '!',
-            messageContent: "Terima kasih telah mendaftar di CoFund!\n\nSilakan klik tombol di bawah untuk memverifikasi alamat email Anda. Link ini akan kedaluwarsa dalam 60 menit.\n\nJika Anda tidak mendaftar di CoFund, abaikan email ini.",
-            actionText: 'Verifikasi Email',
-            actionUrl: $verificationUrl,
-        ));
+            Mail::to($this->email)->send(new NotifikasiEmail(
+                subject: 'Verifikasi Email — CoFund',
+                greeting: 'Halo ' . ($this->name ?? 'Pengguna') . '!',
+                messageContent: "Terima kasih telah mendaftar di CoFund!\n\nSilakan klik tombol di bawah untuk memverifikasi alamat email Anda. Link ini akan kedaluwarsa dalam 60 menit.\n\nJika Anda tidak mendaftar di CoFund, abaikan email ini.",
+                actionText: 'Verifikasi Email',
+                actionUrl: $verificationUrl,
+            ));
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim email verifikasi', [
+                'user_id' => $this->id,
+                'email' => $this->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function campaigns(): HasMany

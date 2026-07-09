@@ -14,18 +14,19 @@
       </div>
 
       <!-- Filter Panel -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 mb-8">
+      <div class="bg-white rounded-2xl shadow-sm  p-4 md:p-6 mb-8">
         <div class="flex flex-col gap-4">
           <!-- Row 1: Search -->
-          <div class="relative">
+          <div class="relative !border-2 !border-grey-300 !rounded-xl !py-1 !px-4  focus-within:!shadow-sm focus-within:!shadow-emerald-100 transition-all">
             <i
-              class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-colors"
+            
+              class="pi  absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-colors"
               :class="{ '!text-emerald-500': search }"
             ></i>
             <InputText
+            placeholder="Cari kampanye..."
               v-model="searchInput"
-              placeholder="Cari kampanye berdasarkan judul atau deskripsi..."
-              class="w-full pl-10 pr-12 !border-gray-200 !rounded-xl !py-3 !text-sm focus:!border-emerald-400 focus:!shadow-sm focus:!shadow-emerald-100 transition-all"
+              class="w-full pl-10 pr-12 !border-2 !border-emerald-300 !rounded-xl !py-2 !px-3 !text-sm focus:!shadow-sm"
               @input="onSearchInput"
             />
             <!-- Clear search button -->
@@ -41,7 +42,7 @@
           <!-- Row 2: Filter dropdowns -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <!-- Category Filter -->
-            <div class="relative">
+            <div class="relative !border-2 !border-grey-300 !rounded-xl !py-1 !px-1  focus-within:!shadow-sm focus-within:!shadow-emerald-100 transition-all">
               <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 <i class="pi pi-tag mr-1 text-[10px]"></i>Kategori
               </label>
@@ -51,14 +52,15 @@
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Semua Kategori"
-                class="w-full !bg-white"
+                class="w-full !bg-white !border-2 px-2 !border-emerald-300"
+                panelClass="!bg-white"
                 :showClear="true"
                 @change="onFilterChange"
               />
             </div>
 
             <!-- Status Filter -->
-            <div class="relative">
+            <div class="relative !border-2 !border-grey-300 !rounded-xl !py-1 !px-4  focus-within:!shadow-sm focus-within:!shadow-emerald-100 transition-all">
               <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 <i class="pi pi-flag mr-1 text-[10px]"></i>Status
               </label>
@@ -68,14 +70,15 @@
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Semua Status"
-                class="w-full !bg-white"
+                class="w-full !bg-white !px-3 !border-2 !border-emerald-300"
+                panelClass="!bg-white"
                 :showClear="true"
                 @change="onFilterChange"
               />
             </div>
 
             <!-- Sort -->
-            <div class="relative">
+            <div class="relative !border-2 !border-grey-300 !rounded-xl !py-1 !px-4  focus-within:!shadow-sm focus-within:!shadow-emerald-100 transition-all">
               <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 <i class="pi pi-sort-amount-down mr-1 text-[10px]"></i>Urutkan
               </label>
@@ -85,7 +88,8 @@
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Urutkan"
-                class="w-full !bg-white"
+                class="w-full !bg-white !px-3 !border-2 !border-emerald-300"
+                panelClass="!bg-white"
                 @change="onFilterChange"
               />
             </div>
@@ -239,6 +243,12 @@
           <p class="text-gray-600 text-sm">Anda tidak dapat mendanai kampanye milik sendiri.</p>
         </div>
 
+        <!-- Admin Check -->
+        <div v-else-if="isAdmin" class="text-center py-4">
+          <i class="pi pi-shield text-3xl text-red-400 mb-3 block"></i>
+          <p class="text-gray-600 text-sm">Akun admin tidak dapat mendanai kampanye.</p>
+        </div>
+
         <!-- Campaign Not Active -->
         <div v-else-if="backingCampaign.status !== 'active'" class="text-center py-4">
           <i class="pi pi-lock text-3xl text-gray-300 mb-3 block"></i>
@@ -250,6 +260,11 @@
           <div class="p-3 bg-white rounded-xl border border-emerald-200 flex items-center justify-between">
             <span class="text-xs text-gray-500 font-medium">Saldo Anda</span>
             <span class="text-sm font-bold text-gray-800">{{ formatCurrency(userBalance) }}</span>
+          </div>
+
+          <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+            <p class="text-xs text-emerald-600 font-medium">Sisa dana yang diperlukan</p>
+            <p class="text-sm font-bold text-emerald-800">{{ formatCurrency(remainingAmount(backingCampaign)) }}</p>
           </div>
 
           <!-- Preset Amounts -->
@@ -366,7 +381,6 @@ const statusOptions = [
 
 const sortOptions = [
   { label: 'Terbaru', value: 'newest' },
-  { label: 'Populer', value: 'popular' },
   { label: 'Segera Berakhir', value: 'ending_soon' },
 ]
 
@@ -442,6 +456,7 @@ const presetAmounts = [50000, 100000, 250000, 500000]
 const isOwner = computed(() => {
   return authStore.user?.id && backingCampaign.value?.user_id === authStore.user.id
 })
+const isAdmin = computed(() => authStore.user?.role === 'admin')
 const userBalance = computed(() => authStore.user?.balance || 0)
 
 // ── Debounced Search ──────────────────────────────────────────
@@ -616,6 +631,10 @@ async function handleBackingDirect() {
 // ── Helpers ───────────────────────────────────────────────────
 function formatCurrency(val) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val)
+}
+
+function remainingAmount(c) {
+  return Math.max(0, Number(c.target_amount || 0) - Number(c.collected_amount || 0))
 }
 
 // ── Eager fetch (runs at module level, before mount) ────────

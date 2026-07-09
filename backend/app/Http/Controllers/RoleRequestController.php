@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoleEnum;
 use App\Models\CreatorRequest;
+use App\Models\Notification;
+use App\Services\ActivityLoggerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -104,8 +106,43 @@ class RoleRequestController extends Controller
 
         if ($validated['status'] === 'approved') {
             $creatorRequest->user->update(['role' => RoleEnum::CREATOR->value]);
+
+            Notification::create([
+                'user_id' => $creatorRequest->user_id,
+                'type' => 'creator_approved',
+                'title' => 'Permintaan Kreator Disetujui!',
+                'body' => 'Selamat! Permintaan upgrade akun Anda menjadi Kreator telah disetujui oleh admin. Anda sekarang dapat membuat kampanye crowdfunding.',
+                'data' => ['approved_at' => now()->toISOString()],
+                'created_at' => now(),
+            ]);
+
+            ActivityLoggerService::log(
+                Auth::id(),
+                'creator_request.approve',
+                'creator_request',
+                $creatorRequest->id,
+                "Menyetujui permintaan creator dari user: {$creatorRequest->user->name} ({$creatorRequest->user->email})"
+            );
+
         } elseif ($validated['status'] === 'rejected') {
             $creatorRequest->rejection_reason = $validated['rejection_reason'] ?? 'Permintaan ditolak oleh admin.';
+
+            Notification::create([
+                'user_id' => $creatorRequest->user_id,
+                'type' => 'creator_rejected',
+                'title' => 'Permintaan Kreator Ditolak',
+                'body' => "Permintaan upgrade akun Anda menjadi Kreator ditolak oleh admin.\nAlasan: {$creatorRequest->rejection_reason}",
+                'data' => ['rejection_reason' => $creatorRequest->rejection_reason],
+                'created_at' => now(),
+            ]);
+
+            ActivityLoggerService::log(
+                Auth::id(),
+                'creator_request.reject',
+                'creator_request',
+                $creatorRequest->id,
+                "Menolak permintaan creator dari user: {$creatorRequest->user->name} ({$creatorRequest->user->email}), alasan: {$creatorRequest->rejection_reason}"
+            );
         }
 
         $creatorRequest->save();

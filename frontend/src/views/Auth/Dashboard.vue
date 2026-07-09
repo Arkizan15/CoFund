@@ -15,7 +15,7 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="perspective-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+      <div v-if="!isAdmin" class="perspective-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <div class="card-3d card-visible card-3d-inner bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
           <div class="card-3d-inner flex items-center gap-3">
             <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center">
@@ -224,8 +224,26 @@
         </div>
       </div>
 
+      <!-- Admin: Simple dashboard message -->
+      <div v-if="isAdmin" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+          <i class="pi pi-shield text-3xl text-emerald-700"></i>
+        </div>
+        <h2 class="text-xl font-bold text-gray-800">Panel Admin</h2>
+        <p class="text-gray-500 text-sm mt-2 max-w-md mx-auto">
+          Anda login sebagai Admin. Gunakan menu Panel Admin untuk mengelola pengguna, kampanye, dan pengaturan platform.
+        </p>
+        <router-link :to="{ name: 'AdminDashboard' }">
+          <Button
+            label="Buka Panel Admin"
+            icon="pi pi-external-link"
+            class="mt-5 !bg-emerald-600 !border-none hover:!bg-emerald-700 !text-white !rounded-xl !py-3 !px-6"
+          />
+        </router-link>
+      </div>
+
       <!-- Tabs: My Campaigns / My Backings -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="flex border-b border-gray-100">
           <button
             class="flex-1 sm:flex-none px-6 py-4 text-sm font-semibold transition-all duration-200 relative"
