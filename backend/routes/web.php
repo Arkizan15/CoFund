@@ -18,7 +18,12 @@ use App\Mail\NotifikasiEmail;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
+
+// Named route for login redirect (used by Sanctum auth middleware)
+Route::get('/login', function () {
+    return redirect()->away(config('app.frontend_url') . '/login');
+})->name('login');
 
 // Sitemap (web route for XML serving)
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
