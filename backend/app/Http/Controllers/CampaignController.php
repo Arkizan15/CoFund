@@ -326,7 +326,7 @@ class CampaignController extends Controller
 
         $file = $request->file('image');
         $filename = 'campaign_' . $campaign->id . '_' . time() . '_' . uniqid() . '.' . $file->extension();
-        $path = $file->storeAs('public/campaigns', $filename);
+        $path = $file->storeAs('campaigns', $filename, 'public');
 
         if (!$path) {
             return response()->json([
@@ -335,7 +335,7 @@ class CampaignController extends Controller
             ], 500);
         }
 
-        $imageUrl = Storage::url($path);
+        $imageUrl = Storage::disk('public')->url($path);
 
         // Set as primary if it's the first real image
         $isPrimary = $campaign->images()
@@ -424,7 +424,7 @@ class CampaignController extends Controller
         }
 
         // Delete physical file if it's a local upload (not external URL)
-        $localPath = str_replace('/storage/', 'public/', $image->image_url);
+        $localPath = $this->imageUrlToStoragePath($image->image_url);
         if (Storage::exists($localPath)) {
             Storage::delete($localPath);
         }
@@ -443,6 +443,28 @@ class CampaignController extends Controller
             'success' => true,
             'message' => 'Gambar berhasil dihapus.',
         ], 200);
+    }
+
+    /**
+     * Convert an image URL (from Storage::disk('public')->url()) back to a
+     * local storage path usable by Storage::exists() / Storage::delete().
+     *
+     * Handles both:
+     * - Old relative paths like "public/campaigns/..."
+     * - New absolute URLs like "http://localhost:8000/storage/campaigns/..."
+     */
+    private function imageUrlToStoragePath(string $imageUrl): string
+    {
+        // Already a local storage-relative path (e.g. "public/campaigns/...")
+        if (str_starts_with($imageUrl, 'public/')) {
+            return $imageUrl;
+        }
+
+        // Extract the path after the public disk URL prefix
+        $publicUrlPrefix = Storage::disk('public')->url('/');
+        $relative = str_replace($publicUrlPrefix, '', $imageUrl);
+
+        return 'public/' . ltrim($relative, '/');
     }
 
     public function destroy(int $id): JsonResponse
@@ -465,7 +487,7 @@ class CampaignController extends Controller
 
         // Delete associated images from storage
         foreach ($campaign->images as $image) {
-            $localPath = str_replace('/storage/', 'public/', $image->image_url);
+            $localPath = $this->imageUrlToStoragePath($image->image_url);
             if (\Illuminate\Support\Facades\Storage::exists($localPath)) {
                 \Illuminate\Support\Facades\Storage::delete($localPath);
             }
